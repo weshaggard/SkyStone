@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import teamcode.common.BoundingBox2D;
 import teamcode.common.League1TTArm;
@@ -15,8 +13,8 @@ import teamcode.common.TTOpMode;
 import teamcode.common.TTVision;
 import teamcode.common.Vector2;
 
-@Autonomous(name = "TT Auto Blue Grab and Grab")
-public class TTAutoBlueGrabAndGrab extends TTOpMode {
+@Autonomous(name = "TT Auto Blue Grab And Drag")
+public class TTAutoBlueGrabAndDrag extends TTOpMode {
 
     /**
      * A bounding box which is used to see if a skystone is in the center of the camera's view.
@@ -27,7 +25,6 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
     private League1TTArm arm;
     private TTVision vision;
     private int skystonePos;
-    private Timer timer;
 
     @Override
     protected void onInitialize() {
@@ -35,75 +32,21 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();
-        timer = getNewTimer();
+
     }
 
     @Override
     protected void onStart() {
         initArm();
-        skystonePos = locateSkystone456();
-        telemetry.addData("Skystone num", skystonePos);
-        telemetry.update();
+        skystonePos = locateSkystone();
         if(skystonePos == 6) {
             grabSkyStone(6);
-            moveAndGrabStone(3);
-            arm.openClaw();
-            driveSystem.lateral(-10, 0.6);
         } else if(skystonePos == 5){
             grabSkyStone(5);
-            moveAndGrabStone(2);
-            arm.openClaw();
-            driveSystem.lateral(-10, 0.6);
         } else {
-            /*driveSystem.vertical(13.5, 0.7);
-            grabSkyStone(5);
-            arm.openClaw();
-            driveSystem.turn(5, 0.3);
-            moveAndGrabStone(4);
-            driveSystem.vertical(-6, 0.5);
-            arm.openClaw();
-            driveSystem.turn(5, 0.3);
-            driveSystem.lateral(-4, 0.5);
-            moveAndGrabStone(6);
-            */
-            //Brians code
-            driveSystem.vertical(14, 0.7);
-            placeSkystoneInScoredFoundation(4, 1);
-            driveSystem.vertical(-6, 0.5);
-            telemetry.addData("status", "lowering arm");
-            telemetry.update();
-            arm.lower(1);
-            telemetry.addData("status", "done lowering arm");
-            telemetry.update();
-            driveSystem.vertical(-48, 0.4);
-            driveSystem.turn(90, 0.5);
-            driveSystem.vertical(14, 0.5);
-            placeSkystoneInScoredFoundation(1, 2);
-            driveSystem.vertical(-30, 0.5);
-
+            grabSkyStone(4);
         }
-    }
-
-    private void placeSkystoneInScoredFoundation(int stoneNum, int cycleNum){
-        arm.closeClaw();
-        sleep(750);
-        arm.liftTimed(0.25, 0.5);
-        sleep(500);
-        driveSystem.vertical(-12 + 8 * (cycleNum - 1), 0.5);
-        driveSystem.turn(-90, 0.5);
-        TimerTask ts = new TimerTask() {
-            @Override
-            public void run() {
-                arm.liftTimed(0.2, 0.5);
-            }
-        };
-        timer.schedule(ts, 1500);
-        driveSystem.vertical(103 - stoneNum * 8 , 0.5);
-        arm.openClaw();
-
-        //6, 60
-        //5, 68
-        //4, 76
+        driveSystem.brake();
     }
 
 
@@ -120,22 +63,20 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
      * slots. Returns 5 if the skystones are in the second and fifth slots. Returns 6 if the skystones
      * are in the third and sixth slots.
      */
-    private int locateSkystone456() {
-        driveSystem.vertical(21, 0.5);
-        driveSystem.lateral(3.25, 0.5);
+    private int locateSkystone() {
+        driveSystem.vertical(20, 0.5);
+        driveSystem.lateral(2, 0.5);
         if (seesSkystone()) {
             driveSystem.lateral(2, 0.5);
-            driveSystem.vertical(13.5, 0.7);
             return 6;
         }
-        driveSystem.lateral(7.5, 0.3);
-        sleep(500);
+        driveSystem.lateral(8, 0.3);
+        sleep(1000);
         if (seesSkystone()) {
             driveSystem.lateral(1.5, 0.5);
-            driveSystem.vertical(13.5, 0.7);
             return 5;
         }
-        driveSystem.lateral(8, 0.5);
+        driveSystem.lateral(9.5, 0.3);
         return 4;
     }
 
@@ -159,24 +100,45 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
       at that specific block pos then faces the foundation
      */
     private void grabSkyStone(int stoneNum) {
+        driveSystem.vertical(14.5, 0.7);
         arm.closeClaw();
         sleep(750);
         arm.liftTimed(0.25, 0.5);
         sleep(500);
-        driveSystem.vertical(-10 + stoneNum, 0.7);
-        driveSystem.lateral(-80 + stoneNum * 8, 0.5);
+        driveSystem.vertical(-27.5, 0.7);
+        driveSystem.turn(-88, 0.25);
+        moveToFoundation(stoneNum);
+        pullFoundation();
+        driveSystem.brake();
     }
 
-    private void moveAndGrabStone(int stoneNum){
-        driveSystem.lateral(-stoneNum * 8 + 80, 0.5);
-        driveSystem.vertical(15.5 + stoneNum, 0.7);
-        arm.lower(0.5);
-        sleep(750);
-        grabSkyStone(stoneNum);
+    //Moves towards the foundation and turns to face it
+    private void moveToFoundation(int stoneNum) {
+        driveSystem.vertical(120.5 - stoneNum * 8, 0.7);
+        driveSystem.turn(88, 0.7);
+        arm.liftTimed(1, 0.5);
+        driveSystem.vertical(32, 0.6);
+        sleep(250);
+        arm.openClaw();
     }
+
+    private void pullFoundation() {
+        driveSystem.lateral(-4.5, 0.7);
+        driveSystem.vertical(2, 0.7);
+        arm.lower(0.5);
+        sleep(250);
+        driveSystem.vertical(-60.5, 0.5);
+        arm.liftTimed(1, 0.5);
+        sleep(250);
+        arm.closeClaw();
+        driveSystem.lateral(41.5, 0.7);
+        arm.lower(0.5);
+    }
+
     @Override
     protected void onStop() {
     }
 
 
 }
+
