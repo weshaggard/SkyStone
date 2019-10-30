@@ -1,10 +1,8 @@
-package DemoCodes.common;
+package demoCodes.common;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import DemoCodes.common.DemoComponentNames;
 
 public class DemoArm {
     private DcMotor armLift;

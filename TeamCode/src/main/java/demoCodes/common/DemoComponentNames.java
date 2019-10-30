@@ -1,4 +1,4 @@
-package DemoCodes.common;
+package demoCodes.common;
 
 public class DemoComponentNames {
     public static final String LEFT_DRIVE = "LeftDrive";
