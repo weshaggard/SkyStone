@@ -1,4 +1,4 @@
-package demoCodes.common;
+package DemoCodes.common;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
