@@ -2,13 +2,15 @@ package teamcode.common;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 public abstract class TTOpMode extends LinearOpMode {
 
     private static TTOpMode opMode;
 
-    private Timer timer;
+    private List<Timer> timers;
 
     public static TTOpMode currentOpMode() {
         return opMode;
@@ -17,12 +19,14 @@ public abstract class TTOpMode extends LinearOpMode {
     @Override
     public final void runOpMode() {
         opMode = this;
-        timer = new Timer();
+        timers = new ArrayList<>();
         onInitialize();
         waitForStart();
         onStart();
         onStop();
-        timer.cancel();
+        for(Timer timer:timers){
+            timer.cancel();
+        }
     }
 
     protected abstract void onInitialize();
@@ -31,7 +35,17 @@ public abstract class TTOpMode extends LinearOpMode {
 
     protected abstract void onStop();
 
-    public Timer getTimer() {
+    /**
+     * Use getNewTimer() instead.
+     */
+    @Deprecated
+    public Timer getTimer(){
+        return getNewTimer();
+    }
+
+    public Timer getNewTimer() {
+        Timer timer = new Timer();
+        timers.add(timer);
         return timer;
     }
 
