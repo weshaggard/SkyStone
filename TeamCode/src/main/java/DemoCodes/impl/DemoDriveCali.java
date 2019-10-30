@@ -1,9 +1,10 @@
-package demoCodes.impl;
+package DemoCodes.impl;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import demoCodes.common.DemoDrive;
-import demoCodes.common.TTOpMode;
+import DemoCodes.common.DemoArm;
+import DemoCodes.common.DemoDrive;
+import DemoCodes.common.TTOpMode;
 
 @Autonomous(name = "Demo Drive Calibration")
 public class DemoDriveCali extends TTOpMode {

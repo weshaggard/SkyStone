@@ -3,8 +3,6 @@ package teamcode.common;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -22,20 +20,11 @@ public class TTVision {
     private static final double MINIMUM_CONFIDENCE = 0.7;
 
     private HardwareMap hardwareMap;
-    private CameraType cameraType;
     private TFObjectDetector tfod;
     private boolean enabled;
 
-    /**
-     * Uses the phone as the camera type by default.
-     */
     public TTVision(HardwareMap hardwareMap) {
-        this(hardwareMap, CameraType.PHONE);
-    }
-
-    public TTVision(HardwareMap hardwareMap, CameraType cameraType) {
         this.hardwareMap = hardwareMap;
-        this.cameraType = cameraType;
     }
 
     /**
@@ -58,10 +47,7 @@ public class TTVision {
     private VuforiaLocalizer createVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        if (cameraType == CameraType.WEBCAM) {
-            CameraName cameraName = ClassFactory.getInstance().getCameraManager().getAllWebcams().get(0);
-            parameters.cameraName = cameraName;
-        }
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
         return vuforia;
     }
@@ -96,10 +82,6 @@ public class TTVision {
         double x2 = recognition.getRight();
         double y2 = recognition.getBottom();
         return new BoundingBox2D(x1, y1, x2, y2);
-    }
-
-    public static enum CameraType {
-        PHONE, WEBCAM
     }
 
 }

@@ -1,9 +1,9 @@
-package demoCodes.impl;
+package DemoCodes.impl;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import demoCodes.common.DemoArm;
-import demoCodes.common.DemoDrive;
-import demoCodes.common.TTOpMode;
+import DemoCodes.common.DemoArm;
+import DemoCodes.common.DemoDrive;
+import DemoCodes.common.TTOpMode;
 
 @TeleOp(name = "Demo TeleOp")
 public class DemoTeleOp extends TTOpMode {

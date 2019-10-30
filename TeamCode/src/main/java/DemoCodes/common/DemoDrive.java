@@ -1,4 +1,4 @@
-package demoCodes.common;
+package DemoCodes.common;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
