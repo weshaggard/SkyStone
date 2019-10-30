@@ -69,8 +69,7 @@ public class TTTeleOp extends TTOpMode {
             }
             if (gamepad1.dpad_up) {
                 arm.liftContinuous(0.5);
-            }
-            if (gamepad1.dpad_down) {
+            } else if (gamepad1.dpad_down) {
                 arm.liftContinuous(-0.5);
             } else {
                 arm.liftContinuous(0.0);
@@ -78,8 +77,12 @@ public class TTTeleOp extends TTOpMode {
             if (gamepad1.x && canUseClaw) {
                 if (arm.clawIsOpen()) {
                     arm.closeClaw();
+                    //telemetry.addData("claw posistion ", arm.getClaw().getPosition());
+                    //telemetry.update();
                 } else {
                     arm.openClaw();
+                    //telemetry.addData("claw posistion ", arm.getClaw().getPosition());
+                    //telemetry.update();
                 }
                 clawCooldown();
             }
