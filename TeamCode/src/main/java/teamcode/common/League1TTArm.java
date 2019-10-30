@@ -13,21 +13,17 @@ import java.util.TimerTask;
 
 public class League1TTArm {
 
-    private static final double CLAW_OPEN_POS = 0.4;
+    private static final double CLAW_OPEN_POS = 1.0;
     private static final double CLAW_CLOSE_POS = 0.0;
-    private static final double CLAW_POSITION_ERROR = 0.1;
-
     private final CRServo lift;
     private final ColorSensor liftSensor;
     private final Servo claw;
-    private final Timer timer;
 
     public League1TTArm(HardwareMap hardwareMap) {
         lift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
-        timer = TTOpMode.currentOpMode().getNewTimer();
     }
 
     public void testColorSensor(Telemetry telemetry) {
@@ -72,9 +68,6 @@ public class League1TTArm {
         boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, seconds);
         while (!stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) ;
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        telemetry.addData("stopLift", stopLift[0]);
-        telemetry.update();
         lift.setPower(0.0);
     }
 
@@ -88,7 +81,7 @@ public class League1TTArm {
                 stopLiftFlag[0] = true;
             }
         };
-        timer.schedule(stop, (long) (seconds * 1000));
+        TTOpMode.currentOpMode().getTimer().schedule(stop, (long) (seconds * 1000));
     }
 
     private LiftColor getColor() {
@@ -114,15 +107,10 @@ public class League1TTArm {
 
     public void closeClaw() {
         claw.setPosition(CLAW_CLOSE_POS);
-
     }
 
     public boolean clawIsOpen() {
-        return Math.abs(claw.getPosition() - CLAW_OPEN_POS) < CLAW_POSITION_ERROR;
-    }
-
-    public Servo getClaw() {
-        return claw;
+        return claw.getPosition() == CLAW_OPEN_POS;
     }
 
     private enum LiftColor {
