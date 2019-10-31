@@ -14,7 +14,7 @@ import teamcode.common.TTVision;
 import teamcode.common.Vector2;
 
 @Autonomous(name = "TT Auto Blue Grab And Drag")
-public class TTAutoBlueGrabAndDrag extends TTOpMode {
+public class TTAutoBlue extends TTOpMode {
 
     /**
      * A bounding box which is used to see if a skystone is in the center of the camera's view.

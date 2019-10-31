@@ -33,7 +33,6 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();
-
     }
 
     @Override
@@ -71,7 +70,6 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
             driveSystem.lateral(8, 0.5);
             placeSkystoneInScoredFoundation(4);
             driveSystem.vertical(-30, 0.5);
-
         }
     }
 
@@ -165,6 +163,7 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
     }
     @Override
     protected void onStop() {
+
     }
 
 
