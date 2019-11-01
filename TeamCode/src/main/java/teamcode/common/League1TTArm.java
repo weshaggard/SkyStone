@@ -15,11 +15,14 @@ import java.util.TimerTask;
 
 public class League1TTArm {
 
-    private static final double CLAW_OPEN_POS = 0.5;
+    private static final double CLAW_OPEN_POS = 0.4;
     private static final double CLAW_CLOSE_POS = 0.0;
+    private static final double CLAW_POSITION_ERROR = 0.1;
+
     private final CRServo lift;
     private final ColorSensor liftSensor, skybridgeSensor;
     private final Servo claw;
+    private final Timer timer;
 
     public League1TTArm(HardwareMap hardwareMap) {
         lift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
@@ -27,6 +30,7 @@ public class League1TTArm {
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
         skybridgeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.SKYBRIDGE_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
+        timer = TTOpMode.currentOpMode().getNewTimer();
     }
 
     public void testColorSensor(Telemetry telemetry, ColorSensor sensor) {
@@ -71,6 +75,9 @@ public class League1TTArm {
         boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, seconds);
         while (!stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) ;
+        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
+        telemetry.addData("stopLift", stopLift[0]);
+        telemetry.update();
         lift.setPower(0.0);
     }
 
@@ -84,7 +91,7 @@ public class League1TTArm {
                 stopLiftFlag[0] = true;
             }
         };
-        TTOpMode.currentOpMode().getTimer().schedule(stop, (long) (seconds * 1000));
+        timer.schedule(stop, (long) (seconds * 1000));
     }
 
     private LiftColor getColor(ColorSensor sensor) {
@@ -138,10 +145,15 @@ public class League1TTArm {
 
     public void closeClaw() {
         claw.setPosition(CLAW_CLOSE_POS);
+
     }
 
     public boolean clawIsOpen() {
-        return claw.getPosition() == CLAW_OPEN_POS;
+        return Math.abs(claw.getPosition() - CLAW_OPEN_POS) < CLAW_POSITION_ERROR;
+    }
+
+    public Servo getClaw() {
+        return claw;
     }
 
     private enum LiftColor {

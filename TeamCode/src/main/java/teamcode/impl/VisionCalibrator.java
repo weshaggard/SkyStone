@@ -8,16 +8,16 @@ import java.util.List;
 
 import teamcode.common.BoundingBox2D;
 import teamcode.common.TTOpMode;
-import teamcode.common.TTVision;
+import teamcode.common.TTVisionTF;
 
 @Autonomous(name = "Vision Calibrator")
 public class VisionCalibrator extends TTOpMode {
 
-    private TTVision vision;
+    private TTVisionTF vision;
 
     @Override
     protected void onInitialize() {
-        vision = new TTVision(hardwareMap);
+        vision = new TTVisionTF(hardwareMap);
         vision.enable();
     }
 
@@ -26,7 +26,7 @@ public class VisionCalibrator extends TTOpMode {
         while (opModeIsActive()) {
             List<Recognition> recognitions = vision.getRecognitions();
             for (Recognition recognition : recognitions) {
-                BoundingBox2D boundingBox = TTVision.getBoundingBox(recognition);
+                BoundingBox2D boundingBox = TTVisionTF.getBoundingBox(recognition);
                 telemetry.addData(recognition.getLabel(), boundingBox);
             }
             telemetry.update();

@@ -78,8 +78,12 @@ public class TTTeleOp extends TTOpMode {
             if (gamepad1.x && canUseClaw) {
                 if (arm.clawIsOpen()) {
                     arm.closeClaw();
+                    //telemetry.addData("claw posistion ", arm.getClaw().getPosition());
+                    //telemetry.update();
                 } else {
                     arm.openClaw();
+                    //telemetry.addData("claw posistion ", arm.getClaw().getPosition());
+                    //telemetry.update();
                 }
                 clawCooldown();
             }
