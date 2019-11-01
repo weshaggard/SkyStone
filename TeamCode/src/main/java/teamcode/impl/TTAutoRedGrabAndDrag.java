@@ -10,7 +10,7 @@ import teamcode.common.BoundingBox2D;
 import teamcode.common.League1TTArm;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
-import teamcode.common.TTVision;
+import teamcode.common.TTVisionTF;
 import teamcode.common.Vector2;
 
 @Autonomous(name = "TT Auto Red")
@@ -23,13 +23,13 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
 
     private TTDriveSystem driveSystem;
     private League1TTArm arm;
-    private TTVision vision;
+    private TTVisionTF vision;
 
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
         arm = new League1TTArm(hardwareMap);
-        vision = new TTVision(hardwareMap);
+        vision = new TTVisionTF(hardwareMap);
         vision.enable();
     }
 
@@ -77,8 +77,8 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     private boolean seesSkystone() {
         List<Recognition> recognitions = vision.getRecognitions();
         for (Recognition recognition : recognitions) {
-            if (recognition.getLabel().equals(TTVision.LABEL_SKYSTONE)) {
-                Vector2 center = TTVision.getCenter(recognition);
+            if (recognition.getLabel().equals(TTVisionTF.LABEL_SKYSTONE)) {
+                Vector2 center = TTVisionTF.getCenter(recognition);
                 if (SKYSTONE_BOUNDING_BOX.contains(center)) {
                     return true;
                 }
