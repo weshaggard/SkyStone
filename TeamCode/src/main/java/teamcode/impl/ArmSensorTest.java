@@ -23,7 +23,7 @@ public class ArmSensorTest extends TTOpMode {
             } else if (gamepad1.a) {
                 arm.lower(0.5);
             }
-            arm.testColorSensor(telemetry);
+            //arm.testColorSensor(telemetry);
         }
     }
 

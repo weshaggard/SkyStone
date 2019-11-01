@@ -12,5 +12,6 @@ public class TTHardwareComponentNames {
     public static final String ARM_LIFT_SENSOR = "ArmLiftSensor";
     public static final String ARM_WRIST = "ArmWrist";
     public static final String ARM_CLAW = "ArmClaw";
+    public static final String SKYBRIDGE_SENSOR = "SkybridgeSensor";
 
 }

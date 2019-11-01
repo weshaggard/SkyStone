@@ -13,7 +13,7 @@ import teamcode.common.TTOpMode;
 import teamcode.common.TTVision;
 import teamcode.common.Vector2;
 
-@Autonomous(name = "TT Auto Red")
+@Autonomous(name = "TT Auto Red Grab And Grag")
 public class TTAutoRedGrabAndDrag extends TTOpMode {
 
     /**
@@ -105,7 +105,7 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
         arm.liftTimed(0.25, 0.5);
         sleep(500);
         driveSystem.vertical(-27.5, 0.7);
-        driveSystem.turn(88, 0.25);
+        driveSystem.turn(90, 0.25);
         moveToFoundation(stoneNum);
         pullFoundation();
         driveSystem.brake();
@@ -114,7 +114,7 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     //Moves towards the foundation and turns to face it
     private void moveToFoundation(int stoneNum) {
         driveSystem.vertical(120.5 - stoneNum * 8, 0.5);
-        driveSystem.turn(-88, 0.4);
+        driveSystem.turn(-90, 0.4);
         arm.liftTimed(1, 0.5);
         driveSystem.vertical(32, 0.6);
         sleep(250);

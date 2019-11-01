@@ -42,10 +42,12 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
             grabSkyStone(6);
             moveToStone(3);
             grabSkyStone(3);
+            driveSystem.vertical(-30, 1);
         } else if(skystonePos == 5){
             grabSkyStone(5);
-            moveToPlacedFoundation(2);
+            moveToStone(2);
             grabSkyStone(2);
+            driveSystem.vertical(-30, 1);
         } else {
             grabSkyStone(4);
         }
@@ -58,7 +60,7 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
      */
     private void initArm() {
         arm.openClaw();
-        arm.lower(0.5);
+        arm.lower(1);
     }
 
     /**
@@ -103,30 +105,37 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
       at that specific block pos then faces the foundation
      */
     private void grabSkyStone(int stoneNum) {
-        driveSystem.vertical(13.5, 0.75);
+        driveSystem.vertical(13.5, 0.6);
         arm.closeClaw();
         sleep(700);
         arm.liftTimed(0.15, 0.5);
-        driveSystem.vertical(-9, 0.75);
-        driveSystem.turn(-90, 0.25);
+        driveSystem.vertical(-12, 0.6);
+        driveSystem.turn(-90, 0.6);
         moveToPlacedFoundation(stoneNum);
     }
 
     //Moves towards the foundation and turns to face it
     private void moveToPlacedFoundation(int stoneNum) {
-        driveSystem.vertical(90 - stoneNum * 8, 0.75);
-        arm.liftTimed(1, 0.5);
-        driveSystem.vertical(16, 0.75);
-        arm.liftTimed(0.5, -0.5);
+        if(stoneNum > 3) {
+            driveSystem.vertical(90 - stoneNum * 8, 0.6);
+        } else {
+            driveSystem.vertical(90 - stoneNum * 8, 1);
+        }
+        if(stoneNum < 4) {
+            arm.liftTimed(0.5, 0.5);
+        } else {
+            arm.liftTimed(0.5, 0.7);
+        }
+        driveSystem.vertical(16, 0.6);
         arm.openClaw();
     }
 
     private void moveToStone(int stoneNum) {
-        driveSystem.vertical(-5, 0.75);
-        arm.lower(0.5);
-        driveSystem.vertical(-100 + stoneNum * 8, 0.75);
-        driveSystem.turn(90, 0.25);
-        driveSystem.vertical(-6, 0.75);
+        driveSystem.vertical(-5, 0.6);
+        arm.lower(1);
+        driveSystem.vertical(-100 + stoneNum * 8, 0.6);
+        driveSystem.turn(90, 0.6);
+        driveSystem.vertical(-2, 0.6);
     }
 
 

@@ -55,7 +55,7 @@ public class TTAutoBlueGrabAndDrag extends TTOpMode {
      */
     private void initArm() {
         arm.openClaw();
-        arm.lower(0.5);
+        arm.lower(1);
     }
 
     /**
@@ -106,7 +106,7 @@ public class TTAutoBlueGrabAndDrag extends TTOpMode {
         arm.liftTimed(0.25, 0.5);
         sleep(500);
         driveSystem.vertical(-27.5, 0.7);
-        driveSystem.turn(-88, 0.25);
+        driveSystem.turn(-90, 0.25);
         moveToFoundation(stoneNum);
         pullFoundation();
         driveSystem.brake();
@@ -115,7 +115,7 @@ public class TTAutoBlueGrabAndDrag extends TTOpMode {
     //Moves towards the foundation and turns to face it
     private void moveToFoundation(int stoneNum) {
         driveSystem.vertical(120.5 - stoneNum * 8, 0.7);
-        driveSystem.turn(88, 0.7);
+        driveSystem.turn(90, 0.7);
         arm.liftTimed(1, 0.5);
         driveSystem.vertical(32, 0.6);
         sleep(250);
@@ -125,14 +125,14 @@ public class TTAutoBlueGrabAndDrag extends TTOpMode {
     private void pullFoundation() {
         driveSystem.lateral(-4.5, 0.7);
         driveSystem.vertical(2, 0.7);
-        arm.lower(0.5);
+        arm.lower(1);
         sleep(250);
         driveSystem.vertical(-60.5, 0.5);
         arm.liftTimed(1, 0.5);
         sleep(250);
         arm.closeClaw();
         driveSystem.lateral(41.5, 0.7);
-        arm.lower(0.5);
+        arm.lower(1);
     }
 
     @Override
