@@ -34,6 +34,11 @@ public class Debug {
         updateTelemetry();
     }
 
+    public static void clear() {
+        lines.clear();
+        updateTelemetry();
+    }
+
     private static void updateTelemetry() {
         for (Object line : lines) {
             telemetry.addData("Debug", line);

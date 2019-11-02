@@ -8,13 +8,14 @@ import java.util.List;
 
 import teamcode.common.BoundingBox2D;
 import teamcode.common.League1TTArm;
+import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
 import teamcode.common.TTVision;
 import teamcode.common.Vector2;
 
-@Autonomous(name = "TT Auto Red Grab And Drag")
-public class TTAutoRedGrabAndDrag extends TTOpMode {
+@Autonomous(name = "Red Single Stone")
+public class TTAutoRedSingleStone extends TTOpMode {
 
     /**
      * A bounding box which is used to see if a skystone is in the center of the camera's view.
@@ -36,41 +37,44 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     @Override
     protected void onStart() {
         initArm();
-        int skystonePos = locateSkystone();
-        if (skystonePos == 6) {
-            grabSkyStone(6);
-        } else if (skystonePos == 5) {
-            grabSkyStone(5);
-        } else {
-            grabSkyStone(4);
-        }
-        driveSystem.brake();
+        SkyStoneConfiguration skyStoneConfig = determineSkyStoneConfig();
+
+        grabStone();
+        stoneToFoundation(skyStoneConfig.getSecondStone());
+        pullFoundationAndApproachTape();
     }
 
     /**
-     * Approaches the skystone and records its position. Returns 4 if the skystones are in the first and fourth
-     * slots. Returns 5 if the skystones are in the second and fifth slots. Returns 6 if the skystones
-     * are in the third and sixth slots.
+     * Opens the claw and lowers the arm for starting position.
      */
-    private int locateSkystone() {
+    private void initArm() {
+        arm.openClaw();
+        arm.lower(0.5);
+    }
+
+    /**
+     * Approaches the second SkyStone to determine the configuration of the SkyStones.
+     */
+    private SkyStoneConfiguration determineSkyStoneConfig() {
         driveSystem.vertical(22.5, 0.3);
         driveSystem.lateral(-2, 0.3);
-        if (seesSkystone()) {
-            return 6;
+        if (seesSkyStone()) {
+            driveSystem.lateral(2, 0.3);
+            return SkyStoneConfiguration.THREE_SIX;
         }
         driveSystem.lateral(-6.5, 0.3);
         sleep(1000);
-        if (seesSkystone()) {
-            return 5;
+        if (seesSkyStone()) {
+            return SkyStoneConfiguration.TWO_FIVE;
         }
         driveSystem.lateral(-8, 0.3);
-        return 4;
+        return SkyStoneConfiguration.ONE_FOUR;
     }
 
     /**
      * Returns true if the skystone is in the center of the camera's field of view.
      */
-    private boolean seesSkystone() {
+    private boolean seesSkyStone() {
         List<Recognition> recognitions = vision.getRecognitions();
         for (Recognition recognition : recognitions) {
             if (recognition.getLabel().equals(TTVision.LABEL_SKYSTONE)) {
@@ -84,50 +88,43 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     }
 
     /**
-     * Opens the claw and lowers the arm for starting position.
+     * Robot grabs the stone in front of it and backs out.
      */
-    private void initArm() {
-        arm.openClaw();
-        arm.lower(0.5);
-    }
-
-    /*Starts from the starting pos and moves grab the block
-      at that specific block pos then faces the foundation
-     */
-    private void grabSkyStone(int stoneNum) {
-        driveSystem.vertical(14.5, 0.7);
+    private void grabStone() {
+        driveSystem.vertical(13.5, 0.7);
         arm.closeClaw();
         sleep(750);
-        arm.liftTimed(0.25, 0.5);
+        arm.liftTimed(0.25, 0.3);
         sleep(500);
         driveSystem.vertical(-27.5, 0.7);
-        driveSystem.turn(90, 0.25);
-        moveToFoundation(stoneNum);
-        pullFoundation();
-        driveSystem.brake();
     }
 
-    //Moves towards the foundation and turns to face it
-    private void moveToFoundation(int stoneNum) {
-        driveSystem.vertical(120.5 - stoneNum * 8, 0.5);
-        driveSystem.turn(-90, 0.4);
+    /**
+     * Robot drives towards the foundation from the stone area and turns to face it.
+     *
+     * @param stone the position of the stone that was grabbed in the stone area
+     */
+    private void stoneToFoundation(int stone) {
+        driveSystem.turn(90, 0.5);
+        driveSystem.vertical(120.5 - stone * 8, 0.7);
+        driveSystem.turn(-90, 0.5);
         arm.liftTimed(1, 0.5);
-        driveSystem.vertical(32, 0.6);
+        driveSystem.vertical(34, 0.6);
         sleep(250);
         arm.openClaw();
     }
 
-    private void pullFoundation() {
-        driveSystem.lateral(4.5, 0.7);
-        driveSystem.vertical(2, 0.7);
-        arm.lower(0.5);
+    private void pullFoundationAndApproachTape() {
+        driveSystem.lateral(5, 0.7);
+        driveSystem.vertical(2, 0.5);
+        arm.lower(1);
         sleep(250);
         driveSystem.vertical(-60.5, 0.5);
         arm.liftTimed(1, 0.5);
         sleep(250);
         arm.closeClaw();
-        driveSystem.lateral(-41.5, 0.7);
-        arm.lower(0.5);
+        driveSystem.lateral(-50, 0.7);
+        arm.lower(1);
     }
 
     @Override
