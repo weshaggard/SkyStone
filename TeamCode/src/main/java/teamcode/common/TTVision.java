@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-public class TTVisionTF {
+public class TTVision {
 
     private static final String VUFORIA_KEY = "AQR2KKb/////AAABmcBOjjqXfkjtrjI9/Ps5Rs1yoVMyJe0wdjaX8pHqOaPu2gRcObwPjsuWCCo7Xt52/kJ4dAZfUM5Gy73z3ogM2E2qzyVObda1EFHZuUrrYkJzKM3AhY8vUz6R3fH0c/R9j/pufFYAABOAFoc5PtjMQ2fbeFI95UYXtl0u+6OIkCUJ3Zw71tvoD9Fs/cOiLB45FrWrxHPbinEhsOlCTWK/sAC2OK2HuEsBFCebaV57vKyATHW4w2LMWEZaCByHMk9RJDR38WCqivXz753bsiBVMbCzPYzwzc3DKztTbK8/cXqPPBLBKwU8ls0RN52akror1xE9lPwwksMXwJwolpyIZGnZngWcBWX4lLH+HlDNZ8Qm";
     private static final String ASSET_NAME = "Skystone.tflite";
@@ -24,11 +24,11 @@ public class TTVisionTF {
     private TFObjectDetector tfod;
     private boolean enabled;
 
-    public TTVisionTF(HardwareMap hardwareMap) {
+    public TTVision(HardwareMap hardwareMap) {
         this(hardwareMap, CameraType.PHONE);
     }
 
-    public TTVisionTF(HardwareMap hardwareMap, CameraType cameraType) {
+    public TTVision(HardwareMap hardwareMap, CameraType cameraType) {
         this.hardwareMap = hardwareMap;
         this.cameraType = cameraType;
     }

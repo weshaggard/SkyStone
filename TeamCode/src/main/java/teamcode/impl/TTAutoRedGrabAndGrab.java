@@ -40,12 +40,12 @@ public class TTAutoRedGrabAndGrab extends TTOpMode {
     protected void onStart() {
         initArm();
         skystonePos = locateSkystone();
-        if(skystonePos == 6) {
+        if (skystonePos == 6) {
             grabSkyStone(6);
             moveToStone(3);
             grabSkyStone(3);
             driveSystem.vertical(-30, 1);
-        } else if(skystonePos == 5){
+        } else if (skystonePos == 5) {
             grabSkyStone(5);
             moveToStone(2);
             grabSkyStone(2);
@@ -122,16 +122,11 @@ public class TTAutoRedGrabAndGrab extends TTOpMode {
 
     //Moves towards the foundation and turns to face it
     private void moveToPlacedFoundation(int stoneNum) {
-        if(stoneNum > 3) {
-            scheduleSeeSkyBridge();
-            driveSystem.vertical(94 - stoneNum * 8, 0.6);
-        } else {
-            scheduleSeeSkyBridge();
-            driveSystem.vertical(94 - stoneNum * 8, 1);
-            driveSystem.turn(-5, 0.6);
-        }
-        driveSystem.vertical(16, 0.6);
-        arm.openClaw();
+        driveSystem.vertical(120.5 - stoneNum * 8, 0.5);
+        driveSystem.turn(-88, 0.4);
+        arm.liftTimed(1, 0.5);
+        driveSystem.vertical(32, 0.6);
+        sleep(250);
     }
 
     private void moveToStone(int stoneNum) {
@@ -139,41 +134,12 @@ public class TTAutoRedGrabAndGrab extends TTOpMode {
         arm.lower(1);
         driveSystem.vertical(-104 + stoneNum * 8, 0.6);
         driveSystem.turn(-90, 0.6);
-        driveSystem.vertical(3,0.6);
+        driveSystem.vertical(3, 0.6);
     }
-
-    private void scheduleSeeSkyBridge() {
-        TimerTask scan = new TimerTask() {
-            @Override
-            public void run() {
-                liftAfterSkybridge(0.5, 0.7);
-            }
-        };
-        TTOpMode.currentOpMode().getTimer().schedule(scan, 0);
-    }
-
-    public void liftAfterSkybridge(double time, double power){
-        int timesPassed = 0;
-        while(timesPassed < 2) {
-            if(arm.isRed(arm.getSkyBridgeSensor()) || arm.isBlue(arm.getSkyBridgeSensor())){
-                timesPassed++;
-            }
-        }
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        telemetry.addData("Times Saw: ", timesPassed);
-        telemetry.update();
-
-        if(timesPassed == 2){
-            arm.liftTimed(time, power);
-        }
-
-    }
-
 
     @Override
     protected void onStop() {
-
+        vision.disable();
     }
-
 
 }

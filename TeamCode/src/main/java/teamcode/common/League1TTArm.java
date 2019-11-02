@@ -20,7 +20,7 @@ public class League1TTArm {
     private static final double CLAW_POSITION_ERROR = 0.1;
 
     private final CRServo lift;
-    private final ColorSensor liftSensor, skybridgeSensor;
+    private final ColorSensor liftSensor;
     private final Servo claw;
     private final Timer timer;
 
@@ -28,7 +28,6 @@ public class League1TTArm {
         lift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
-        skybridgeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.SKYBRIDGE_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         timer = TTOpMode.currentOpMode().getNewTimer();
     }
@@ -36,11 +35,10 @@ public class League1TTArm {
     public void testColorSensor(Telemetry telemetry, ColorSensor sensor) {
         int red = sensor.red();
         int blue = sensor.blue();
+        int green = sensor.green();
         telemetry.addData("red", red);
         telemetry.addData("blue", blue);
-        LiftColor color = getColor(liftSensor);
-        telemetry.addData("color detected", color);
-        telemetry.addData("lift power", lift.getPower());
+        telemetry.addData("green", green);
         telemetry.update();
     }
 
@@ -48,26 +46,20 @@ public class League1TTArm {
         power = Math.abs(power);
         final boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, 2);
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        while (getColor(liftSensor) != LiftColor.RED && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
-            //testColorSensor(telemetry);
+        while (getLiftColor() != LiftColor.RED && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
             lift.setPower(power);
         }
         lift.setPower(0.0);
-        //testColorSensor(telemetry, liftSensor);
     }
 
     public void lower(double power) {
         power = Math.abs(power);
         final boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, 2);
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        while (getColor(liftSensor) != LiftColor.BLUE && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
-            //testColorSensor(telemetry);
+        while (getLiftColor() != LiftColor.BLUE && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
             lift.setPower(-power);
         }
         lift.setPower(0.0);
-        //testColorSensor(telemetry, liftSensor);
     }
 
     public void liftTimed(double seconds, double power) {
@@ -75,9 +67,6 @@ public class League1TTArm {
         boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, seconds);
         while (!stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) ;
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        telemetry.addData("stopLift", stopLift[0]);
-        telemetry.update();
         lift.setPower(0.0);
     }
 
@@ -94,9 +83,9 @@ public class League1TTArm {
         timer.schedule(stop, (long) (seconds * 1000));
     }
 
-    private LiftColor getColor(ColorSensor sensor) {
-        int r = sensor.red();
-        int b = sensor.blue();
+    private LiftColor getLiftColor() {
+        int r = liftSensor.red();
+        int b = liftSensor.blue();
         if (r < 800 && b < 800 && r > 250 && b > 250) {
             if (r > b) {
                 return LiftColor.RED;
@@ -106,34 +95,6 @@ public class League1TTArm {
         }
         return LiftColor.NONE;
     }
-
-    public boolean isRed(ColorSensor sensor){
-        int r = sensor.red();
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        if(r > 350 && r < 800){
-            testColorSensor(telemetry, skybridgeSensor);
-            return true;
-        }
-        testColorSensor(telemetry, skybridgeSensor);
-        return false;
-    }
-
-    public boolean isBlue(ColorSensor sensor){
-        int b = sensor.blue();
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        if(b > 350 && b < 800){
-            testColorSensor(telemetry, skybridgeSensor);
-            return true;
-        }
-        testColorSensor(telemetry, skybridgeSensor);
-        return false;
-    }
-
-    public ColorSensor getSkyBridgeSensor(){
-        return this.skybridgeSensor;
-    }
-
-
 
     public void liftContinuous(double power) {
         lift.setPower(power);

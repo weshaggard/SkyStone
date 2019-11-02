@@ -10,10 +10,10 @@ import teamcode.common.BoundingBox2D;
 import teamcode.common.League1TTArm;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
-import teamcode.common.TTVisionTF;
+import teamcode.common.TTVision;
 import teamcode.common.Vector2;
 
-@Autonomous(name = "TT Auto Red Grab And Grag")
+@Autonomous(name = "TT Auto Red Grab And Drag")
 public class TTAutoRedGrabAndDrag extends TTOpMode {
 
     /**
@@ -23,13 +23,13 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
 
     private TTDriveSystem driveSystem;
     private League1TTArm arm;
-    private TTVisionTF vision;
+    private TTVision vision;
 
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
         arm = new League1TTArm(hardwareMap);
-        vision = new TTVisionTF(hardwareMap);
+        vision = new TTVision(hardwareMap);
         vision.enable();
     }
 
@@ -37,18 +37,14 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     protected void onStart() {
         initArm();
         int skystonePos = locateSkystone();
-        if(skystonePos == 6) {
+        if (skystonePos == 6) {
             grabSkyStone(6);
-        } else if(skystonePos == 5){
+        } else if (skystonePos == 5) {
             grabSkyStone(5);
         } else {
             grabSkyStone(4);
         }
         driveSystem.brake();
-    }
-
-    @Override
-    protected void onStop() {
     }
 
     /**
@@ -77,8 +73,8 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
     private boolean seesSkystone() {
         List<Recognition> recognitions = vision.getRecognitions();
         for (Recognition recognition : recognitions) {
-            if (recognition.getLabel().equals(TTVisionTF.LABEL_SKYSTONE)) {
-                Vector2 center = TTVisionTF.getCenter(recognition);
+            if (recognition.getLabel().equals(TTVision.LABEL_SKYSTONE)) {
+                Vector2 center = TTVision.getCenter(recognition);
                 if (SKYSTONE_BOUNDING_BOX.contains(center)) {
                     return true;
                 }
@@ -133,4 +129,10 @@ public class TTAutoRedGrabAndDrag extends TTOpMode {
         driveSystem.lateral(-41.5, 0.7);
         arm.lower(0.5);
     }
+
+    @Override
+    protected void onStop() {
+        vision.disable();
+    }
+
 }

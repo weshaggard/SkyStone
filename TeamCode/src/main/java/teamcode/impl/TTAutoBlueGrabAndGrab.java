@@ -7,7 +7,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import java.util.List;
 
 import teamcode.common.BoundingBox2D;
+import teamcode.common.Debug;
 import teamcode.common.League1TTArm;
+import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
 import teamcode.common.TTVision;
@@ -24,7 +26,7 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
     private TTDriveSystem driveSystem;
     private League1TTArm arm;
     private TTVision vision;
-    private int skystonePos;
+    private SkyStoneConfiguration skyStoneConfig;
 
     @Override
     protected void onInitialize() {
@@ -37,21 +39,15 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
     @Override
     protected void onStart() {
         initArm();
-        skystonePos = locateSkystone();
-        if(skystonePos == 6) {
-            grabSkyStone(6);
-            moveToStone(3);
-            grabSkyStone(3);
-            driveSystem.vertical(-30, 1);
-        } else if(skystonePos == 5){
-            grabSkyStone(5);
-            moveToStone(2);
-            grabSkyStone(2);
-            driveSystem.vertical(-30, 1);
-        } else {
-            grabSkyStone(4);
-        }
-        driveSystem.brake();
+        skyStoneConfig = determineSkyStoneConfig();
+        int firstStop = skyStoneConfig.getSecondStone();
+        int secondStop = skyStoneConfig == SkyStoneConfiguration.ONE_FOUR ? 6 : skyStoneConfig.getFirstStone();
+        grabStone();
+        stoneToFoundation(firstStop);
+        foundationToStone(secondStop);
+        grabStone();
+        stoneToFoundation(secondStop);
+        driveSystem.vertical(-30, 1);
     }
 
 
@@ -64,31 +60,29 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
     }
 
     /**
-     * Approaches the skystone and records its position. Returns 4 if the skystones are in the first and fourth
-     * slots. Returns 5 if the skystones are in the second and fifth slots. Returns 6 if the skystones
-     * are in the third and sixth slots.
+     * Approaches the second SkyStone to determine the configuration of the SkyStones.
      */
-    private int locateSkystone() {
+    private SkyStoneConfiguration determineSkyStoneConfig() {
         driveSystem.vertical(20, 0.5);
         driveSystem.lateral(2, 0.5);
-        if (seesSkystone()) {
+        if (seesSkyStone()) {
             driveSystem.lateral(2, 0.5);
-            return 6;
+            return SkyStoneConfiguration.THREE_SIX;
         }
         driveSystem.lateral(8, 0.3);
-        sleep(1000);
-        if (seesSkystone()) {
+        sleep(1500);
+        if (seesSkyStone()) {
             driveSystem.lateral(1.5, 0.5);
-            return 5;
+            return SkyStoneConfiguration.TWO_FIVE;
         }
         driveSystem.lateral(9.5, 0.3);
-        return 4;
+        return SkyStoneConfiguration.ONE_FOUR;
     }
 
     /**
      * Returns true if the skystone is in the center of the camera's field of view.
      */
-    private boolean seesSkystone() {
+    private boolean seesSkyStone() {
         List<Recognition> recognitions = vision.getRecognitions();
         for (Recognition recognition : recognitions) {
             if (recognition.getLabel().equals(TTVision.LABEL_SKYSTONE)) {
@@ -101,48 +95,47 @@ public class TTAutoBlueGrabAndGrab extends TTOpMode {
         return false;
     }
 
-    /*Starts from the starting pos and moves grab the block
-      at that specific block pos then faces the foundation
+    /**
+     * Robot grabs the stone in front of it and backs out.
      */
-    private void grabSkyStone(int stoneNum) {
+    private void grabStone() {
         driveSystem.vertical(13.5, 0.6);
         arm.closeClaw();
         sleep(700);
         arm.liftTimed(0.15, 0.5);
-        driveSystem.vertical(-12, 0.6);
-        driveSystem.turn(-90, 0.6);
-        moveToPlacedFoundation(stoneNum);
+        driveSystem.vertical(-14, 0.6);
     }
 
-    //Moves towards the foundation and turns to face it
-    private void moveToPlacedFoundation(int stoneNum) {
-        if(stoneNum > 3) {
-            driveSystem.vertical(90 - stoneNum * 8, 0.6);
-        } else {
-            driveSystem.vertical(90 - stoneNum * 8, 1);
-        }
-        if(stoneNum < 4) {
-            arm.liftTimed(0.5, 0.5);
-        } else {
-            arm.liftTimed(0.5, 0.7);
-        }
+    /**
+     * Robot drives towards the foundation from the stone area, turns to face it, and releases a
+     * stone onto it. Assumes the foundation has been moved.
+     *
+     * @param stone the position of the stone that was grabbed in the stone area
+     */
+    private void stoneToFoundation(int stone) {
+        driveSystem.turn(-90, 0.5);
+        driveSystem.vertical(90 - stone * 8, 1);
+        arm.liftTimed(0.25, 1);
         driveSystem.vertical(16, 0.6);
         arm.openClaw();
-    }
-
-    private void moveToStone(int stoneNum) {
         driveSystem.vertical(-5, 0.6);
         arm.lower(1);
-        driveSystem.vertical(-100 + stoneNum * 8, 0.6);
-        driveSystem.turn(90, 0.6);
-        driveSystem.vertical(-2, 0.6);
+    }
+
+    /**
+     * Robot approaches stone area from foundation to target a stone.
+     *
+     * @param stone the position of the stone to be targeted in the stone area.
+     */
+    private void foundationToStone(int stone) {
+        driveSystem.vertical(-100 + stone * 8, 1);
+        driveSystem.turn(90, 0.5);
     }
 
 
     @Override
     protected void onStop() {
-
+        vision.disable();
     }
-
 
 }
