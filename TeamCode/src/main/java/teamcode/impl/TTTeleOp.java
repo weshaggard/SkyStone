@@ -87,6 +87,14 @@ public class TTTeleOp extends TTOpMode {
                 }
                 clawCooldown();
             }
+            if(gamepad1.left_bumper && canUseClaw){
+                if(arm.clawIsMid()){
+                    arm.closeClaw();
+                } else {
+                    arm.midClaw();
+                }
+                clawCooldown();
+            }
         }
 
         private void clawCooldown() {

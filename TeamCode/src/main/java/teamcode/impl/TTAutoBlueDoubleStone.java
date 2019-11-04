@@ -65,6 +65,7 @@ public class TTAutoBlueDoubleStone extends TTOpMode {
     private SkyStoneConfiguration determineSkyStoneConfig() {
         driveSystem.vertical(20, 0.5);
         driveSystem.lateral(2, 0.5);
+        sleep(1000);
         if (seesSkyStone()) {
             driveSystem.lateral(2, 0.5);
             return SkyStoneConfiguration.THREE_SIX;

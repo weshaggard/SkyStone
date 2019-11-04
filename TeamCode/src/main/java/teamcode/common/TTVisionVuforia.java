@@ -24,7 +24,7 @@ public class TTVisionVuforia {
     public static final String LABEL_STONE = "Boring Boy";
     public static final String LABEL_SKYSTONE = "Extra Scory Point Boi";
     public static final String[] LABELS = {LABEL_STONE, LABEL_SKYSTONE};
-    private static final double MINIMUM_CONFIDENCE = 0.7;
+    private static final double MINIMUM_CONFIDENCE = 0.75;
     private static final String WEBCAM_NAME = "Webcam1";
 
     private HardwareMap hardwareMap;

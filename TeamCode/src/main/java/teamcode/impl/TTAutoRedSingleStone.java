@@ -57,12 +57,13 @@ public class TTAutoRedSingleStone extends TTOpMode {
      */
     private SkyStoneConfiguration determineSkyStoneConfig() {
         driveSystem.vertical(22.5, 0.3);
-        driveSystem.lateral(-2, 0.3);
+        driveSystem.lateral(-3, 0.3);
+        sleep(1000);
         if (seesSkyStone()) {
             driveSystem.lateral(2, 0.3);
             return SkyStoneConfiguration.THREE_SIX;
         }
-        driveSystem.lateral(-6.5, 0.3);
+        driveSystem.lateral(-7.5, 0.3);
         sleep(1000);
         if (seesSkyStone()) {
             return SkyStoneConfiguration.TWO_FIVE;
@@ -91,12 +92,12 @@ public class TTAutoRedSingleStone extends TTOpMode {
      * Robot grabs the stone in front of it and backs out.
      */
     private void grabStone() {
-        driveSystem.vertical(13.5, 0.7);
+        driveSystem.vertical(11.5, 0.6);
         arm.closeClaw();
         sleep(750);
         arm.liftTimed(0.25, 0.3);
         sleep(500);
-        driveSystem.vertical(-27.5, 0.7);
+        driveSystem.vertical(-27.5, 0.6);
     }
 
     /**
@@ -106,17 +107,17 @@ public class TTAutoRedSingleStone extends TTOpMode {
      */
     private void stoneToFoundation(int stone) {
         driveSystem.turn(90, 0.5);
-        driveSystem.vertical(120.5 - stone * 8, 0.7);
-        driveSystem.turn(-90, 0.5);
+        driveSystem.vertical(120.5 - stone * 8, 0.6);
+        driveSystem.turn(-90, 0.6);
         arm.liftTimed(1, 0.5);
-        driveSystem.vertical(34, 0.6);
+        driveSystem.vertical(29, 0.6);
         sleep(250);
         arm.openClaw();
     }
 
     private void pullFoundationAndApproachTape() {
-        driveSystem.lateral(5, 0.7);
-        driveSystem.vertical(2, 0.5);
+        driveSystem.lateral(3, 0.6);
+        driveSystem.vertical(2, 0.6);
         arm.lower(1);
         sleep(250);
         driveSystem.vertical(-60.5, 0.5);
