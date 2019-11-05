@@ -40,6 +40,17 @@ public final class Vector2 {
         return new Vector2(x / magnitude, y / magnitude);
     }
 
+    /**
+     *
+     * @param other, a 2 dimensional vector added to the vector which is the
+     * @return a new vector that is the sum of the 2 passed in vectors
+     */
+    public Vector2 add(Vector2 other){
+        double xSum = other.x * Math.cos(other.getDirection()) + this.x * Math.cos(this.getDirection());
+        double ySum = other.y * Math.sin(other.getDirection()) + this.y * Math.sin(this.getDirection());
+        return new Vector2(xSum, ySum);
+    }
+
     public double dotProduct(Vector2 other) {
         return this.x * other.x + this.y * other.y;
     }
@@ -66,5 +77,7 @@ public final class Vector2 {
     public String toString() {
         return String.format("x = %.1f, y = %.1f", x, y);
     }
+
+
 
 }
