@@ -55,10 +55,11 @@ public class TTAutoBlueSingleStone extends TTOpMode {
      * Approaches the second SkyStone to determine the configuration of the SkyStones.
      */
     private SkyStoneConfiguration determineSkystoneConfig() {
-        driveSystem.vertical(20, 0.5);
-        driveSystem.lateral(2, 0.5);
+        driveSystem.vertical(25, 0.5);
+        driveSystem.lateral(0.75  , 0.5);
+        sleep(1000);
         if (seesSkyStone()) {
-            driveSystem.lateral(2, 0.5);
+            driveSystem.lateral(1, 0.5);
             return SkyStoneConfiguration.THREE_SIX;
         }
         driveSystem.lateral(8, 0.3);
@@ -91,7 +92,7 @@ public class TTAutoBlueSingleStone extends TTOpMode {
      * Robot grabs the stone in front of it and backs out.
      */
     private void grabStone() {
-        driveSystem.vertical(14.5, 0.7);
+        driveSystem.vertical(10.5, 0.7);
         arm.closeClaw();
         sleep(750);
         arm.liftTimed(0.25, 0.3);
@@ -109,7 +110,7 @@ public class TTAutoBlueSingleStone extends TTOpMode {
         driveSystem.vertical(120.5 - stone * 8, 0.7);
         driveSystem.turn(90, 0.7);
         arm.liftTimed(1, 0.5);
-        driveSystem.vertical(32, 0.6);
+        driveSystem.vertical(29, 0.6);
         sleep(250);
         arm.openClaw();
     }

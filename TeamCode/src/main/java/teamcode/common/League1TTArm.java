@@ -17,6 +17,7 @@ public class League1TTArm {
 
     private static final double CLAW_OPEN_POS = 0.4;
     private static final double CLAW_CLOSE_POS = 0.0;
+    private static final double CLAW_MID_POS = 0.2;
     private static final double CLAW_POSITION_ERROR = 0.1;
 
     private final CRServo lift;
@@ -109,10 +110,20 @@ public class League1TTArm {
 
     }
 
+    public void midClaw(){
+        claw.setPosition(CLAW_MID_POS);
+    }
     public boolean clawIsOpen() {
         return Math.abs(claw.getPosition() - CLAW_OPEN_POS) < CLAW_POSITION_ERROR;
     }
 
+    public boolean clawIsMid(){
+        return Math.abs(claw.getPosition() - CLAW_MID_POS) < CLAW_POSITION_ERROR;
+    }
+
+    public boolean clawIsClose(){
+        return Math.abs(claw.getPosition() - CLAW_CLOSE_POS) < CLAW_POSITION_ERROR;
+    }
     public Servo getClaw() {
         return claw;
     }
