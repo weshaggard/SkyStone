@@ -24,13 +24,13 @@ public class TTTeleOp extends TTOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
-        arm = new League1TTArm(hardwareMap);
+        //arm = new League1TTArm(hardwareMap);
         canUseClaw = true;
     }
 
     @Override
     protected void onStart() {
-        new ArmInputListener().start();
+        //new ArmInputListener().start();
         while (opModeIsActive()) {
             driveUpdate();
         }
