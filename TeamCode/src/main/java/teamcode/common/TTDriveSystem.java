@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 public class TTDriveSystem {
 
     // correct ticks = current ticks * correct distance / current distance
@@ -88,8 +86,7 @@ public class TTDriveSystem {
     public void vertical(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_VERTICAL);
-        Telemetry telemetry = TTOpMode.currentOpMode().telemetry;
-        telemetry.addData("Target Ticks:", ticks);
+
         for (DcMotor motor : motors) {
             motor.setTargetPosition(ticks);
         }
@@ -232,7 +229,4 @@ public class TTDriveSystem {
         }
     }
 
-    public DcMotor[] getMotors() {
-        return motors;
-    }
 }

@@ -27,19 +27,21 @@ public class TTAutoBlueDoubleStone extends TTOpMode {
     private League1TTArm arm;
     private TTVision vision;
     private SkyStoneConfiguration skyStoneConfig;
-
+    private SkystoneColorSensing skystoneDetection;
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();
+        skystoneDetection = new SkystoneColorSensing(hardwareMap);
+
     }
 
     @Override
     protected void onStart() {
         initArm();
-        skyStoneConfig = determineSkyStoneConfig();
+        skyStoneConfig = determineSkyStoneConfigColor();
         int firstStop = skyStoneConfig.getSecondStone();
         int secondStop = skyStoneConfig == SkyStoneConfiguration.ONE_FOUR ? 6 : skyStoneConfig.getFirstStone();
         grabStone();
@@ -77,6 +79,26 @@ public class TTAutoBlueDoubleStone extends TTOpMode {
             return SkyStoneConfiguration.TWO_FIVE;
         }
         driveSystem.lateral(9.5, 0.3);
+        return SkyStoneConfiguration.ONE_FOUR;
+    }
+
+    /**
+     * Determines Skystone placement using the Color sensor
+     */
+    public SkyStoneConfiguration determineSkyStoneConfigColor(){
+        driveSystem.vertical(20, 0.5);
+        driveSystem.lateral(2, 0.5);
+        if(skystoneDetection.SeesSkystone()){
+            driveSystem.lateral(2, 0.5);
+            return SkyStoneConfiguration.THREE_SIX;
+        }
+        driveSystem.lateral(8, 0.5);
+        sleep(500);
+        if(skystoneDetection.SeesSkystone()){
+            driveSystem.lateral(1, 0.5);
+            return SkyStoneConfiguration.TWO_FIVE;
+        }
+        driveSystem.lateral(9.5, 0.7);
         return SkyStoneConfiguration.ONE_FOUR;
     }
 
