@@ -24,6 +24,7 @@ public class League1TTArm {
     private final ColorSensor liftSensor;
     private final Servo claw;
     private final Timer timer;
+    private final ColorSensor tapeSensor;
 
     public League1TTArm(HardwareMap hardwareMap) {
         lift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
@@ -31,6 +32,7 @@ public class League1TTArm {
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         timer = TTOpMode.currentOpMode().getNewTimer();
+        tapeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.TAPE_COLOR_SENSOR);
     }
 
     public void testColorSensor(Telemetry telemetry, ColorSensor sensor) {
@@ -51,6 +53,19 @@ public class League1TTArm {
             lift.setPower(power);
         }
         lift.setPower(0.0);
+    }
+
+    public void blueTapeListening(final double power){
+        Thread blueTape = new Thread(){
+            @Override
+            public void run(){
+                while (getLiftColor() != LiftColor.BLUE && TTOpMode.currentOpMode().opModeIsActive()) {
+                    lift.setPower(0);
+                }
+                raise(power);
+            }
+        };
+        blueTape.start();
     }
 
     public void lower(double power) {
