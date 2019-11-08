@@ -229,7 +229,4 @@ public class TTDriveSystem {
         }
     }
 
-    public boolean isBusy() {
-        return frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
-    }
 }
