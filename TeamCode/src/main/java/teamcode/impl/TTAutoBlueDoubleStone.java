@@ -26,14 +26,15 @@ public class TTAutoBlueDoubleStone extends TTOpMode {
     private League1TTArm arm;
     private TTVision vision;
     private SkyStoneConfiguration skyStoneConfig;
-    private TapeColorSensing skystoneDetection;
+    private MetaTTArm metaArm;
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
+        metaArm = new MetaTTArm(hardwareMap);
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();
-        skystoneDetection = new TapeColorSensing(hardwareMap);
+
 
     }
 

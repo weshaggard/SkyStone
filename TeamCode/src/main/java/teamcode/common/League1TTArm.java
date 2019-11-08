@@ -24,7 +24,6 @@ public class League1TTArm {
     private final ColorSensor liftSensor;
     private final Servo claw;
     private final Timer timer;
-    private final ColorSensor tapeSensor;
 
     public League1TTArm(HardwareMap hardwareMap) {
         lift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
@@ -32,7 +31,6 @@ public class League1TTArm {
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         timer = TTOpMode.currentOpMode().getNewTimer();
-        tapeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.TAPE_COLOR_SENSOR);
     }
 
     public void testColorSensor(Telemetry telemetry, ColorSensor sensor) {
@@ -54,7 +52,7 @@ public class League1TTArm {
         }
         lift.setPower(0.0);
     }
-
+    @Deprecated //Doubt I will use this method but it may be useful in case, the TapeColorSensing Class seems more viable
     public void blueTapeListening(final double power){
         Thread blueTape = new Thread(){
             @Override
@@ -141,6 +139,10 @@ public class League1TTArm {
     }
     public Servo getClaw() {
         return claw;
+    }
+
+    public ColorSensor getLiftSensor() {
+        return liftSensor;
     }
 
     private enum LiftColor {

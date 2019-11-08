@@ -45,6 +45,7 @@ public class MetaTTArm {
         armLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         presetIndex++;
         armLift.setTargetPosition(1000 * presetIndex);
+        //TODO arbetrary value need to adjust this later
         while(armLift.isBusy()) {
             armLift.setPower(1);
         }
@@ -56,6 +57,7 @@ public class MetaTTArm {
         armLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         presetIndex++;
         armLift.setTargetPosition(-1000 * presetIndex);
+        //TODO arbetrary value need to adjust this later
         while(armLift.isBusy()) {
             armLift.setPower(-1);
         }
