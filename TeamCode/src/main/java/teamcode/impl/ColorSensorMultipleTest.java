@@ -53,7 +53,6 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
 @TeleOp(name = "ColorSensorMultipleTest", group = "Sensor")
-@Disabled                            // Comment this out to add to the opmode list
 public class ColorSensorMultipleTest extends LinearOpMode {
 
     /**
@@ -87,15 +86,20 @@ public class ColorSensorMultipleTest extends LinearOpMode {
      */
     ColorSensor sensorColor;
     DistanceSensor sensorDistance;
+    ColorSensor sensorColor2;
+    DistanceSensor sensorDistance2;
 
     @Override
     public void runOpMode() {
 
         // get a reference to the color sensor.
         sensorColor = hardwareMap.get(ColorSensor.class, "s1");
+        sensorColor2 = hardwareMap.get(ColorSensor.class, "s2");
 
         // get a reference to the distance sensor that shares the same name.
-        //sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "s1");
+        sensorDistance2 = hardwareMap.get(DistanceSensor.class, "s2");
+
 
         // hsvValues is an array that will hold the hue, saturation, and value information.
         float hsvValues[] = {0F, 0F, 0F};
@@ -133,7 +137,15 @@ public class ColorSensorMultipleTest extends LinearOpMode {
             telemetry.addData("Red  ", sensorColor.red());
             telemetry.addData("Green", sensorColor.green());
             telemetry.addData("Blue ", sensorColor.blue());
-            telemetry.addData("Hue", hsvValues[0]);
+            //telemetry.addData("Hue", hsvValues[0]);
+
+            telemetry.addData("Distance2 (cm)",
+                    String.format(Locale.US, "%.02f", sensorDistance2.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Alpha2", sensorColor2.alpha());
+            telemetry.addData("Red2  ", sensorColor2.red());
+            telemetry.addData("Green2", sensorColor2.green());
+            telemetry.addData("Blue2 ", sensorColor2.blue());
+            //telemetry.addData("Hue", hsvValues[0]);
 
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument

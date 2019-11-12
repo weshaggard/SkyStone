@@ -19,7 +19,7 @@ public class TapeColorSensing {
     //reference code, hue < 60 || hue > 320 for red and hue > 120 || hue < 260
     public TapeColorSensing(HardwareMap hardwareMap) {
         tapeDetector = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.TAPE_COLOR_SENSOR);
-        //tapeDetector.setI2cAddress(new I2cAddr());
+        tapeDetector.setI2cAddress(I2cAddr.create8bit(0x3c));
         tapeDetector.enableLed(true);
     }
 
