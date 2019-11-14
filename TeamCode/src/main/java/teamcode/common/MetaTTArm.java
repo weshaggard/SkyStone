@@ -1,4 +1,4 @@
-package teamcode.impl;
+package teamcode.common;
 
 import android.text.method.Touch;
 
@@ -13,12 +13,11 @@ import java.util.TimerTask;
 import teamcode.common.TTHardwareComponentNames;
 
 public class MetaTTArm {
-    private static final double CLAW_OPEN_POS = 0.5;
+    private static final double CLAW_OPEN_POS = 0;
     private static final double CLAW_CLOSE_POS = 1.0;
     private static final double WRIST_OPEN_POS = 1.0;
     private static final double WRIST_CLOSE_POS = 0.0;
-    private final CRServo leftIntake, rightIntake;
-    //private final DcMotor armLift;
+    private final CRServo leftIntake, rightIntake, armLift;
     private final Servo armClaw, armWrist;
     private int presetIndex;
     //preset index in inches should be 4 inches * preset index should equal the total lift height
@@ -28,7 +27,7 @@ public class MetaTTArm {
     public MetaTTArm(HardwareMap hardwareMap){
         rightIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_RIGHT);
         leftIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_LEFT);
-    //    armLift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
+        armLift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
         armClaw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         armWrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
 
@@ -90,6 +89,10 @@ public class MetaTTArm {
     public void spit(float power) {
         leftIntake.setPower(-power);
         rightIntake.setPower(-power);
+    }
+
+    public void useArm(double power){
+        armLift.setPower(power);
     }
 
 

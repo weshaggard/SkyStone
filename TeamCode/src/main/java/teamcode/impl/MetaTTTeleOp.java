@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.TimerTask;
 
+import teamcode.common.MetaTTArm;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
 import teamcode.common.Vector2;
@@ -16,6 +17,8 @@ public class MetaTTTeleOp extends TTOpMode {
     private static final double CLAW_COOLDOWN_SECONDS = 0.5;
     private boolean canUseClaw;
     private boolean canUseWrist;
+    private static final double STRAIGHT_SPEED_MODIFIER = 0.75;
+    private static final double TURN_SPEED_MODIFIER = 0.6;
 
 
     @Override
@@ -35,11 +38,17 @@ public class MetaTTTeleOp extends TTOpMode {
     }
 
     private void driveUpdate() {
-        double vertical = gamepad1.right_stick_y;
+        double vertical = gamepad1.right_stick_y * STRAIGHT_SPEED_MODIFIER;
         double horizontal = gamepad1.right_stick_x;
-        double turn = -gamepad1.left_stick_x;
-        Vector2 velocity = new Vector2(horizontal, vertical);
-        driveSystem.continuous(velocity, turn);
+        double turn = -gamepad1.left_stick_x * TURN_SPEED_MODIFIER;
+        if(gamepad1.right_bumper){
+            vertical = vertical / STRAIGHT_SPEED_MODIFIER;
+            Vector2 velocity = new Vector2(horizontal, vertical);
+            driveSystem.continuous(velocity, turn);
+        } else {
+            Vector2 velocity = new Vector2(horizontal, vertical);
+            driveSystem.continuous(velocity, turn);
+        }
     }
 
     private class IntakeInput extends Thread{
@@ -59,11 +68,20 @@ public class MetaTTTeleOp extends TTOpMode {
             }else if(gamepad1.a && canUseClaw){
                 arm.adjustClawPos();
                 clawCooldown();
-             }else if(gamepad1.b && canUseWrist){
+             }else if(gamepad1.b && canUseWrist) {
                 arm.rotate();
                 rotateCooldown();
+            } else if(gamepad1.dpad_down) {
+                arm.useArm(-1.0);
+            } else if(gamepad1.dpad_up) {
+                arm.useArm(1);
+            } else if(gamepad1.dpad_left) {
+                arm.useArm(-0.5);
+            } else if(gamepad1.dpad_right){
+                arm.useArm(0.5);
             }else{
                 arm.spit(0);
+                arm.useArm(0);
             }
             telemetry.addData("can rotate: ", canUseWrist);
             telemetry.update();
