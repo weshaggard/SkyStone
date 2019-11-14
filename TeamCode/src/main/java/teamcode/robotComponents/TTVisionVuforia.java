@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import teamcode.common.BoundingBox2D;
+import teamcode.common.Debug;
 import teamcode.common.Vector2D;
 
 public class TTVisionVuforia {
@@ -22,19 +23,14 @@ public class TTVisionVuforia {
     private static final double MINIMUM_CONFIDENCE = 0.75;
     private static final String WEBCAM_NAME = "Webcam1";
 
-    private HardwareMap hardwareMap;
-    private CameraType cameraType;
-    private boolean enabled;
-    private VuforiaLocalizer vuforia;
+    private VuforiaTrackables trackables;
 
     public TTVisionVuforia(HardwareMap hardwareMap) {
         this(hardwareMap, CameraType.PHONE);
-        createVuforia();
     }
 
     public TTVisionVuforia(HardwareMap hardwareMap, CameraType cameraType) {
-        this.hardwareMap = hardwareMap;
-        this.cameraType = cameraType;
+        createVuforia(hardwareMap, cameraType);
     }
 
     public static Vector2D getCenter(Recognition recognition) {
@@ -43,28 +39,34 @@ public class TTVisionVuforia {
         return new Vector2D(x, y);
     }
 
-    private VuforiaLocalizer createVuforia() {
+    private VuforiaLocalizer createVuforia(HardwareMap hardwareMap, CameraType cameraType) {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         if (cameraType == CameraType.WEBCAM) {
             parameters.cameraName = ClassFactory.getInstance().getCameraManager().getAllWebcams().get(0);
         }
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        Debug.log(1);
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
+        Debug.log(2);
         VuforiaTrackables trackables = vuforia.loadTrackablesFromFile(ASSET_NAME);
-        VuforiaTrackable trackable = trackables.get(0);
-        OpenGLMatrix transform = trackable.getLocation();
-
+        Debug.log(3);
+        trackables.activate();
+        Debug.log(4);
         return vuforia;
     }
 
-    public static BoundingBox2D getBoundingBox(Recognition recognition) {
-        double x1 = recognition.getLeft();
-        double y1 = recognition.getTop();
-        double x2 = recognition.getRight();
-        double y2 = recognition.getBottom();
-        return new BoundingBox2D(x1, y1, x2, y2);
+    public OpenGLMatrix getSkystoneLocation() {
+        VuforiaTrackable skystone = trackables.get(0);
+        Debug.log(5);
+        if (skystone == null) {
+            Debug.log("It's null");
+            return null;
+        }
+        Debug.log(6);
+        OpenGLMatrix location = skystone.getLocation();
+        Debug.log(location);
+        return location;
     }
 
     public enum CameraType {
