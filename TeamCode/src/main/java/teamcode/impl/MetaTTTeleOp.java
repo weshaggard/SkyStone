@@ -1,9 +1,11 @@
 package teamcode.impl;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.TimerTask;
 
+import teamcode.common.Debug;
 import teamcode.common.MetaTTArm;
 import teamcode.common.TTDriveSystem;
 import teamcode.common.TTOpMode;
@@ -27,6 +29,8 @@ public class MetaTTTeleOp extends TTOpMode {
         driveSystem = new TTDriveSystem(hardwareMap);
         canUseClaw = true;
         canUseWrist = true;
+        arm.getArmlift().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.getArmlift().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     @Override
@@ -61,6 +65,8 @@ public class MetaTTTeleOp extends TTOpMode {
         }
 
         public void armUpdate(){
+            Debug debug = new Debug();
+            debug.log(arm.getLiftPosition());
             if(gamepad1.right_trigger > 0) {
                 arm.suck(gamepad1.right_trigger);
             }else if(gamepad1.left_trigger > 0){

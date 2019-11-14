@@ -3,7 +3,7 @@ package teamcode.common;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import teamcode.impl.MetaTTArm;
+import teamcode.common.MetaTTArm;
 
 @TeleOp(name = "Rotation Calibration")
 public class RotationCalibration extends TTOpMode{
