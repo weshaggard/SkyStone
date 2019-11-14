@@ -1,4 +1,4 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -6,16 +6,16 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import java.util.List;
 
+import teamcode.common.AbstractOpMode;
 import teamcode.common.BoundingBox2D;
-import teamcode.common.League1TTArm;
+import teamcode.robotComponents.League1TTArm;
 import teamcode.common.SkyStoneConfiguration;
-import teamcode.common.TTDriveSystem;
-import teamcode.common.TTOpMode;
-import teamcode.common.TTVision;
+import teamcode.robotComponents.TTDriveSystem;
+import teamcode.robotComponents.TTVision;
 import teamcode.common.Vector2;
 
 @Autonomous(name = "Blue Double Stone")
-public class TTAutoBlueDoubleStone extends TTOpMode {
+public class TTAutoBlueDoubleStone extends AbstractOpMode {
 
     /**
      * A bounding box which is used to see if a skystone is in the center of the camera's view.

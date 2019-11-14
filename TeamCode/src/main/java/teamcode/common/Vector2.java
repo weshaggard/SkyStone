@@ -1,54 +1,64 @@
 package teamcode.common;
 
 /**
- * Represents an immutable 2-dimensional vector.
+ * Represents a 2-dimensional vector.
  */
-public final class Vector2 {
+public final class Vector2 implements Cloneable {
 
-    public static final Vector2 FORWARD = new Vector2(0.0, 1.0);
-    public static final Vector2 BACKWARD = new Vector2(0.0, -1.0);
-    public static final Vector2 LEFT = new Vector2(-1.0, 0.0);
-    public static final Vector2 RIGHT = new Vector2(1.0, 0.0);
-    public static final Vector2 ZERO = new Vector2(0.0, 0.0);
-
-    private final double x;
-    private final double y;
+    private double x;
+    private double y;
 
     public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
+    public static Vector2 forward() {
+        return new Vector2(0, 1);
+    }
+
+    public static Vector2 right() {
+        return new Vector2(1, 0);
+    }
+
     public double getX() {
         return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
     }
 
     public double getY() {
         return y;
     }
 
-    public Vector2 multiply(double scalar) {
-        return new Vector2(x * scalar, y * scalar);
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void multiply(double scalar) {
+        x *= scalar;
+        y *= scalar;
     }
 
     public double magnitude() {
         return Math.sqrt(x * x + y * y);
     }
 
-    public Vector2 normalized() {
+    public void normalize() {
         double magnitude = magnitude();
-        return new Vector2(x / magnitude, y / magnitude);
+        x /= magnitude;
+        y /= magnitude;
     }
 
     /**
-     *
      * @param other, a 2 dimensional vector added to the vector which is the
      * @return a new vector that is the sum of the 2 passed in vectors
      */
-    public Vector2 add(Vector2 other){
-        double xSum = other.x * Math.cos(other.getDirection()) + this.x * Math.cos(this.getDirection());
-        double ySum = other.y * Math.sin(other.getDirection()) + this.y * Math.sin(this.getDirection());
-        return new Vector2(xSum, ySum);
+    public void add(Vector2 other) {
+        x += other.x;
+        y += other.y;
     }
 
     public double dotProduct(Vector2 other) {
@@ -75,9 +85,20 @@ public final class Vector2 {
 
     @Override
     public String toString() {
-        return String.format("x = %.1f, y = %.1f", x, y);
+        return String.format("[x=%.1f,y=%.1f]", x, y);
     }
 
+    @Override
+    public Vector2 clone() {
+        Vector2 clone;
+        try {
+            clone = (Vector2) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            clone = null;
+        }
+        return clone;
+    }
 
 
 }

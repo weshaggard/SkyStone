@@ -1,11 +1,10 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.I2cAddrConfig;
 
-import teamcode.common.TTHardwareComponentNames;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 public class TapeColorSensing {
     private final ColorSensor tapeDetector;

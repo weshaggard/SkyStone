@@ -1,13 +1,13 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import teamcode.common.League1TTArm;
-import teamcode.common.TTDriveSystem;
-import teamcode.common.TTOpMode;
+import teamcode.robotComponents.League1TTArm;
+import teamcode.robotComponents.TTDriveSystem;
+import teamcode.common.AbstractOpMode;
 
 @Autonomous(name = "MatchOneRed")
-public class MatchOneRed extends TTOpMode {
+public class MatchOneRed extends AbstractOpMode {
     private TTDriveSystem driveSystem;
     private League1TTArm arm;
 

@@ -1,4 +1,4 @@
-package teamcode.common;
+package teamcode.robotComponents;
 
 public class TTHardwareComponentNames {
 
@@ -11,6 +11,7 @@ public class TTHardwareComponentNames {
     public static final String ARM_LIFT = "ArmLift";
     public static final String ARM_LIFT_SENSOR = "ArmLiftSensor";
     public static final String ARM_WRIST = "ArmWrist";
+    private static final String ARM_ELBOW="ArmElbow";
     public static final String ARM_CLAW = "ArmClaw";
     public static final String TAPE_COLOR_SENSOR = "TapeColorSensor";
     public static final String INTAKE_TOUCH_SENSOR = "IntakeTouchSensor";

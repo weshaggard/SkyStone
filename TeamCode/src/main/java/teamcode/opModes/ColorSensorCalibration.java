@@ -1,14 +1,13 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import teamcode.common.League1TTArm;
-import teamcode.common.TTDriveSystem;
-import teamcode.common.TTOpMode;
+import teamcode.common.AbstractOpMode;
+import teamcode.robotComponents.League1TTArm;
+import teamcode.robotComponents.TTDriveSystem;
 
 @Autonomous(name = "Color Sensor Calibration")
-public class ColorSensorCalibration extends TTOpMode {
+public class ColorSensorCalibration extends AbstractOpMode {
     private TTDriveSystem driveSystem;
     private League1TTArm arm;
     private TapeColorSensing tapeSensor;

@@ -1,16 +1,10 @@
-package teamcode.impl;
-
-import android.text.method.Touch;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import java.util.TimerTask;
-
-import teamcode.common.TTHardwareComponentNames;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 public class MetaTTArm {
     private static final double CLAW_OPEN_POS = 0.5;

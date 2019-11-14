@@ -1,4 +1,4 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -7,11 +7,11 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import java.util.List;
 
 import teamcode.common.BoundingBox2D;
-import teamcode.common.TTOpMode;
-import teamcode.common.TTVision;
+import teamcode.common.AbstractOpMode;
+import teamcode.robotComponents.TTVision;
 
 @Autonomous(name = "Vision Calibrator")
-public class VisionCalibrator extends TTOpMode {
+public class VisionCalibrator extends AbstractOpMode {
 
     private TTVision vision;
 

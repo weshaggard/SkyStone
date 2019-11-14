@@ -1,13 +1,12 @@
-package teamcode.impl;
+package teamcode.opModes;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import teamcode.common.League1TTArm;
-import teamcode.common.TTOpMode;
+import teamcode.robotComponents.League1TTArm;
+import teamcode.common.AbstractOpMode;
 
 @TeleOp(name = "Arm Sensor Test")
-public class ArmSensorTest extends TTOpMode {
+public class ArmSensorTest extends AbstractOpMode {
 
     private League1TTArm arm;
 

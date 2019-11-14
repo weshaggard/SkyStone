@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 
-public abstract class TTOpMode extends LinearOpMode {
+public abstract class AbstractOpMode extends LinearOpMode {
 
-    private static TTOpMode opMode;
+    private static AbstractOpMode opMode;
 
     private List<Timer> timers;
 
-    public static TTOpMode currentOpMode() {
+    public static AbstractOpMode currentOpMode() {
         return opMode;
     }
 
@@ -22,9 +22,11 @@ public abstract class TTOpMode extends LinearOpMode {
         timers = new ArrayList<>();
         onInitialize();
         waitForStart();
-        onStart();
+        if (opModeIsActive()) {
+            onStart();
+        }
         onStop();
-        for(Timer timer:timers){
+        for (Timer timer : timers) {
             timer.cancel();
         }
     }
@@ -39,7 +41,7 @@ public abstract class TTOpMode extends LinearOpMode {
      * Use getNewTimer() instead.
      */
     @Deprecated
-    public Timer getTimer(){
+    public Timer getTimer() {
         return getNewTimer();
     }
 

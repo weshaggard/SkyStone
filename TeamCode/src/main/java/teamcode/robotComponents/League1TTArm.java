@@ -1,6 +1,4 @@
-package teamcode.common;
-
-import android.graphics.Color;
+package teamcode.robotComponents;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -12,6 +10,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import teamcode.common.AbstractOpMode;
 
 public class League1TTArm {
 
@@ -30,7 +30,7 @@ public class League1TTArm {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         liftSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.ARM_LIFT_SENSOR);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
-        timer = TTOpMode.currentOpMode().getNewTimer();
+        timer = AbstractOpMode.currentOpMode().getNewTimer();
     }
 
     public void testColorSensor(Telemetry telemetry, ColorSensor sensor) {
@@ -47,7 +47,7 @@ public class League1TTArm {
         power = Math.abs(power);
         final boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, 2);
-        while (getLiftColor() != LiftColor.RED && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
+        while (getLiftColor() != LiftColor.RED && !stopLift[0] && AbstractOpMode.currentOpMode().opModeIsActive()) {
             lift.setPower(power);
         }
         lift.setPower(0.0);
@@ -57,7 +57,7 @@ public class League1TTArm {
         Thread blueTape = new Thread(){
             @Override
             public void run(){
-                while (getLiftColor() != LiftColor.BLUE && TTOpMode.currentOpMode().opModeIsActive()) {
+                while (getLiftColor() != LiftColor.BLUE && AbstractOpMode.currentOpMode().opModeIsActive()) {
                     lift.setPower(0);
                 }
                 raise(power);
@@ -70,7 +70,7 @@ public class League1TTArm {
         power = Math.abs(power);
         final boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, 2);
-        while (getLiftColor() != LiftColor.BLUE && !stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) {
+        while (getLiftColor() != LiftColor.BLUE && !stopLift[0] && AbstractOpMode.currentOpMode().opModeIsActive()) {
             lift.setPower(-power);
         }
         lift.setPower(0.0);
@@ -80,7 +80,7 @@ public class League1TTArm {
         lift.setPower(power);
         boolean[] stopLift = new boolean[1];
         scheduleStopLiftFlag(stopLift, seconds);
-        while (!stopLift[0] && TTOpMode.currentOpMode().opModeIsActive()) ;
+        while (!stopLift[0] && AbstractOpMode.currentOpMode().opModeIsActive()) ;
         lift.setPower(0.0);
     }
 

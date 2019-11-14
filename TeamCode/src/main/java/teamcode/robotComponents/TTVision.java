@@ -1,4 +1,4 @@
-package teamcode.common;
+package teamcode.robotComponents;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -8,6 +8,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
+
+import teamcode.common.BoundingBox2D;
+import teamcode.common.Vector2;
 
 public class TTVision {
 

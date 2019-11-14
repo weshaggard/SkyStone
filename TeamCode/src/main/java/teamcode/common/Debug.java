@@ -19,10 +19,10 @@ public class Debug {
     private static final List<Object> lines;
 
     static {
-        if (TTOpMode.currentOpMode() == null) {
-            throw new IllegalStateException("Cannot use Debug unless TTOpMode is initialized.");
+        if (AbstractOpMode.currentOpMode() == null) {
+            throw new IllegalStateException("Cannot use Debug unless AbstractOpMode is initialized.");
         }
-        telemetry = TTOpMode.currentOpMode().telemetry;
+        telemetry = AbstractOpMode.currentOpMode().telemetry;
         lines = new ArrayList<>();
     }
 

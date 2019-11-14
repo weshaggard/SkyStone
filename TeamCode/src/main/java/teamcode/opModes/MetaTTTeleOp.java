@@ -1,15 +1,15 @@
-package teamcode.impl;
+package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.TimerTask;
 
-import teamcode.common.TTDriveSystem;
-import teamcode.common.TTOpMode;
+import teamcode.robotComponents.TTDriveSystem;
+import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2;
 
 @TeleOp(name =  "Meta Tele Op")
-public class MetaTTTeleOp extends TTOpMode {
+public class MetaTTTeleOp extends AbstractOpMode {
     private static final double WRIST_COOLDOWN_SECONDS = 0.5;
     private MetaTTArm arm;
     private TTDriveSystem driveSystem;
