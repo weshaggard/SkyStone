@@ -7,7 +7,7 @@ public class BoundingBox2D {
 
     private final double x1, y1, x2, y2;
 
-    public BoundingBox2D(Vector2 topLeft, Vector2 bottomRight) {
+    public BoundingBox2D(Vector2D topLeft, Vector2D bottomRight) {
         this(topLeft.getX(), topLeft.getY(), bottomRight.getX(), bottomRight.getY());
     }
 
@@ -34,7 +34,7 @@ public class BoundingBox2D {
         return y2;
     }
 
-    public boolean contains(Vector2 point) {
+    public boolean contains(Vector2D point) {
         return contains(point.getX(), point.getY());
     }
 
