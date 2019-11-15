@@ -1,11 +1,11 @@
 package teamcode.common;
 
 /**
- * An immutable 2-dimensional bounding box.
+ * A 2-dimensional bounding box.
  */
 public class BoundingBox2D {
 
-    private final double x1, y1, x2, y2;
+    private double x1, y1, x2, y2;
 
     public BoundingBox2D(Vector2D topLeft, Vector2D bottomRight) {
         this(topLeft.getX(), topLeft.getY(), bottomRight.getX(), bottomRight.getY());
@@ -22,16 +22,32 @@ public class BoundingBox2D {
         return x1;
     }
 
+    public void setX1(double x1) {
+        this.x1 = x1;
+    }
+
     public double getY1() {
         return y1;
+    }
+
+    public void setY1(double y1) {
+        this.y1 = y1;
     }
 
     public double getX2() {
         return x2;
     }
 
+    public void setX2(double x2) {
+        this.x2 = x2;
+    }
+
     public double getY2() {
         return y2;
+    }
+
+    public void setY2(double y2){
+        this.y2 = y2;
     }
 
     public boolean contains(Vector2D point) {
@@ -47,7 +63,7 @@ public class BoundingBox2D {
 
     @Override
     public String toString() {
-        return String.format("x1 = %.1f, y1 = %.1f, x2 = %.1f, y2 = %.1f", x1, y1, x2, y2);
+        return String.format("x1=%.1f, y1=%.1f, x2=%.1f, y2=%.1f", x1, y1, x2, y2);
     }
 
 }

@@ -52,14 +52,9 @@ public final class Vector2D implements Cloneable {
         y /= magnitude;
     }
 
-    /**
-     * @param other, a 2 dimensional vector added to the vector which is the
-     * @return a new vector that is the sum of the 2 passed in vectors
-     */
-    public Vector2D add(Vector2D other) {
-        double xSum = this.x + other.x;
-        double ySum = this.y + other.y;
-        return new Vector2D(xSum, ySum);
+    public void add(Vector2D vector) {
+        x += vector.x;
+        y += vector.y;
     }
 
     public double dotProduct(Vector2D other) {
@@ -86,7 +81,7 @@ public final class Vector2D implements Cloneable {
 
     @Override
     public String toString() {
-        return String.format("x = %.1f, y = %.1f", x, y);
+        return String.format("x=%.1f, y=%.1f", x, y);
     }
 
     @Override
