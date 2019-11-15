@@ -1,15 +1,15 @@
 package teamcode.robotComponents;
 
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class MetaTTArm {
     private static final double CLAW_OPEN_POS = 0;
     private static final double CLAW_CLOSE_POS = 1.0;
-    private static final double WRIST_OPEN_POS = 1.0;
-    private static final double WRIST_CLOSE_POS = 0.0;
-    private final CRServo leftIntake, rightIntake, armLift;
+    private static final double TICK_ERROR_TOLERANCE = 25.0;
+    private final DcMotor leftIntake, rightIntake, armLift;
     private final Servo armClaw, armWrist;
     private int presetIndex;
     //preset index in inches should be 4 inches * preset index should equal the total lift height
@@ -17,9 +17,9 @@ public class MetaTTArm {
 
     //TODO need to calibrate this value
     public MetaTTArm(HardwareMap hardwareMap){
-        rightIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_RIGHT);
-        leftIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_LEFT);
-        armLift = hardwareMap.get(CRServo.class, TTHardwareComponentNames.ARM_LIFT);
+        rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
+        leftIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_LEFT);
+        armLift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
         armClaw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         armWrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
 
@@ -28,8 +28,8 @@ public class MetaTTArm {
     }
 
     public void suck(double power){
-        leftIntake.setPower(power);
-        rightIntake.setPower(power);
+        leftIntake.setPower(-power);
+        rightIntake.setPower(-power);
 
         // while(!armSensor.isPressed()){
         //stall until the touch sensor is pressed
@@ -69,23 +69,44 @@ public class MetaTTArm {
         }
 
     }
-    public void rotate() {
-        if(armWrist.getPosition() == WRIST_CLOSE_POS) {
-            armWrist.setPosition(WRIST_OPEN_POS);
-        }else{
-            armWrist.setPosition(WRIST_CLOSE_POS);
-        }
+    public void rotate(double position){
+        armWrist.setPosition(position);
     }
 
 
     public void spit(float power) {
-        leftIntake.setPower(-power);
-        rightIntake.setPower(-power);
+        leftIntake.setPower(power);
+        rightIntake.setPower(power);
     }
 
     public void useArm(double power){
         armLift.setPower(power);
     }
 
+    public void liftToTarget(int ticks, double power){
+        armLift.setTargetPosition(ticks);
+        armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armLift.setPower(power);
+        while (!nearTarget()) ;
+        armLift.setPower(0.0);
+    }
+
+    public int getCurrentLiftTicks(){
+        return armLift.getCurrentPosition();
+    }
+
+    public DcMotor getArmLift() {
+        return armLift;
+    }
+
+    private boolean nearTarget() {
+        int targetPosition = armLift.getTargetPosition();
+        int currentPosition = armLift.getCurrentPosition();
+        double ticksFromTarget = Math.abs(targetPosition - currentPosition);
+        if (ticksFromTarget >= TICK_ERROR_TOLERANCE) {
+            return false;
+        }
+        return true;
+    }
 
 }

@@ -121,6 +121,7 @@ public class TTDriveSystem {
     public DcMotor[] getMotors(){
         return motors;
     }
+
     public void vertical(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks;
