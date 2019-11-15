@@ -19,6 +19,7 @@ public class TTDriveSystem {
     private static  double INCHES_TO_TICKS_LATERAL_META;
     //private static double INCHES_TO_TICKS_DIAGONAL_META;
     private static double DEGREES_TO_TICKS_META;
+    private static double DRIVE_SPEED_MODIFIER = 0.7;
 
     //6000 rpm base
     //approx 28 ticks per revolution
@@ -94,7 +95,7 @@ public class TTDriveSystem {
         }
     }
 
-    public void continuous(Vector2 velocity, double turnSpeed) {
+    public void continuous(Vector2 velocity, double turnSpeed, boolean isSprint) {
         setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         double direction = velocity.getDirection();
@@ -110,11 +111,17 @@ public class TTDriveSystem {
         double frontRightPow = power * cos + turnSpeed;
         double backLeftPow = power * cos - turnSpeed;
         double backRightPow = power * sin + turnSpeed;
-
-        frontLeft.setPower(frontLeftPow);
-        frontRight.setPower(frontRightPow);
-        backLeft.setPower(backLeftPow);
-        backRight.setPower(backRightPow);
+        if(isSprint){
+            frontLeft.setPower(frontLeftPow);
+            frontRight.setPower(frontRightPow);
+            backLeft.setPower(backLeftPow);
+            backRight.setPower(backRightPow);
+        }else {
+            frontLeft.setPower(frontLeftPow * DRIVE_SPEED_MODIFIER);
+            frontRight.setPower(frontRightPow * DRIVE_SPEED_MODIFIER);
+            backLeft.setPower(backLeftPow * DRIVE_SPEED_MODIFIER);
+            backRight.setPower(backRightPow * DRIVE_SPEED_MODIFIER);
+        }
     }
     public DcMotor[] getMotors(){
         return motors;

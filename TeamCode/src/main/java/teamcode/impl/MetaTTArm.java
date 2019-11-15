@@ -11,14 +11,18 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import java.util.TimerTask;
 
 import teamcode.common.TTHardwareComponentNames;
+import teamcode.common.TTOpMode;
 
 public class MetaTTArm {
     private static final double CLAW_OPEN_POS = 0.5;
     private static final double CLAW_CLOSE_POS = 1.0;
     private static final double WRIST_OPEN_POS = 1.0;
     private static final double WRIST_CLOSE_POS = 0.0;
+    private static final double TICK_ERROR_TOLERANCE = 25.0;
+    private static final double INCHES_TO_TICKS = 5;
+    //TODO need to calibrate this vale
     private final CRServo leftIntake, rightIntake;
-    //private final DcMotor armLift;
+    private final DcMotor armLift;
     private final Servo armClaw, armWrist;
     private int presetIndex;
     //preset index in inches should be 4 inches * preset index should equal the total lift height
@@ -28,10 +32,10 @@ public class MetaTTArm {
     public MetaTTArm(HardwareMap hardwareMap){
         rightIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_RIGHT);
         leftIntake = hardwareMap.get(CRServo.class, TTHardwareComponentNames.INTAKE_LEFT);
-    //    armLift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
+        armLift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
         armClaw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         armWrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
-
+        //TODO Hardware team needs to implement this
       //  armSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_TOUCH_SENSOR);
         presetIndex = 0;
     }
@@ -40,34 +44,47 @@ public class MetaTTArm {
         leftIntake.setPower(power);
         rightIntake.setPower(power);
 
+
         // while(!armSensor.isPressed()){
         //stall until the touch sensor is pressed
         //}
         //raise();
     }
-    public void raise(){
-        //armClaw.setPosition(ARM_CLOSE_POS);
-        //armLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //armLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public void raise( double power){
+        adjustClawPos();
+        liftSetHeight(6, power);
+        TimerTask rotate = new TimerTask(){
+            @Override
+            public void run() {
+                rotate();
+            }
+        };
         presetIndex++;
-        //armLift.setTargetPosition(1000 * presetIndex);
-        //TODO arbetrary value need to adjust this later
-        //while(armLift.isBusy()) {
-          //  armLift.setPower(1);
-        //}
-        //armLift.setPower(0);
+        TTOpMode.currentOpMode().getNewTimer().schedule(rotate, 0);
+        liftSetHeight(4 * presetIndex, power);
     }
 
-    public void lower(){
-        //armLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //armLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        presetIndex++;
-        //armLift.setTargetPosition(-1000 * presetIndex);
-        //TODO arbetrary value need to adjust this later
-        //while(armLift.isBusy()) {
-          //  armLift.setPower(-1);
-        //}
-        //armLift.setPower(0);
+    private void liftSetHeight(int inches, double power) {
+        armLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armLift.setTargetPosition((int) (inches * INCHES_TO_TICKS));
+        while(!nearTarget()){
+            armLift.setPower(power);
+        }
+        armLift.setPower(0);
+
+    }
+
+    public void score(){
+        adjustClawPos();
+        TimerTask rotate = new TimerTask(){
+            @Override
+            public void run() {
+                rotate();
+            }
+        };
+        TTOpMode.currentOpMode().getNewTimer().schedule(rotate, 0);
+        liftSetHeight(-6 - 4 * presetIndex, -1);
     }
 
     public void adjustClawPos(){
@@ -90,6 +107,11 @@ public class MetaTTArm {
     public void spit(float power) {
         leftIntake.setPower(-power);
         rightIntake.setPower(-power);
+    }
+
+    private boolean nearTarget(){
+        int tickDistance = armLift.getTargetPosition() - armLift.getCurrentPosition();
+        return Math.abs(tickDistance) < TICK_ERROR_TOLERANCE;
     }
 
 

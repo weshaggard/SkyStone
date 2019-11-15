@@ -16,7 +16,7 @@ public class MetaTTTeleOp extends TTOpMode {
     private static final double CLAW_COOLDOWN_SECONDS = 0.5;
     private boolean canUseClaw;
     private boolean canUseWrist;
-
+    private double DRIVE_SPEED_MODIFIER = 0.7;
 
     @Override
     protected void onInitialize() {
@@ -39,7 +39,11 @@ public class MetaTTTeleOp extends TTOpMode {
         double horizontal = gamepad1.right_stick_x;
         double turn = -gamepad1.left_stick_x;
         Vector2 velocity = new Vector2(horizontal, vertical);
-        driveSystem.continuous(velocity, turn);
+        if(gamepad1.right_bumper){
+            driveSystem.continuous(velocity, turn, true);
+        }else {
+            driveSystem.continuous(velocity, turn, false);
+        }
     }
 
     private class IntakeInput extends Thread{
@@ -62,15 +66,19 @@ public class MetaTTTeleOp extends TTOpMode {
              }else if(gamepad1.b && canUseWrist){
                 arm.rotate();
                 rotateCooldown();
+            }else if(gamepad1.x){
+                //Temporary conditional, when Touch Sensor implementation occurs pseudo autonomous script will run
+                while(gamepad1.x){
+                    arm.raise(1);
+                }
+            }else if(gamepad1.y){
+                arm.score();
+
             }else{
                 arm.spit(0);
             }
-            telemetry.addData("can rotate: ", canUseWrist);
-            telemetry.update();
 
         }
-
-
     }
     private void rotateCooldown() {
         canUseWrist = false;
