@@ -10,14 +10,12 @@ import teamcode.robotComponents.TTDriveSystem;
 @TeleOp(name = "Rotation Calibration")
 public class RotationCalibration extends AbstractOpMode {
 
-    public MetaTTArm arm;
     public TTDriveSystem driveSystem;
 
 
     @Override
     protected void onInitialize() {
-        arm = new MetaTTArm(hardwareMap);
-        driveSystem = new TTDriveSystem(hardwareMap, 24.4);
+        driveSystem = new TTDriveSystem(hardwareMap);
     }
 
     @Override

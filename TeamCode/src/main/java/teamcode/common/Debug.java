@@ -26,6 +26,10 @@ public class Debug {
         lines = new ArrayList<>();
     }
 
+    private Debug(){
+        // Brian why would you instantiate Debug?
+    }
+
     public static void log(Object message) {
         lines.add(message);
         if (lines.size() > MAX_NUM_LINES) {

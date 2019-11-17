@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class TTArm {
+
+    private static final double TICK_ERROR = 25.0;
+
     private final CRServo armLift;
     private final Servo armClaw;
-    private static final double TICK_ERROR = 25.0;
     private double lastPosition = 0;
 
     public TTArm(HardwareMap hardwareMap) {
@@ -20,14 +22,15 @@ public class TTArm {
         armLift.setPower(0.0);
     }
 
-    public void armMove(double power){
+    public void armMove(double power) {
         armLift.setPower(power);
     }
+
     public void rotateClaw(double position) {
         armClaw.setPosition(position);
     }
 
-    public double getClawPos(){
+    public double getClawPos() {
         return this.armClaw.getPosition();
     }
 }
