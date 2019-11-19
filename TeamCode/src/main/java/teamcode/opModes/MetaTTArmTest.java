@@ -33,18 +33,8 @@ public class MetaTTArmTest extends AbstractOpMode {
         arm.intake(0.0);
         arm.setClawPosition(false);
         sleep(2000);
-        TimerTask extendWristTask = new TimerTask() {
-            @Override
-            public void run() {
-                double liftHeight = arm.getLiftHeight();
-                while (liftHeight < TICKS / 2.0) {
-                    Debug.log(liftHeight);
-                }
-                arm.extendWristIncrementally();
-            }
-        };
-        timer.schedule(extendWristTask, 0);
         arm.lift(TICKS, 1.0);
+        arm.extendWristIncrementally();
         arm.lift(-TICKS, 1.0);
         arm.setClawPosition(true);
         sleep(2000);
