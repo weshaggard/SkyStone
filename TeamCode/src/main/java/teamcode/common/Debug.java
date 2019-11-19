@@ -30,7 +30,7 @@ public class Debug {
         // Brian why would you instantiate Debug?
     }
 
-    public static void log(Object message) {
+    public static synchronized void log(Object message) {
         lines.add(message);
         if (lines.size() > MAX_NUM_LINES) {
             lines.remove(0);

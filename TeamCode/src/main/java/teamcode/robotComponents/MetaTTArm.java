@@ -17,11 +17,11 @@ public class MetaTTArm {
     private static final double LIFT_INCHES_TO_TICKS = 1;
     private static final double LIFT_POSITION_ERROR_TOLERANCE = 25.0;
 
-    private static final double WRIST_EXTENDED_POSITION = 0.0;
-    private static final double WRIST_RETRACTED_POSITION = 1.0;
+    private static final double WRIST_EXTENDED_POSITION = 1.0;
+    private static final double WRIST_RETRACTED_POSITION = 0.0;
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
-    private static final double WRIST_TICK_DISTANCE = -1.0 / 33.0;
-    private static final long WRIST_TICK_PERIOD = 100;
+    private static final double WRIST_TICK_DISTANCE = 0.2;
+    private static final long WRIST_TICK_PERIOD = 1000;
 
     private static final double CLAW_OPEN_POSITION = 0.0;
     private static final double CLAW_CLOSE_POSITION = 1.0;
@@ -88,21 +88,12 @@ public class MetaTTArm {
     }
 
     public void extendWristIncrementally() {
-        TimerTask increment = new TimerTask() {
-            @Override
-            public void run() {
-                double current = wrist.getPosition();
-                wrist.setPosition(current + WRIST_TICK_DISTANCE);
-            }
-        };
-        timer.scheduleAtFixedRate(increment, 0, WRIST_TICK_PERIOD);
-        while (!Utils.servoNearPosition(wrist, WRIST_EXTENDED_POSITION,
-                WRIST_POSITION_ERROR_TOLERANCE) &&
+        while (!Utils.servoNearPosition(wrist, WRIST_EXTENDED_POSITION, WRIST_POSITION_ERROR_TOLERANCE) &&
                 AbstractOpMode.currentOpMode().opModeIsActive()) {
-            Debug.log("Extending wrist!");
+            double current = wrist.getPosition();
+            wrist.setPosition(current + WRIST_TICK_DISTANCE);
+            AbstractOpMode.currentOpMode().sleep(WRIST_TICK_PERIOD);
         }
-        ;
-        increment.cancel();
     }
 
     public boolean clawIsOpen() {

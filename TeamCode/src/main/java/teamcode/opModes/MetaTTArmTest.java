@@ -1,12 +1,14 @@
 package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.robotComponents.MetaTTArm;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 @Autonomous(name = "Meta Arm Test")
 public class MetaTTArmTest extends AbstractOpMode {
@@ -22,17 +24,17 @@ public class MetaTTArmTest extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        arm.setClawPosition(false);
-        sleep(2000);
-        arm.lift(TICKS, 0.5);
+        //        arm.setClawPosition(false);
+//        sleep(2000);
+//        arm.lift(TICKS, 0.5);
         arm.extendWristIncrementally();
-        arm.lift(-TICKS, 0.5);
-        arm.setClawPosition(true);
-        sleep(2000);
-        arm.lift(TICKS, 0.5);
-        arm.setWristPosition(false);
-        arm.lift(-TICKS, 0.5);
-        sleep(1000);
+//        arm.lift(-TICKS, 0.5);
+//        arm.setClawPosition(true);
+//        sleep(2000);
+//        arm.lift(TICKS, 0.5);
+//        arm.setWristPosition(false);
+//        arm.lift(-TICKS, 0.5);
+//        sleep(1000);
     }
 
     @Override
