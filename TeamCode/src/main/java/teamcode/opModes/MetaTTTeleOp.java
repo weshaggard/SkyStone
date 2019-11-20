@@ -96,7 +96,8 @@ public class MetaTTTeleOp extends AbstractOpMode {
             } else if (gamepad1.a && canUseWrist) {
                 arm.lift(LOW_LEVEL_WINCH, 1);
             }
-
+            telemetry.addData("Lift Pos Ticks:", arm.getLiftTicks());
+            telemetry.update();
             arm.liftContinuously(0);
             arm.intake(0);
         }

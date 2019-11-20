@@ -4,12 +4,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.TimerTask;
 
-import teamcode.common.TTDriveSystem;
-import teamcode.common.TTOpMode;
-import teamcode.common.Vector2;
+import teamcode.common.AbstractOpMode;
+
+import teamcode.common.Vector2D;
+import teamcode.robotComponents.MetaTTArm;
+import teamcode.robotComponents.TTDriveSystem;
 
 @TeleOp(name =  "Meta Tele Op")
-public class MetaTTTeleOp extends TTOpMode {
+public class MetaTTTeleOp extends AbstractOpMode {
     private static final double WRIST_COOLDOWN_SECONDS = 0.5;
     private MetaTTArm arm;
     private TTDriveSystem driveSystem;
@@ -20,7 +22,7 @@ public class MetaTTTeleOp extends TTOpMode {
 
     @Override
     protected void onInitialize() {
-        arm = new MetaTTArm(hardwareMap);
+        arm = new MetaTTArm(this);
         driveSystem = new TTDriveSystem(hardwareMap);
         canUseClaw = true;
         canUseWrist = true;
@@ -38,12 +40,8 @@ public class MetaTTTeleOp extends TTOpMode {
         double vertical = gamepad1.right_stick_y;
         double horizontal = gamepad1.right_stick_x;
         double turn = -gamepad1.left_stick_x;
-        Vector2 velocity = new Vector2(horizontal, vertical);
-        if(gamepad1.right_bumper){
-            driveSystem.continuous(velocity, turn, true);
-        }else {
-            driveSystem.continuous(velocity, turn, false);
-        }
+        Vector2D velocity = new Vector2D(horizontal, vertical);
+        driveSystem.continuous(velocity, turn);
     }
 
     private class IntakeInput extends Thread{
@@ -57,25 +55,25 @@ public class MetaTTTeleOp extends TTOpMode {
 
         public void armUpdate(){
             if(gamepad1.right_trigger > 0) {
-                arm.suck(gamepad1.right_trigger);
+                //arm.suck(gamepad1.right_trigger);
             }else if(gamepad1.left_trigger > 0){
-                arm.spit(gamepad1.left_trigger);
+                //arm.spit(gamepad1.left_trigger);
             }else if(gamepad1.a && canUseClaw){
-                arm.adjustClawPos();
+                //arm.adjustClawPos();
                 clawCooldown();
              }else if(gamepad1.b && canUseWrist){
-                arm.rotate();
+                //arm.rotate();
                 rotateCooldown();
             }else if(gamepad1.x){
                 //Temporary conditional, when Touch Sensor implementation occurs pseudo autonomous script will run
                 while(gamepad1.x){
-                    arm.raise(1);
+                    //arm.raise(1);
                 }
             }else if(gamepad1.y){
-                arm.score();
+                //arm.score();
 
             }else{
-                arm.spit(0);
+                //arm.spit(0);
             }
 
         }
