@@ -12,7 +12,7 @@ public class TTDriveSystem {
 
     private final double GEAR_RATIO = 19.54;
     // correct ticks = current ticks * correct distance / current distance
-    private static final double INCHES_TO_TICKS_VERTICAL = -42.64;
+    private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
     private static final double INCHES_TO_TICKS_LATERAL = 47.06;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = -8.547404708;
@@ -50,6 +50,7 @@ public class TTDriveSystem {
     }
 
     private void correctDirections() {
+        //frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
     }
