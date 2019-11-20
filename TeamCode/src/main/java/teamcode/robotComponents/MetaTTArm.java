@@ -52,6 +52,10 @@ public class MetaTTArm {
         return ticks / LIFT_INCHES_TO_TICKS;
     }
 
+    public int getLiftTicks(){
+        return lift.getCurrentPosition();
+    }
+
     public void lift(double inches, double power) {
         int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

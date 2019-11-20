@@ -16,6 +16,7 @@ public class TTDriveSystem {
     private static final double INCHES_TO_TICKS_LATERAL = 47.06;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = -8.547404708;
+    private static final double DRIVE_SPEED_MODIFIER = 0.7;
 
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to
@@ -80,7 +81,6 @@ public class TTDriveSystem {
         double frontRightPow = power * cos + turnSpeed;
         double backLeftPow = power * cos - turnSpeed;
         double backRightPow = power * sin + turnSpeed;
-
         frontLeft.setPower(frontLeftPow);
         frontRight.setPower(frontRightPow);
         backLeft.setPower(backLeftPow);
