@@ -15,7 +15,7 @@ import teamcode.common.Utils;
 public class MetaTTArm {
 
     private static final double LIFT_INCHES_TO_TICKS = 1.0;
-    private static final double LIFT_POSITION_ERROR_TOLERANCE = 35.0;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100.0;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
@@ -23,7 +23,7 @@ public class MetaTTArm {
     private static final double WRIST_TICK_DELTA = -0.05;
     private static final long WRIST_TICK_PERIOD = 100;
 
-    private static final double CLAW_OPEN_POSITION = 0.0;
+    private static final double CLAW_OPEN_POSITION = 0.4;
     private static final double CLAW_CLOSE_POSITION = 1.0;
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
@@ -58,7 +58,10 @@ public class MetaTTArm {
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
-        while (!liftIsNearTarget()) ;
+        while (!liftIsNearTarget())
+        {
+            ////Debug.log("pos = " + lift.getCurrentPosition() + ", target = " + ticks);
+        }
         lift.setPower(0.0);
     }
 
@@ -91,22 +94,15 @@ public class MetaTTArm {
      * IMPORTANT: BE SURE TO UPDATE RELATIONAL OPERATOR IF RETRACTED AND EXTENDED POSITIONS CHANGE.
      */
     public void extendWristIncrementally() {
-        final boolean[] flag = {false};
-        TimerTask increment = new TimerTask() {
-            double currentPosition = WRIST_RETRACTED_POSITION;
+        double currentPosition = WRIST_RETRACTED_POSITION;
+        Debug.log("Wrist: pos = " + currentPosition + ", target = " + WRIST_EXTENDED_POSITION);
 
-            @Override
-            public void run() {
-                currentPosition += WRIST_TICK_DELTA;
-                wrist.setPosition(currentPosition);
-                if (currentPosition <= WRIST_EXTENDED_POSITION) {
-                    flag[0] = true;
-                    cancel();
-                }
-            }
-        };
-        timer.scheduleAtFixedRate(increment, 0, WRIST_TICK_PERIOD);
-        while (!flag[0]) ;
+        while (currentPosition >= WRIST_EXTENDED_POSITION) {
+            Debug.log("Wrist: pos = " + currentPosition + ", target = " + WRIST_EXTENDED_POSITION);
+            currentPosition += WRIST_TICK_DELTA;
+            wrist.setPosition(currentPosition);
+            Utils.sleep(50);
+        }
     }
 
     public boolean clawIsOpen() {
