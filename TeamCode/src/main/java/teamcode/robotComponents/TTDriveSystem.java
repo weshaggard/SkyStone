@@ -10,23 +10,12 @@ import teamcode.common.Vector2D;
 
 public class TTDriveSystem {
 
+    private final double GEAR_RATIO = 19.54;
     // correct ticks = current ticks * correct distance / current distance
-    //Old Values
     private static final double INCHES_TO_TICKS_VERTICAL = -42.64;
     private static final double INCHES_TO_TICKS_LATERAL = 47.06;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = -8.547404708;
-    //Meta values
-    private static  double INCHES_TO_TICKS_VERTICAL_META;
-    private static  double INCHES_TO_TICKS_LATERAL_META;
-    //private static double INCHES_TO_TICKS_DIAGONAL_META;
-    private static double DEGREES_TO_TICKS_META;
-    private static double DRIVE_SPEED_MODIFIER = 0.7;
-
-    //6000 rpm base
-    //approx 28 ticks per revolution
-    //28 * 60
-
 
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to
@@ -48,7 +37,6 @@ public class TTDriveSystem {
 
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
     private final DcMotor[] motors;
-    private final DriveSystem version;
 
     public TTDriveSystem(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_LEFT_DRIVE);
@@ -56,29 +44,8 @@ public class TTDriveSystem {
         backLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_LEFT_DRIVE);
         backRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_RIGHT_DRIVE);
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
-        version = DriveSystem.old;
         correctDirections();
         setPID();
-    }
-
-    //Meta Constructor
-    public TTDriveSystem(HardwareMap hardwareMap, double gearRatio){
-        frontLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_LEFT_DRIVE);
-        frontRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_RIGHT_DRIVE);
-        backLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_LEFT_DRIVE);
-        backRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_RIGHT_DRIVE);
-        motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
-        version = DriveSystem.meta;
-        setGearRatios(gearRatio);
-        correctDirections();
-        setPID();
-    }
-
-    private void setGearRatios(double gearRatio) {
-        INCHES_TO_TICKS_VERTICAL_META = (28 * gearRatio) / (2.95276 * Math.PI);
-        INCHES_TO_TICKS_LATERAL_META = (28 * gearRatio) / (2.95276 * Math.PI);
-        DEGREES_TO_TICKS_META =  1;
-        //TODO Arbetrary value
     }
 
     private void correctDirections() {
@@ -125,18 +92,14 @@ public class TTDriveSystem {
             backRight.setPower(backRightPow * DRIVE_SPEED_MODIFIER);
         }
     }
-    public DcMotor[] getMotors(){
+
+    public DcMotor[] getMotors() {
         return motors;
     }
 
     public void vertical(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        int ticks;
-        if(version.equals(DriveSystem.old)) {
-            ticks = (int) (inches * INCHES_TO_TICKS_VERTICAL);
-        }else{
-             ticks = (int)(inches * INCHES_TO_TICKS_VERTICAL_META);
-        }
+        int ticks = (int) (inches * INCHES_TO_TICKS_VERTICAL);
 
         for (DcMotor motor : motors) {
             motor.setTargetPosition(ticks);
@@ -153,12 +116,8 @@ public class TTDriveSystem {
 
     public void lateral(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        int ticks;
-        if(version.equals(DriveSystem.old)) {
-            ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
-        }else{
-            ticks = (int)(inches * INCHES_TO_TICKS_LATERAL_META);
-        }
+        int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
+
 
         frontLeft.setTargetPosition(-ticks);
         frontRight.setTargetPosition(ticks);
@@ -283,10 +242,6 @@ public class TTDriveSystem {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
         }
-    }
-
-    private enum DriveSystem{
-        old,meta
     }
 
 }

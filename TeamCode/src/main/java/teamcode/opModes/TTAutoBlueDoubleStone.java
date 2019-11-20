@@ -31,7 +31,7 @@ public class TTAutoBlueDoubleStone extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
-        metaArm = new MetaTTArm(hardwareMap);
+        metaArm = new MetaTTArm(this);
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();

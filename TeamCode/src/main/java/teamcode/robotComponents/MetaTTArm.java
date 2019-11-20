@@ -1,136 +1,137 @@
 package teamcode.robotComponents;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import java.util.Timer;
 import java.util.TimerTask;
 
-import teamcode.common.TTHardwareComponentNames;
-import teamcode.common.TTOpMode;
+import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
+import teamcode.common.Utils;
 
 public class MetaTTArm {
-    private static final double CLAW_OPEN_POS = 0;
-    private static final double CLAW_CLOSE_POS = 1.0;
-    private static final double WRIST_OPEN_POS = 1.0;
-    private static final double WRIST_CLOSE_POS = 0.0;
-    private static final double TICK_ERROR_TOLERANCE = 25.0;
-    private static final double INCHES_TO_TICKS = 5;
-    //TODO need to calibrate this vale
+
+    private static final double LIFT_INCHES_TO_TICKS = 1.0;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 35.0;
+
+    private static final double WRIST_EXTENDED_POSITION = 0.0;
+    private static final double WRIST_RETRACTED_POSITION = 1.0;
+    private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
+    private static final double WRIST_TICK_DELTA = -0.05;
+    private static final long WRIST_TICK_PERIOD = 100;
+
+    private static final double CLAW_OPEN_POSITION = 0.0;
+    private static final double CLAW_CLOSE_POSITION = 1.0;
+    private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
+
+    private final DcMotor lift;
+    private final Servo wrist, claw;
     private final DcMotor leftIntake, rightIntake;
-    private final DcMotor armLift;
-    private final Servo armClaw, armWrist;
-    private int presetIndex;
-    //preset index in inches should be 4 inches * preset index should equal the total lift height
-    //private TouchSensor armSensor;
+    private final TouchSensor intakeSensor;
+    private final Timer timer;
 
-    //TODO need to calibrate this value
-    public MetaTTArm(HardwareMap hardwareMap){
-        rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
+    public MetaTTArm(AbstractOpMode opMode) {
+        HardwareMap hardwareMap = opMode.hardwareMap;
+        lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
         leftIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_LEFT);
-        armLift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
-        armClaw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
-        armWrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
-        //TODO Hardware team needs to implement this
-      //  armSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_TOUCH_SENSOR);
-        presetIndex = 0;
+        rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
+        wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
+        claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
+        intakeSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
+        timer = opMode.getNewTimer();
     }
 
-    public void suck(double power){
-        leftIntake.setPower(-power);
-        rightIntake.setPower(-power);
-
-
-        // while(!armSensor.isPressed()){
-        //stall until the touch sensor is pressed
-        //}
-        //raise();
+    /**
+     * In inches.
+     */
+    public double getLiftHeight() {
+        int ticks = lift.getCurrentPosition();
+        return ticks / LIFT_INCHES_TO_TICKS;
     }
-    public void raise( double power){
-        adjustClawPos();
-        liftSetHeight(6, power);
-        TimerTask rotate = new TimerTask(){
+
+    public void lift(double inches, double power) {
+        int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setTargetPosition(ticks);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setPower(power);
+        while (!liftIsNearTarget()) ;
+        lift.setPower(0.0);
+    }
+
+    public void liftContinuously(double power) {
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setPower(power);
+    }
+
+    private boolean liftIsNearTarget() {
+        int target = lift.getTargetPosition();
+        int current = lift.getCurrentPosition();
+        double ticksFromTarget = Math.abs(target - current);
+        return ticksFromTarget <= LIFT_POSITION_ERROR_TOLERANCE;
+    }
+
+    public boolean wristIsExtended() {
+        return Utils.servoNearPosition(wrist, WRIST_EXTENDED_POSITION,
+                WRIST_POSITION_ERROR_TOLERANCE);
+    }
+
+    public void setWristPosition(boolean extended) {
+        if (extended) {
+            wrist.setPosition(WRIST_EXTENDED_POSITION);
+        } else {
+            wrist.setPosition(WRIST_RETRACTED_POSITION);
+        }
+    }
+
+    /**
+     * IMPORTANT: BE SURE TO UPDATE RELATIONAL OPERATOR IF RETRACTED AND EXTENDED POSITIONS CHANGE.
+     */
+    public void extendWristIncrementally() {
+        final boolean[] flag = {false};
+        TimerTask increment = new TimerTask() {
+            double currentPosition = WRIST_RETRACTED_POSITION;
+
             @Override
             public void run() {
-                rotate();
+                currentPosition += WRIST_TICK_DELTA;
+                wrist.setPosition(currentPosition);
+                if (currentPosition <= WRIST_EXTENDED_POSITION) {
+                    flag[0] = true;
+                    cancel();
+                }
             }
         };
-        presetIndex++;
-        TTOpMode.currentOpMode().getNewTimer().schedule(rotate, 0);
-        liftSetHeight(4 * presetIndex, power);
+        timer.scheduleAtFixedRate(increment, 0, WRIST_TICK_PERIOD);
+        while (!flag[0]) ;
     }
 
-    private void liftSetHeight(int inches, double power) {
-        armLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armLift.setTargetPosition((int) (inches * INCHES_TO_TICKS));
-        while(!nearTarget()){
-            armLift.setPower(power);
+    public boolean clawIsOpen() {
+        return Utils.servoNearPosition(claw, CLAW_OPEN_POSITION, CLAW_POSITION_ERROR_TOLERANCE);
+    }
+
+    public void setClawPosition(boolean open) {
+        if (open) {
+            claw.setPosition(CLAW_OPEN_POSITION);
+        } else {
+            claw.setPosition(CLAW_CLOSE_POSITION);
         }
-        armLift.setPower(0);
-
     }
 
-    public void score(){
-        adjustClawPos();
-        TimerTask rotate = new TimerTask(){
-            @Override
-            public void run() {
-                rotate();
-            }
-        };
-        TTOpMode.currentOpMode().getNewTimer().schedule(rotate, 0);
-        liftSetHeight(-6 - 4 * presetIndex, -1);
-    }
-
-    public void adjustClawPos(){
-        if(armClaw.getPosition() == CLAW_CLOSE_POS) {
-            armClaw.setPosition(CLAW_OPEN_POS);
-        }else{
-            armClaw.setPosition(CLAW_CLOSE_POS);
-        }
-
-    }
-    public void rotate(double position){
-        armWrist.setPosition(position);
-    }
-
-
-    public void spit(float power) {
+    /**
+     * @param power sucks if positive, spits if negative
+     */
+    public void intake(double power) {
+        power = -power;
         leftIntake.setPower(power);
         rightIntake.setPower(power);
     }
 
-    public void useArm(double power){
-        armLift.setPower(power);
-    }
-
-    public void liftToTarget(int ticks, double power){
-        armLift.setTargetPosition(ticks);
-        armLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armLift.setPower(power);
-        while (!nearTarget()) ;
-        armLift.setPower(0.0);
-    }
-
-    public int getCurrentLiftTicks(){
-        return armLift.getCurrentPosition();
-    }
-
-    public DcMotor getArmLift() {
-        return armLift;
-    }
-
-    private boolean nearTarget() {
-        int targetPosition = armLift.getTargetPosition();
-        int currentPosition = armLift.getCurrentPosition();
-        double ticksFromTarget = Math.abs(targetPosition - currentPosition);
-        if (ticksFromTarget >= TICK_ERROR_TOLERANCE) {
-            return false;
-        }
-        return true;
+    public boolean intakeIsFull() {
+        return intakeSensor.isPressed();
     }
 
 }
