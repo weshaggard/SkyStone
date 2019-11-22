@@ -17,8 +17,6 @@ import teamcode.robotComponents.TTHardwareComponentNames;
 public class MetaTTArmTest extends AbstractOpMode {
 
     private static final int TICKS = 2000;
-    private static final long CLOSE_CLAW_DELAY = 1000;
-    private static final long OPEN_CLAW_DELAY = 2500;
     private static final int ARM_STATE_WAIT = 0;
     private static final int ARM_STATE_SCORE = 1;
     private static final int ARM_STATE_RETRACT = 2;
@@ -99,12 +97,12 @@ public class MetaTTArmTest extends AbstractOpMode {
 
     private void closeClaw() {
         arm.setClawPosition(false);
-        sleep(CLOSE_CLAW_DELAY);
+        Utils.sleep(Utils.CLOSE_CLAW_DELAY);
     }
 
     private void openClaw() {
         arm.setClawPosition(true);
-        sleep(OPEN_CLAW_DELAY);
+        Utils.sleep(Utils.OPEN_CLAW_DELAY);
     }
 
     private void liftArm(final int ticks, final double power) {
