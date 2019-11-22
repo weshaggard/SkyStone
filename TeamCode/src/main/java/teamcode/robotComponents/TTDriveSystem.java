@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
+import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
 
 public class TTDriveSystem {
@@ -14,7 +16,7 @@ public class TTDriveSystem {
     private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
     private static final double INCHES_TO_TICKS_LATERAL = 47.06;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
-    private static final double DEGREES_TO_TICKS = -8.547404708;
+    private static final double DEGREES_TO_TICKS = -8.986561;
 
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to
@@ -36,6 +38,7 @@ public class TTDriveSystem {
 
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
     private final DcMotor[] motors;
+    private Servo leftFoundation, rightFoundation;
 
     public TTDriveSystem(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_LEFT_DRIVE);
@@ -43,6 +46,8 @@ public class TTDriveSystem {
         backLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_LEFT_DRIVE);
         backRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_RIGHT_DRIVE);
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
+        leftFoundation = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_FOUNDATION);
+        rightFoundation = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_FOUNDATION);
         correctDirections();
         setPID();
     }
@@ -234,6 +239,16 @@ public class TTDriveSystem {
     private void setRunMode(DcMotor.RunMode mode) {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
+        }
+    }
+
+    public void adjustGrabberPos(boolean open){
+        if(open){
+            rightFoundation.setPosition(1);
+            leftFoundation.setPosition(0);
+        }else{
+            rightFoundation.setPosition(0);
+            leftFoundation.setPosition(1);
         }
     }
 
