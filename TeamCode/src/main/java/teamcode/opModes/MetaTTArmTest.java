@@ -19,14 +19,19 @@ public class MetaTTArmTest extends AbstractOpMode {
     private static final int TICKS = 2000;
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 2500;
+    private static final int ARM_STATE_WAIT = 0;
+    private static final int ARM_STATE_SCORE = 1;
+    private static final int ARM_STATE_RETRACT = 2;
 
-    private Timer timer;
+    private Timer timer1;
+    private Timer timer2;
     private MetaTTArm arm;
-    private int armState = 0; // 0 is wait, 1 is score, 2 is retract
+    private int armState = ARM_STATE_WAIT; // 0 is wait, 1 is score, 2 is retract
 
     @Override
     protected void onInitialize() {
-        timer = getNewTimer();
+        timer1 = getNewTimer();
+        timer2 = getNewTimer();
         arm = new MetaTTArm(this);
     }
 
@@ -39,11 +44,10 @@ public class MetaTTArmTest extends AbstractOpMode {
         TimerTask intakeTask = new TimerTask() {
             @Override
             public void run() {
-                while (opModeIsActive())
-                {
+                while (opModeIsActive()) {
                     if (arm.intakeIsFull()) {
                         arm.intake(0.0);
-                        armState = 1;
+                        armState = ARM_STATE_SCORE;
                     }
                 }
             }
@@ -53,9 +57,8 @@ public class MetaTTArmTest extends AbstractOpMode {
         TimerTask armTask = new TimerTask() {
             @Override
             public void run() {
-                while (opModeIsActive())
-                {
-                    if (armState == 1) {
+                while (opModeIsActive()) {
+                    if (armState == ARM_STATE_SCORE) {
                         // score
                         closeClaw();
                         Debug.log("Going up");
@@ -65,10 +68,9 @@ public class MetaTTArmTest extends AbstractOpMode {
                         Debug.log("Going down");
                         arm.lift(-TICKS, 1.0);
                         openClaw();
-                        armState = 2;
-                    }
-                    else if(armState == 2){
-                        long t = 1200;
+                        armState = ARM_STATE_RETRACT;
+                    } else if (armState == ARM_STATE_RETRACT) {
+                        int t = 1200;
                         // retract
                         Debug.log("Going up");
                         liftArm(t, 1.0);
@@ -78,22 +80,21 @@ public class MetaTTArmTest extends AbstractOpMode {
                         Debug.log("Going down");
                         Utils.sleep(500);
                         liftArm(-t, 0.7);
-                        armState = 0;
+                        armState = ARM_STATE_WAIT;
                     }
                 }
             }
         };
 
         // Schedule all tasks
-        timer.schedule(intakeTask, 0);
-        getNewTimer().schedule(armTask, 0);
+        timer1.schedule(intakeTask, 0);
+        timer2.schedule(armTask, 0);
 
-        while (opModeIsActive());
+        while (opModeIsActive()) ;
     }
 
     @Override
     protected void onStop() {
-
     }
 
     private void closeClaw() {
@@ -106,13 +107,13 @@ public class MetaTTArmTest extends AbstractOpMode {
         sleep(OPEN_CLAW_DELAY);
     }
 
-    private void liftArm(final double ticks, final double power) {
+    private void liftArm(final int ticks, final double power) {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 arm.lift(ticks, power);
             }
         };
-        getNewTimer().schedule(task, 0);
+        timer2.schedule(task, 0);
     }
 }

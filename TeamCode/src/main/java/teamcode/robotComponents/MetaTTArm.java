@@ -6,15 +6,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.common.Debug;
 import teamcode.common.Utils;
 
 public class MetaTTArm {
 
-    private static final double LIFT_INCHES_TO_TICKS = 1.0;
     private static final double LIFT_POSITION_ERROR_TOLERANCE = 100.0;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
@@ -45,27 +42,18 @@ public class MetaTTArm {
     }
 
     /**
-     * In inches.
+     * In ticks.
      */
-    public double getLiftHeight() {
-        int ticks = lift.getCurrentPosition();
-        return ticks / LIFT_INCHES_TO_TICKS;
-    }
-
-    public int getLiftTicks(){
+    public int getLiftHeight() {
         return lift.getCurrentPosition();
     }
 
-    public void lift(double inches, double power) {
-        int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
+    public void lift(int ticks, double power) {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
-        while (!liftIsNearTarget())
-        {
-            ////Debug.log("pos = " + lift.getCurrentPosition() + ", target = " + ticks);
-        }
+        while (!liftIsNearTarget()) ;
         lift.setPower(0.0);
     }
 
@@ -99,10 +87,7 @@ public class MetaTTArm {
      */
     public void extendWristIncrementally() {
         double currentPosition = WRIST_RETRACTED_POSITION;
-        Debug.log("Wrist: pos = " + currentPosition + ", target = " + WRIST_EXTENDED_POSITION);
-
         while (currentPosition >= WRIST_EXTENDED_POSITION) {
-            Debug.log("Wrist: pos = " + currentPosition + ", target = " + WRIST_EXTENDED_POSITION);
             currentPosition += WRIST_TICK_DELTA;
             wrist.setPosition(currentPosition);
             Utils.sleep(50);
