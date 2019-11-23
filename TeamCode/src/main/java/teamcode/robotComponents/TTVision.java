@@ -3,97 +3,56 @@ package teamcode.robotComponents;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import java.util.List;
-
-import teamcode.common.BoundingBox2D;
-import teamcode.common.Vector2D;
+import teamcode.common.Vector3D;
 
 public class TTVision {
 
     private static final String VUFORIA_KEY = "AQR2KKb/////AAABmcBOjjqXfkjtrjI9/Ps5Rs1yoVMyJe0wdjaX8pHqOaPu2gRcObwPjsuWCCo7Xt52/kJ4dAZfUM5Gy73z3ogM2E2qzyVObda1EFHZuUrrYkJzKM3AhY8vUz6R3fH0c/R9j/pufFYAABOAFoc5PtjMQ2fbeFI95UYXtl0u+6OIkCUJ3Zw71tvoD9Fs/cOiLB45FrWrxHPbinEhsOlCTWK/sAC2OK2HuEsBFCebaV57vKyATHW4w2LMWEZaCByHMk9RJDR38WCqivXz753bsiBVMbCzPYzwzc3DKztTbK8/cXqPPBLBKwU8ls0RN52akror1xE9lPwwksMXwJwolpyIZGnZngWcBWX4lLH+HlDNZ8Qm";
-    private static final String ASSET_NAME = "Skystone.tflite";
-    public static final String LABEL_STONE = "Boring Boy";
-    public static final String LABEL_SKYSTONE = "Extra Scory Point Boi";
-    public static final String[] LABELS = {LABEL_STONE, LABEL_SKYSTONE};
-    private static final double MINIMUM_CONFIDENCE = 0.7;
-    private static final String WEBCAM_NAME = "Webcam1";
+    private static final String ASSET_NAME = "Skystone";
 
-    private HardwareMap hardwareMap;
-    private CameraType cameraType;
-    private TFObjectDetector tfod;
-    private boolean enabled;
+    private VuforiaTrackables trackables;
 
     public TTVision(HardwareMap hardwareMap) {
-        this(hardwareMap, CameraType.PHONE);
+        this(hardwareMap, CameraType.WEBCAM);
     }
 
     public TTVision(HardwareMap hardwareMap, CameraType cameraType) {
-        this.hardwareMap = hardwareMap;
-        this.cameraType = cameraType;
+        createVuforia(hardwareMap, cameraType);
     }
 
-    /**
-     * Must be called from an OpMode before use.
-     */
-    public void enable() {
-        VuforiaLocalizer vuforia = createVuforia();
-        tfod = createTFOD(vuforia);
-        tfod.activate();
-        enabled = true;
-    }
-
-    public void disable() {
-        if (enabled) {
-            tfod.shutdown();
-            enabled = false;
-        }
-    }
-
-    private VuforiaLocalizer createVuforia() {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+    private VuforiaLocalizer createVuforia(HardwareMap hardwareMap, CameraType cameraType) {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().
+                getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         if (cameraType == CameraType.WEBCAM) {
             parameters.cameraName = ClassFactory.getInstance().getCameraManager().getAllWebcams().get(0);
         }
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        trackables = vuforia.loadTrackablesFromAsset(ASSET_NAME);
+        trackables.activate();
         return vuforia;
     }
 
-    private TFObjectDetector createTFOD(VuforiaLocalizer vuforia) {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = MINIMUM_CONFIDENCE;
-        TFObjectDetector tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(ASSET_NAME, LABELS);
-        return tfod;
-    }
-
-    public List<Recognition> getRecognitions() {
-        if (!enabled) {
-            throw new IllegalStateException("Vision must be enabled first");
+    public Vector3D getSkystonePosition() {
+        VuforiaTrackable skystone = trackables.get(0);
+        OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) skystone.getListener()).getPose();
+        if (pose == null) {
+            return null;
         }
-
-        return tfod.getRecognitions();
-    }
-
-    public static Vector2D getCenter(Recognition recognition) {
-        float x = (recognition.getLeft() + recognition.getRight()) / 2;
-        float y = (recognition.getBottom() + recognition.getTop()) / 2;
-        return new Vector2D(x, y);
-    }
-
-    public static BoundingBox2D getBoundingBox(Recognition recognition) {
-        double x1 = recognition.getLeft();
-        double y1 = recognition.getTop();
-        double x2 = recognition.getRight();
-        double y2 = recognition.getBottom();
-        return new BoundingBox2D(x1, y1, x2, y2);
+        VectorF position = pose.getTranslation();
+        double x = position.get(0);
+        double y = position.get(1);
+        double z = position.get(2);
+        return new Vector3D(x, y, z);
     }
 
     public enum CameraType {

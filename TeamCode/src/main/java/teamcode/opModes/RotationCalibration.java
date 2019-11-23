@@ -4,7 +4,6 @@ package teamcode.opModes;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.robotComponents.MetaTTArm;
 import teamcode.robotComponents.TTDriveSystem;
 
 @TeleOp(name = "Rotation Calibration")

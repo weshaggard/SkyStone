@@ -1,9 +1,11 @@
-package teamcode.robotComponents;
+package teamcode.obsolete;
 
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 public class TTArm {
 

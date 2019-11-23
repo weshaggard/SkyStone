@@ -23,7 +23,7 @@ public class DriveCallibration extends AbstractOpMode {
     @Override
     protected void onStart() {
         returnTicks();
-        driveSystem.vertical(10, 0.6);
+        driveSystem.lateral(100, 0.6);
     }
 
     private void returnTicks() {

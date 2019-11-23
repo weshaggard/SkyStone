@@ -1,4 +1,4 @@
-package teamcode.robotComponents;
+package teamcode.obsolete;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 public class League1TTArm {
 
