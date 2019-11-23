@@ -1,12 +1,13 @@
 package teamcode.opModes;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.robotComponents.TTDriveSystem;
 
-@TeleOp(name = "Rotation Calibration")
+@Autonomous(name = "Rotation Calibration")
 public class RotationCalibration extends AbstractOpMode {
 
     public TTDriveSystem driveSystem;
@@ -19,7 +20,7 @@ public class RotationCalibration extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        driveSystem.turn(360, 1);
+        driveSystem.turn(360 * 6, 0.5);
     }
 
     @Override
