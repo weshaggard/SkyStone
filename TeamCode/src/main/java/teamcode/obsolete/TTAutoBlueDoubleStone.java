@@ -1,4 +1,4 @@
-package teamcode.opModes;
+package teamcode.obsolete;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -6,16 +6,14 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 import java.util.List;
 
+import teamcode.common.AbstractOpMode;
 import teamcode.common.BoundingBox2D;
-import teamcode.robotComponents.League1TTArm;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.robotComponents.TTDriveSystem;
-import teamcode.common.AbstractOpMode;
-import teamcode.robotComponents.TTVision;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Red Double Stone")
-public class TTAutoRedDoubleStone extends AbstractOpMode {
+@Autonomous(name = "Blue Double Stone")
+public class TTAutoBlueDoubleStone extends AbstractOpMode {
 
     /**
      * A bounding box which is used to see if a skystone is in the center of the camera's view.
@@ -26,20 +24,22 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
     private League1TTArm arm;
     private TTVision vision;
     private SkyStoneConfiguration skyStoneConfig;
-    private boolean hasDroppedFirstStone;
-
+    private MetaTTArm metaArm;
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
+        metaArm = new MetaTTArm(this);
         arm = new League1TTArm(hardwareMap);
         vision = new TTVision(hardwareMap);
         vision.enable();
+
+
     }
 
     @Override
     protected void onStart() {
         initArm();
-        skyStoneConfig = determineSkyStoneConfig();
+        skyStoneConfig = determineSkyStoneConfigColor();
         int firstStop = skyStoneConfig.getSecondStone();
         int secondStop = skyStoneConfig == SkyStoneConfiguration.ONE_FOUR ? 6 : skyStoneConfig.getFirstStone();
         grabStone();
@@ -47,7 +47,7 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
         foundationToStone(secondStop);
         grabStone();
         stoneToFoundation(secondStop);
-        driveSystem.vertical(-27, 1);
+        driveSystem.vertical(-30, 1);
     }
 
 
@@ -63,19 +63,40 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
      * Approaches the second SkyStone to determine the configuration of the SkyStones.
      */
     private SkyStoneConfiguration determineSkyStoneConfig() {
-        driveSystem.vertical(22.5, 0.5);
-        driveSystem.lateral(-2, 0.3);
+        driveSystem.vertical(20, 0.5);
+        driveSystem.lateral(2, 0.5);
         sleep(1000);
         if (seesSkyStone()) {
-            driveSystem.lateral(2, 0.3);
+            driveSystem.lateral(2, 0.5);
             return SkyStoneConfiguration.THREE_SIX;
         }
-        driveSystem.lateral(-6.5, 0.3);
-        sleep(1000);
+        driveSystem.lateral(8, 0.3);
+        sleep(1500);
         if (seesSkyStone()) {
+            driveSystem.lateral(1.5, 0.5);
             return SkyStoneConfiguration.TWO_FIVE;
         }
-        driveSystem.lateral(-8, 1);
+        driveSystem.lateral(9.5, 0.3);
+        return SkyStoneConfiguration.ONE_FOUR;
+    }
+
+    /**
+     * Determines Skystone placement using the Color sensor
+     */
+    public SkyStoneConfiguration determineSkyStoneConfigColor(){
+        driveSystem.vertical(20, 0.5);
+        driveSystem.lateral(2, 0.5);
+        //if(skystoneDetection.SeesSkystone()){
+            driveSystem.lateral(2, 0.5);
+            //return SkyStoneConfiguration.THREE_SIX;
+        //}
+        //driveSystem.lateral(8, 0.5);
+        //sleep(500);
+        //if(skystoneDetection.SeesSkystone()){
+            //driveSystem.lateral(1, 0.5);
+        //    return SkyStoneConfiguration.TWO_FIVE;
+        //}
+        driveSystem.lateral(9.5, 0.7);
         return SkyStoneConfiguration.ONE_FOUR;
     }
 
@@ -99,15 +120,11 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
      * Robot grabs the stone in front of it and backs out.
      */
     private void grabStone() {
-        if (hasDroppedFirstStone) {
-            driveSystem.vertical(16.5, 1);
-        } else {
-            driveSystem.vertical(13.5, 1);
-        }
+        driveSystem.vertical(13.5, 1);
         arm.closeClaw();
         sleep(700);
-        arm.liftTimed(0.15, 0.3);
-        driveSystem.vertical(-16.5, 1);
+        arm.liftTimed(0.15, 0.5);
+        driveSystem.vertical(-14, 1);
     }
 
     /**
@@ -117,14 +134,13 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
      * @param stone the position of the stone that was grabbed in the stone area
      */
     private void stoneToFoundation(int stone) {
-        driveSystem.turn(90, 0.6);
+        driveSystem.turn(-90, 0.5);
         driveSystem.vertical(90 - stone * 8, 1);
         arm.liftTimed(0.25, 1);
-        driveSystem.vertical(16, 1);
+        driveSystem.vertical(16, 0.6);
         arm.openClaw();
-        driveSystem.vertical(-5, 1);
+        driveSystem.vertical(-5, 0.6);
         arm.lower(1);
-        hasDroppedFirstStone = true;
     }
 
     /**
@@ -134,7 +150,7 @@ public class TTAutoRedDoubleStone extends AbstractOpMode {
      */
     private void foundationToStone(int stone) {
         driveSystem.vertical(-100 + stone * 8, 1);
-        driveSystem.turn(-90, 0.6);
+        driveSystem.turn(90, 0.5);
     }
 
 

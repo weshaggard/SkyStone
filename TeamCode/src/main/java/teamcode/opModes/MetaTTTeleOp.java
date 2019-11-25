@@ -6,7 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.robotComponents.MetaTTArm;
+import teamcode.obsolete.MetaTTArm;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.common.Vector2D;
 

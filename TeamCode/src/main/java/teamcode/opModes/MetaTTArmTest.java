@@ -1,8 +1,6 @@
 package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,8 +8,7 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
-import teamcode.robotComponents.MetaTTArm;
-import teamcode.robotComponents.TTHardwareComponentNames;
+import teamcode.obsolete.MetaTTArm;
 
 @Autonomous(name = "Meta Arm Test 2")
 public class MetaTTArmTest extends AbstractOpMode {

@@ -1,4 +1,4 @@
-package teamcode.robotComponents;
+package teamcode.obsolete;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,6 +9,7 @@ import java.util.Timer;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 public class MetaTTArm {
 

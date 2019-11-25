@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import teamcode.common.Vector2D;
 
@@ -12,7 +13,7 @@ public class TTDriveSystem {
 
     // correct ticks = current ticks * correct distance / current distance
     private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
-    private static final double INCHES_TO_TICKS_LATERAL = 47.06;
+    private static final double INCHES_TO_TICKS_LATERAL = -50.6;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = -8.547404708;
 
@@ -36,13 +37,18 @@ public class TTDriveSystem {
 
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
     private final DcMotor[] motors;
+    private final Servo leftGrabber, rightGrabber;
+    private final Servo[] grabbers;
 
     public TTDriveSystem(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_LEFT_DRIVE);
         frontRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_RIGHT_DRIVE);
         backLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_LEFT_DRIVE);
         backRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_RIGHT_DRIVE);
+        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
+        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
+        grabbers = new Servo[]{leftGrabber, rightGrabber};
         correctDirections();
         setPID();
     }
@@ -234,6 +240,12 @@ public class TTDriveSystem {
     private void setRunMode(DcMotor.RunMode mode) {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
+        }
+    }
+
+    public void foundationGrabbers(double position){
+        for(Servo servo : grabbers) {
+            servo.setPosition(position);
         }
     }
 

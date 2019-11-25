@@ -1,4 +1,4 @@
-package teamcode.opModes;
+package teamcode.obsolete;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,7 +8,6 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
-import teamcode.robotComponents.MetaTTArm;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.common.Vector2D;
 
