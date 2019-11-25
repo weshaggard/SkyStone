@@ -5,19 +5,20 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.robotComponents.MetaTTArm;
+import teamcode.robotComponents.MetaTTArm2;
 import teamcode.robotComponents.TTDriveSystem;
 
 
 @Autonomous(name = "Meta Blue Auto")
-public class MetaTTAutoBlue extends AbstractOpMode {
-    private MetaTTArm arm;
+public class TTAutoBlueSide extends AbstractOpMode {
+    private MetaTTArm2 arm;
     private TTDriveSystem driveSystem;
     private SkyStoneConfiguration skyStoneConfig;
 
 
     @Override
     protected void onInitialize() {
-        arm = new MetaTTArm(this);
+        arm = new MetaTTArm2(this);
         driveSystem = new TTDriveSystem(hardwareMap);
         //TODO need to get vision working, assuming the path is 1
         //also init arm
