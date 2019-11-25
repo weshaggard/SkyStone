@@ -7,10 +7,6 @@ public class Utils {
     private Utils() {
     }
 
-    public static final long CLOSE_CLAW_DELAY = 1000;
-
-    public static final long OPEN_CLAW_DELAY = 2500;
-
     public static boolean servoNearPosition(Servo servo, double position, double errorTolerance) {
         errorTolerance = Math.abs(errorTolerance);
         Debug.log("pos = " + servo.getPosition() + ", target = " + position);

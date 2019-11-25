@@ -19,6 +19,9 @@ public class TTTeleOp2 extends AbstractOpMode {
     private static final double STRAIGHT_SPEED_MODIFIER = 0.5;
     private static final int SCORING_TICKS = 2000;
     private static final int LIFT_STEP_TICKS = 100;
+    private static final long CLOSE_CLAW_DELAY = 1000;
+    private static final long OPEN_CLAW_DELAY = 2500;
+
 
     private TTDriveSystem driveSystem;
     private MetaTTArm2 arm;
@@ -201,13 +204,13 @@ public class TTTeleOp2 extends AbstractOpMode {
 
         private void closeClaw() {
             arm.setClawPosition(false);
-            Utils.sleep(Utils.CLOSE_CLAW_DELAY);
+            Utils.sleep(CLOSE_CLAW_DELAY);
             clawState = ClawState.Close;
         }
 
         private void openClaw() {
             arm.setClawPosition(true);
-            Utils.sleep(Utils.OPEN_CLAW_DELAY);
+            Utils.sleep(OPEN_CLAW_DELAY);
             clawState = ClawState.Open;
         }
 
