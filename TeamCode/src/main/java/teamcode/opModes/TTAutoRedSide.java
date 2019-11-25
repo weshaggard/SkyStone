@@ -7,9 +7,7 @@ import teamcode.common.BoundingBox2D;
 import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
-import teamcode.common.Vector3D;
-import teamcode.obsolete.MetaTTArm;
-import teamcode.robotComponents.MetaTTArm2;
+import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.robotComponents.TTVision;
 
@@ -19,13 +17,13 @@ public class TTAutoRedSide extends AbstractOpMode {
     private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);
     private static final BoundingBox2D RIGHT_STONE_BOUNDS = new BoundingBox2D(120, 0, 500, 0);
 
-    private MetaTTArm2 arm;
+    private TTArmSystem arm;
     private TTDriveSystem driveSystem;
     private TTVision vision;
     SkyStoneConfiguration config = null;
     @Override
     protected void onInitialize(){
-        arm = new MetaTTArm2(this);
+        arm = new TTArmSystem(this);
         driveSystem = new TTDriveSystem(hardwareMap);
         vision = new TTVision(hardwareMap);
     }

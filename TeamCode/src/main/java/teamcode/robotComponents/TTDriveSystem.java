@@ -37,18 +37,13 @@ public class TTDriveSystem {
 
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
     private final DcMotor[] motors;
-    private final Servo leftGrabber, rightGrabber;
-    private final Servo[] grabbers;
 
     public TTDriveSystem(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_LEFT_DRIVE);
         frontRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.FRONT_RIGHT_DRIVE);
         backLeft = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_LEFT_DRIVE);
         backRight = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.BACK_RIGHT_DRIVE);
-        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
-        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
-        grabbers = new Servo[]{leftGrabber, rightGrabber};
         correctDirections();
         setPID();
     }
@@ -116,7 +111,6 @@ public class TTDriveSystem {
     public void lateral(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
-
 
         frontLeft.setTargetPosition(-ticks);
         frontRight.setTargetPosition(ticks);
@@ -240,12 +234,6 @@ public class TTDriveSystem {
     private void setRunMode(DcMotor.RunMode mode) {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
-        }
-    }
-
-    public void foundationGrabbers(double position){
-        for(Servo servo : grabbers) {
-            servo.setPosition(position);
         }
     }
 

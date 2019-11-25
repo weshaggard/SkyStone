@@ -10,7 +10,7 @@ import java.util.Timer;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 
-public class MetaTTArm2 {
+public class TTArmSystem {
 
     private static final double LIFT_POSITION_ERROR_TOLERANCE = 100.0;
 
@@ -28,7 +28,7 @@ public class MetaTTArm2 {
     private final DcMotor leftIntake, rightIntake;
     private final TouchSensor intakeSensor;
 
-    public MetaTTArm2(AbstractOpMode opMode) {
+    public TTArmSystem(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

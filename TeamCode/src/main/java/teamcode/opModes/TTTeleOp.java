@@ -12,7 +12,7 @@ import teamcode.common.Vector2D;
 
 
 @TeleOp(name = "Meta Tele Op")
-public class MetaTTTeleOp extends AbstractOpMode {
+public class TTTeleOp extends AbstractOpMode {
 
     private static final double WRIST_COOLDOWN_SECONDS = 0.5;
     private static final double CLAW_COOLDOWN_SECONDS = 0.5;

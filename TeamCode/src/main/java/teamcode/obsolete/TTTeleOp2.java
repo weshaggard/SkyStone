@@ -9,7 +9,7 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
-import teamcode.robotComponents.MetaTTArm2;
+import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
 
 @TeleOp(name = "TT TeleOp 2")
@@ -24,7 +24,7 @@ public class TTTeleOp2 extends AbstractOpMode {
 
 
     private TTDriveSystem driveSystem;
-    private MetaTTArm2 arm;
+    private TTArmSystem arm;
     private Timer timer2;
 
 
@@ -36,7 +36,7 @@ public class TTTeleOp2 extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
-        arm = new MetaTTArm2(this);
+        arm = new TTArmSystem(this);
         timer2 = getNewTimer();
     }
 
