@@ -40,13 +40,6 @@ public class TTArmSystem {
         intakeSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
     }
 
-    /**
-     * In inches.
-     */
-    public double getLiftHeight() {
-        return lift.getCurrentPosition() / LIFT_INCHES_TO_TICKS;
-    }
-
     public void lift(double inches, double power) {
         int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
         lift.setTargetPosition(ticks);
@@ -54,6 +47,11 @@ public class TTArmSystem {
         lift.setPower(power);
         while (!liftIsNearTarget()) ;
         lift.setPower(0.0);
+    }
+
+    public void liftContinuously(double power) {
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setPower(power);
     }
 
     private boolean liftIsNearTarget() {

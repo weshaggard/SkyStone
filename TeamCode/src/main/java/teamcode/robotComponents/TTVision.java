@@ -3,6 +3,8 @@ package teamcode.robotComponents;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -33,7 +35,7 @@ public class TTVision {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         if (cameraType == CameraType.WEBCAM) {
-            parameters.cameraName = ClassFactory.getInstance().getCameraManager().getAllWebcams().get(0);
+            parameters.cameraName = hardwareMap.get(CameraName.class,"webcam");
         }
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
