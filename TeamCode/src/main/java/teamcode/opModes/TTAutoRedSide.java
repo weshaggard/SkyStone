@@ -2,6 +2,8 @@ package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.BoundingBox2D;
 import teamcode.common.Debug;
@@ -67,7 +69,7 @@ public class TTAutoRedSide extends AbstractOpMode {
 
     private void suckSkystone(int skystoneNum){
         driveSystem.lateral(50.25 - (8 * skystoneNum), 0.6);
-        arm.intake(1.0);
+        timedIntake();
         driveSystem.vertical(-25, 0.6);
         if(arm.intakeIsFull()){
             Debug.log("Intake full");
@@ -76,6 +78,17 @@ public class TTAutoRedSide extends AbstractOpMode {
         }
 
     }
+
+    private void timedIntake(){
+        TimerTask startIntake = new TimerTask(){
+            @Override
+            public void run(){
+                arm.intake(1.0);
+            }
+        };
+        getNewTimer().schedule(startIntake, 0);
+    }
+
     @Override
     protected void onStop(){
 
