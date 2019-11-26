@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import java.util.Timer;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.robotComponents.TTHardwareComponentNames;
 
@@ -19,7 +20,6 @@ public class MetaTTArm {
     private static final double WRIST_RETRACTED_POSITION = 1.0;
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
     private static final double WRIST_TICK_DELTA = -0.05;
-    private static final long WRIST_TICK_PERIOD = 100;
 
     private static final double CLAW_OPEN_POSITION = 0.4;
     private static final double CLAW_CLOSE_POSITION = 1.0;
@@ -49,11 +49,15 @@ public class MetaTTArm {
         return lift.getCurrentPosition();
     }
 
-    public void lift(int ticks, double power) {
+    public void lift(double inches, double power) {
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        int ticks = 0;
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
+
+        Debug.log(lift.getCurrentPosition());
+
         while (!liftIsNearTarget()) ;
         lift.setPower(0.0);
     }
@@ -67,6 +71,7 @@ public class MetaTTArm {
         int target = lift.getTargetPosition();
         int current = lift.getCurrentPosition();
         double ticksFromTarget = Math.abs(target - current);
+        Debug.log(current);
         return ticksFromTarget <= LIFT_POSITION_ERROR_TOLERANCE;
     }
 

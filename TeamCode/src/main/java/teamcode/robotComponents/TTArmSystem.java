@@ -12,7 +12,8 @@ import teamcode.common.Utils;
 
 public class TTArmSystem {
 
-    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100.0;
+    private static final double LIFT_INCHES_TO_TICKS = 300.0;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
@@ -40,13 +41,14 @@ public class TTArmSystem {
     }
 
     /**
-     * In ticks.
+     * In inches.
      */
-    public int getLiftHeight() {
-        return lift.getCurrentPosition();
+    public double getLiftHeight() {
+        return lift.getCurrentPosition() / LIFT_INCHES_TO_TICKS;
     }
 
-    public void lift(int ticks, double power) {
+    public void lift(double inches, double power) {
+        int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);

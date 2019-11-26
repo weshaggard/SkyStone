@@ -1,6 +1,7 @@
 package teamcode.obsolete;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
@@ -12,6 +13,7 @@ import teamcode.robotComponents.TTDriveSystem;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
 
+@Disabled
 @Autonomous(name = "Blue Single Stone")
 public class TTAutoBlueSingleStone extends AbstractOpMode {
 

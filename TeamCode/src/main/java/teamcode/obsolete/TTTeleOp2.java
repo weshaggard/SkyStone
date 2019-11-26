@@ -1,5 +1,6 @@
 package teamcode.obsolete;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
@@ -12,6 +13,7 @@ import teamcode.common.Vector2D;
 import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
 
+@Disabled
 @TeleOp(name = "TT TeleOp 2")
 public class TTTeleOp2 extends AbstractOpMode {
 
@@ -121,14 +123,14 @@ public class TTTeleOp2 extends AbstractOpMode {
                 }
                 else if (gamepad1.dpad_up) {
                     // move lift up
-                    int ticks = Math.min(arm.getLiftHeight() + LIFT_STEP_TICKS, SCORING_TICKS);
-                    Debug.log("Lift up to: " + ticks);
-                    arm.lift(ticks, 1.0);
+//                    int ticks = Math.min(arm.getLiftHeight() + LIFT_STEP_TICKS, SCORING_TICKS);
+//                    Debug.log("Lift up to: " + ticks);
+//                    arm.lift(ticks, 1.0);
                 } else if (gamepad1.dpad_down) {
                     // move lift down
-                    int ticks = Math.max(arm.getLiftHeight() - LIFT_STEP_TICKS, 0);
-                    Debug.log("Lift down to: " + ticks);
-                    arm.lift(ticks, 1.0);
+//                    int ticks = Math.max(arm.getLiftHeight() - LIFT_STEP_TICKS, 0);
+//                    Debug.log("Lift down to: " + ticks);
+//                    arm.lift(ticks, 1.0);
                 }
                 else if (gamepad1.b) {
                     // first height
@@ -170,27 +172,27 @@ public class TTTeleOp2 extends AbstractOpMode {
 
         private void scorePosition() {
             closeClaw();
-            int ticks = arm.getLiftHeight() + SCORING_TICKS;
-            Debug.log("Score Lift to: " + ticks);
-            arm.lift(ticks, 1.0);
-            arm.extendWristIncrementally();
-            ticks = arm.getLiftHeight() - SCORING_TICKS;
-            Debug.log("Score Lift to: " + ticks);
-            arm.lift(ticks, 1.0);
+//            int ticks = arm.getLiftHeight() + SCORING_TICKS;
+//            Debug.log("Score Lift to: " + ticks);
+//            arm.lift(ticks, 1.0);
+//            arm.extendWristIncrementally();
+//            ticks = arm.getLiftHeight() - SCORING_TICKS;
+//            Debug.log("Score Lift to: " + ticks);
+//            arm.lift(ticks, 1.0);
             armState = ArmState.Extended;
         }
 
         private void homePosition() {
-            int c = 1200;
-            int t = arm.getLiftHeight() + c;
-            liftArm(t, 1.0);
-            Utils.sleep(500);
-            arm.setWristPosition(false);
-            Utils.sleep(500);
-            t = arm.getLiftHeight() - c;
-            liftArm(t, 0.7);
-            openClaw();
-            armState = ArmState.Retracted;
+//            int c = 1200;
+//            int t = arm.getLiftHeight() + c;
+//            liftArm(t, 1.0);
+//            Utils.sleep(500);
+//            arm.setWristPosition(false);
+//            Utils.sleep(500);
+//            t = arm.getLiftHeight() - c;
+//            liftArm(t, 0.7);
+//            openClaw();
+//            armState = ArmState.Retracted;
         }
 
         private void toggleClaw() {
