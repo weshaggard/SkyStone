@@ -21,7 +21,7 @@ public class OdometryWheels {
     private double distanceY;
     private int compositeTickX;
     private int compositeTickY;
-    private final double DISTANCE_APART_INCHES  = 1;
+    private final double DISTANCE_APART_INCHES = 1;
     private final TTDriveSystem driveSystem;
 
 
@@ -33,7 +33,7 @@ public class OdometryWheels {
     Hopefully future me knows what the heck I meant
      */
 
-    public OdometryWheels(HardwareMap hardwareMap, List<Vector2D> path){
+    public OdometryWheels(HardwareMap hardwareMap, List<Vector2D> path) {
         XWheel = hardwareMap.get(DcMotor.class, "Xwheel Odometry");
         YWheel = hardwareMap.get(DcMotor.class, "YWheel Odometry");
         apex = System.currentTimeMillis();
@@ -46,14 +46,14 @@ public class OdometryWheels {
 
     }
 
-    public void updateComposite(){
+    public void updateComposite() {
         int currentTickX = XWheel.getCurrentPosition();
         int currentTickY = YWheel.getCurrentPosition();
         compositeTickX += currentTickX;
         compositeTickY += currentTickY;
         long currentTime = System.currentTimeMillis() - apex;
-        double xVelocity = (((double)currentTickX) / ((double) currentTime));
-        double yVelocity = (((double)currentTickY) / ((double) currentTime));
+        double xVelocity = (((double) currentTickX) / ((double) currentTime));
+        double yVelocity = (((double) currentTickY) / ((double) currentTime));
         Vector2D velocity = new Vector2D(xVelocity, yVelocity);
         compositeComponents.add(velocity);
         comparePaths();
@@ -61,10 +61,10 @@ public class OdometryWheels {
 
 
     private void comparePaths() {
-        for(int i = 0; i < compositeComponents.size(); i++){
-            if(compositeComponents.get(i).getDirection() + DEGREE_ERROR == path.get(i).getDirection() || compositeComponents.get(i).getDirection() - DEGREE_ERROR == path.get(i).getDirection()){
+        for (int i = 0; i < compositeComponents.size(); i++) {
+            if (compositeComponents.get(i).getDirection() + DEGREE_ERROR == path.get(i).getDirection() || compositeComponents.get(i).getDirection() - DEGREE_ERROR == path.get(i).getDirection()) {
                 //good case, nothing is necessary
-            }else{
+            } else {
                 double direction = path.get(i).angleBetween(compositeComponents.get(i));
                 double distance = compositeComponents.get(i).magnitude();
                 driveSystem.turn(direction, 1);

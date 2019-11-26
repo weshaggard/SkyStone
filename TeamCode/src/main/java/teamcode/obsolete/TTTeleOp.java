@@ -1,5 +1,6 @@
 package teamcode.obsolete;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
@@ -11,6 +12,7 @@ import teamcode.common.Utils;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.common.Vector2D;
 
+@Disabled
 @TeleOp(name = "TT TeleOp")
 public class TTTeleOp extends AbstractOpMode {
 
