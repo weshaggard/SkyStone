@@ -109,6 +109,11 @@ public class TTTeleOp extends AbstractOpMode {
         }
 
         if (gamepad1.dpad_left) {
+        if (gamepad1.dpad_left) {
+            arm.setWristPosition(false);
+        } else if (gamepad1.dpad_right) {
+            arm.setWristPosition(true);
+        }
             arm.setWristPosition(false);
         } else if (gamepad1.dpad_right) {
             arm.setWristPosition(true);
