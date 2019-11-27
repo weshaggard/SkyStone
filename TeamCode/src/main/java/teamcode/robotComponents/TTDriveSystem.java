@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import teamcode.common.Vector2D;
 
@@ -77,10 +76,10 @@ public class TTDriveSystem {
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
-        double frontLeftPow = power * sin - turnSpeed;
-        double frontRightPow = power * cos + turnSpeed;
-        double backLeftPow = power * cos - turnSpeed;
-        double backRightPow = power * sin + turnSpeed;
+        double frontLeftPow = power * sin + turnSpeed;
+        double frontRightPow = power * cos - turnSpeed;
+        double backLeftPow = power * cos + turnSpeed;
+        double backRightPow = power * sin - turnSpeed;
         frontLeft.setPower(frontLeftPow);
         frontRight.setPower(frontRightPow);
         backLeft.setPower(backLeftPow);
