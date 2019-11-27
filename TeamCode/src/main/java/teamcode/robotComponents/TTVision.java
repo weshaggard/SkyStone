@@ -22,7 +22,7 @@ public class TTVision {
     private VuforiaTrackables trackables;
 
     public TTVision(HardwareMap hardwareMap) {
-        this(hardwareMap, CameraType.WEBCAM);
+        this(hardwareMap, CameraType.PHONE);
     }
 
     public TTVision(HardwareMap hardwareMap, CameraType cameraType) {

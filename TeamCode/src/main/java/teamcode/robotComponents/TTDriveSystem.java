@@ -14,7 +14,7 @@ public class TTDriveSystem {
     private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
     private static final double INCHES_TO_TICKS_LATERAL = -50.6;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
-    private static final double DEGREES_TO_TICKS = 8.547404708;
+    private static final double DEGREES_TO_TICKS = 8.98227425;
 
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to

@@ -68,23 +68,34 @@ public class TTAutoRedSide extends AbstractOpMode {
     }
 
     private void moveToScanningPosition() {
+        foundationGrabber(true);
         driveSystem.lateral(12, 0.6);
     }
 
     private void suckSkystone(int skystoneNum) {
         driveSystem.turn(-90, 0.6);
         timedIntake();
-        driveSystem.lateral(-10, 0.6);
-        driveSystem.vertical(-28, 0.6);
-        driveSystem.turn(-45, 0.6);
+        driveSystem.lateral(42 - skystoneNum * 8, 0.6);
+        driveSystem.vertical(-20, 0.6);
+        driveSystem.vertical(-8, 0.2);
         if (arm.intakeIsFull()) {
             Debug.log("Intake full");
             arm.intake(0);
-            driveSystem.turn(135, 0.6);
+            driveSystem.vertical(24, 0.6);
+            arm.setClawPosition(true);
+            driveSystem.turn(-90, 0.6);
+            moveToFoundation(6);
         } else {
             timedIntake();
         }
+    }
 
+    private void moveToFoundation(int skystoneNum) {
+        arm.grabFoundation(false);
+        driveSystem.vertical(123 - skystoneNum * 8, 0.6);
+        driveSystem.turn(-90, 0.6);
+        driveSystem.vertical(20, 0.6);
+        arm.grabFoundation(true);
     }
 
     private void timedIntake() {
@@ -95,6 +106,16 @@ public class TTAutoRedSide extends AbstractOpMode {
             }
         };
         getNewTimer().schedule(startIntake, 0);
+    }
+
+    private void foundationGrabber(final boolean open){
+        TimerTask activateGrabber = new TimerTask(){
+            @Override
+            public void run(){
+                arm.grabFoundation(open);
+            }
+        };
+        getNewTimer().schedule(activateGrabber, 0);
     }
 
     @Override

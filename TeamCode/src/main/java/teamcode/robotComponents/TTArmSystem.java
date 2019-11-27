@@ -24,7 +24,7 @@ public class TTArmSystem {
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
-    private final Servo wrist, claw;
+    private final Servo wrist, claw, leftGrabber, rightGrabber;
     private final DcMotor leftIntake, rightIntake;
     private final TouchSensor intakeSensor;
 
@@ -38,6 +38,8 @@ public class TTArmSystem {
         wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         intakeSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
+        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
+        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
     }
 
     public void lift(double inches, double power) {
@@ -117,4 +119,21 @@ public class TTArmSystem {
         return intakeSensor.isPressed();
     }
 
+    public void grabFoundation(boolean open){
+        if (open) {
+            closeGrabber();
+        } else {
+            openGrabber();
+        }
+    }
+
+    private void openGrabber(){
+        leftGrabber.setPosition(1);
+        rightGrabber.setPosition(0);
+    }
+
+    private void closeGrabber(){
+        leftGrabber.setPosition(0);
+        rightGrabber.setPosition(1);
+    }
 }
