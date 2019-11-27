@@ -6,12 +6,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 
 public class TTArmSystem {
 
     private static final double LIFT_INCHES_TO_TICKS = 300.0;
-    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 40;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
@@ -30,6 +31,7 @@ public class TTArmSystem {
     public TTArmSystem(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_LEFT);
         rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
@@ -44,7 +46,12 @@ public class TTArmSystem {
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
-        while (!liftIsNearTarget()) ;
+        //while (lift.isBusy());
+        while (!liftIsNearTarget()) {
+            int target = lift.getTargetPosition();
+            int current = lift.getCurrentPosition();
+            Debug.log("Target: " + target + ", Current: " + current);
+        }
         lift.setPower(0.0);
     }
 

@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
@@ -18,9 +19,10 @@ public class TTTeleOp extends AbstractOpMode {
     private static final double DRIVE_LINEAR_SPEED_MULTIPLIER = 0.4;
     private static final double DRIVE_TURN_SPEED_MULTIPLIER = 0.6;
     private static final long BUTTON_COOLDOWN = 500;
+    private static final double LIFT_RETRACT_HEIGHT = 10;
     private static final double LIFT_CLEARANCE_HEIGHT = 6.25;
-    private static final double LIFT_SCORE_HEIGHT_1 = 2.5;
-    private static final double LIFT_SCORE_HEIGHT_2 = 6.75;
+    private static final double LIFT_SCORE_HEIGHT_1 = 5.5;
+    private static final double LIFT_SCORE_HEIGHT_2 = 9.75;
 
     private TTDriveSystem driveSystem;
     private TTArmSystem arm;
@@ -43,6 +45,8 @@ public class TTTeleOp extends AbstractOpMode {
 
         canToggleArmAssist = true;
         canUseClaw = true;
+
+        arm.setClawPosition(true);
     }
 
     @Override
@@ -87,6 +91,7 @@ public class TTTeleOp extends AbstractOpMode {
 
         if (gamepad1.x && canUseClaw) {
             if (arm.wristIsExtended()) {
+                arm.setClawPosition(true);
                 retractAssistSequence();
             } else {
                 arm.setClawPosition(!arm.clawIsOpen());
@@ -95,22 +100,28 @@ public class TTTeleOp extends AbstractOpMode {
         }
 
         if (gamepad1.dpad_down) {
-            arm.liftContinuously(-0.5);
+            double delta = -0.1; // inches
+            arm.lift(delta, 1);
+            currentLiftHeight += delta;
         } else if (gamepad1.dpad_up) {
-            arm.liftContinuously(0.5);
+            double delta = 0.1; // inches
+            arm.lift(delta, 1);
+            currentLiftHeight += delta;
         } else if (gamepad1.b) {
-            arm.lift(LIFT_SCORE_HEIGHT_1, 1);
+            double delta = LIFT_SCORE_HEIGHT_1 - currentLiftHeight;
+            arm.lift(delta, 1);
             currentLiftHeight = LIFT_SCORE_HEIGHT_1;
         } else if (gamepad1.y) {
-            arm.lift(LIFT_SCORE_HEIGHT_2, 1);
+            double delta = LIFT_SCORE_HEIGHT_2 - currentLiftHeight;
+            arm.lift(delta, 1);
             currentLiftHeight = LIFT_SCORE_HEIGHT_2;
         } else {
             arm.liftContinuously(0);
         }
 
-        if (gamepad1.dpad_left) {
+        if (gamepad1.dpad_right) {
             arm.setWristPosition(false);
-        } else if (gamepad1.dpad_right) {
+        } else if (gamepad1.dpad_left) {
             arm.setWristPosition(true);
         }
 
@@ -132,16 +143,27 @@ public class TTTeleOp extends AbstractOpMode {
         arm.intake(0);
         arm.setClawPosition(false);
         Utils.sleep(1500);
-        arm.lift(LIFT_CLEARANCE_HEIGHT, 1);
+        double delta = LIFT_CLEARANCE_HEIGHT - currentLiftHeight;
+        Debug.log("extend up: " + delta);
+        arm.lift(delta, 1);
+        currentLiftHeight = LIFT_CLEARANCE_HEIGHT;
         arm.setWristPosition(true);
         Utils.sleep(500);
-        arm.lift(-LIFT_CLEARANCE_HEIGHT, 1);
+        Debug.log("extend down: " + currentLiftHeight);
+        arm.lift(-currentLiftHeight, 1);
+        currentLiftHeight = 0;
     }
 
     private void retractAssistSequence() {
-        arm.lift(LIFT_CLEARANCE_HEIGHT - currentLiftHeight, 1.0);
+        double delta = LIFT_CLEARANCE_HEIGHT - currentLiftHeight;
+        Debug.log("retract up: " + delta);
+        arm.lift(delta, 1.0);
+        currentLiftHeight = LIFT_CLEARANCE_HEIGHT;
         arm.setWristPosition(false);
-        arm.lift(-LIFT_CLEARANCE_HEIGHT, 1.0);
+        Utils.sleep(500);
+        Debug.log("retract down: " + currentLiftHeight);
+        arm.lift(-currentLiftHeight + 0.55, 1);
+        currentLiftHeight = 0;
     }
 
     private void toggleArmAssistCooldown() {
