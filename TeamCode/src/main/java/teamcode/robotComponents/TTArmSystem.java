@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import java.util.Timer;
-
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 
@@ -41,6 +39,7 @@ public class TTArmSystem {
     }
 
     public void lift(double inches, double power) {
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
