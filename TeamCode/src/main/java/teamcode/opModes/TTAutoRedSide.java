@@ -9,6 +9,7 @@ import teamcode.common.BoundingBox2D;
 import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
+import teamcode.common.Vector3D;
 import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.robotComponents.TTVision;
@@ -23,32 +24,36 @@ public class TTAutoRedSide extends AbstractOpMode {
     private TTDriveSystem driveSystem;
     private TTVision vision;
     SkyStoneConfiguration config = null;
+
     @Override
-    protected void onInitialize(){
+    protected void onInitialize() {
         arm = new TTArmSystem(this);
         driveSystem = new TTDriveSystem(hardwareMap);
-        vision = new TTVision(hardwareMap);
+        vision = new TTVision(hardwareMap, TTVision.CameraType.PHONE);
     }
+
     @Override
-    protected void onStart(){
+    protected void onStart() {
         moveToScanningPosition();
-//        Vector3D pos;
-//        boolean flag = true;
-//        while(flag) {
-//            pos = vision.getSkystonePosition();
-//            if (pos == null) {
-//                continue;
-//            } else {
-//                flag = false;
-//            }
-//            double horizontalDistanceFromRobot = pos.getY();
-//            config = determineSkystoneConfig(horizontalDistanceFromRobot);
-//            Debug.log(config);
-//        }
-//        if(config.equals(SkyStoneConfiguration.THREE_SIX)) {
-//            suckSkystone(6);
-//        }
-        suckSkystone(6);
+        Vector3D pos;
+        boolean flag = true;
+        while (flag) {
+            Debug.log("Line 1");
+            pos = vision.getSkystonePosition();
+            if (pos == null) {
+                continue;
+            } else {
+                flag = false;
+            }
+            Debug.log("Line 2");
+            double horizontalDistanceFromRobot = pos.getY();
+            Debug.log("Line 3");
+            config = determineSkystoneConfig(horizontalDistanceFromRobot);
+            Debug.log(config);
+        }
+        if (config.equals(SkyStoneConfiguration.THREE_SIX)) {
+            suckSkystone(6);
+        }
     }
 
     private SkyStoneConfiguration determineSkystoneConfig(double horizontalDistanceFromRobot) {
@@ -62,27 +67,30 @@ public class TTAutoRedSide extends AbstractOpMode {
         }
     }
 
-    private void moveToScanningPosition(){
-        driveSystem.vertical(-9, 0.6);
-        driveSystem.lateral(-9.5, 0.6);
+    private void moveToScanningPosition() {
+        driveSystem.lateral(12, 0.6);
     }
 
-    private void suckSkystone(int skystoneNum){
-        driveSystem.lateral(50.25 - (8 * skystoneNum), 0.6);
+    private void suckSkystone(int skystoneNum) {
+        driveSystem.turn(-90, 0.6);
         timedIntake();
-        driveSystem.vertical(-25, 0.6);
-        if(arm.intakeIsFull()){
+        driveSystem.lateral(-10, 0.6);
+        driveSystem.vertical(-28, 0.6);
+        driveSystem.turn(-45, 0.6);
+        if (arm.intakeIsFull()) {
             Debug.log("Intake full");
             arm.intake(0);
-            driveSystem.turn(360,0.5);
+            driveSystem.turn(135, 0.6);
+        } else {
+            timedIntake();
         }
 
     }
 
-    private void timedIntake(){
-        TimerTask startIntake = new TimerTask(){
+    private void timedIntake() {
+        TimerTask startIntake = new TimerTask() {
             @Override
-            public void run(){
+            public void run() {
                 arm.intake(1.0);
             }
         };
@@ -90,7 +98,7 @@ public class TTAutoRedSide extends AbstractOpMode {
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
 
     }
 }
