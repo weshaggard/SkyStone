@@ -110,8 +110,8 @@ public class TTArmSystem {
     //4,5
     public void moveToScoringPos() {
         intake(0);
-        setClawPosition(false);
-        sleep(2000);
+        //setClawPosition(false);
+        //sleep(2000);
         Timer wrist = opMode.getNewTimer();
         TimerTask wristTask = new TimerTask(){
             @Override
@@ -121,7 +121,8 @@ public class TTArmSystem {
         };
         wrist.schedule(wristTask, 100);
         lift(2100, 1);
-        lift(-2100, -1 );
+        lift(-1500, -1);
+        setClawPosition(true);
     }
 
     public boolean clawIsOpen() {
@@ -146,11 +147,14 @@ public class TTArmSystem {
     }
 
     public boolean intakeIsFull() {
+        intakeSensor.enableLed(true);
         int blue = intakeSensor.blue();
         int red = intakeSensor.red();
         int green = intakeSensor.green();
-        
-        return false;
+        Debug.log("Red: " + red);
+        Debug.log("Green: " + green);
+        Debug.log("Blue: " + blue);
+        return red > 2000 && green > 4000;
     }
 
     public void grabFoundation(boolean open){

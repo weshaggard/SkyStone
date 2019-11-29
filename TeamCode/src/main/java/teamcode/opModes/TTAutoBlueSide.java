@@ -26,19 +26,18 @@ public class TTAutoBlueSide extends AbstractOpMode {
     private TTVision vision;
     private SkyStoneConfiguration config;
 
+    private final double VERTICAL_SPEED = 0.7;
+    private final double LATERAL_SPEED = 0.7;
+    private final double TURN_SPEED = 0.5;
 
     @Override
     protected void onInitialize() {
         arm = new TTArmSystem(this);
         driveSystem = new TTDriveSystem(hardwareMap);
         vision = new TTVision(hardwareMap, TTVision.CameraType.PHONE);
-        //TODO need to get vision working, assuming the path is 1
-        //also init arm
     }
 
-    private SkyStoneConfiguration determineSkystoneConfig() {
-        return SkyStoneConfiguration.ONE_FOUR;
-    }
+
 
     @Override
     protected void onStart() {
@@ -63,57 +62,90 @@ public class TTAutoBlueSide extends AbstractOpMode {
             moveToStone(6);
             moveToSkystone();
             suckStone();
+            scoreFoundation();
+            driveSystem.vertical(50, VERTICAL_SPEED);
+            moveToStone(3);
+            moveToSkystone();
+            suckStone();
+            
+
         }else if(config.equals(SkyStoneConfiguration.TWO_FIVE)){
             moveToStone(5);
             moveToSkystone();
             suckStone();
+            scoreFoundation();
+            driveSystem.vertical(50, VERTICAL_SPEED);
         }else{
             moveToStone(4);
             moveToSkystone();
             suckStone();
+            scoreFoundation();
+            driveSystem.vertical(50, VERTICAL_SPEED);
         }
     }
 
-    private void moveToStone(int stoneNum) {
-        driveSystem.vertical(-12, 0.7);
-        //driveSystem.adjustGrabberPos(false);
-        driveSystem.vertical(-15, 0.7);
-        driveSystem.lateral(3 + (48 - 8 * stoneNum), 0.7);
-        //probably a negative, have to test it tomorrow
-        driveSystem.vertical(11, 0.7);
-        driveSystem.turn(90, 0.5);
-    }
-
-    private void moveToScanningPos() {
-        foundationGrabber(true);
-        driveSystem.lateral(12, 0.6);
-    }
-
-    private void suckStone() {
+    private void scoreFoundation() {
         Timer armTimer = getNewTimer();
-        while(!arm.intakeIsFull());
-        //stall the program until it has intaken the block
-        driveSystem.turn(30, 0.5);
+
+        foundationGrabber(true);
         TimerTask armScoring = new TimerTask() {
             @Override
             public void run() {
                 arm.moveToScoringPos();
             }
         };
-        //TODO move this to after the scoring foundation
         armTimer.schedule(armScoring, 0);
-        driveSystem.vertical(11, 0.7);
-        driveSystem.turn(-90, 0.5);
+        driveSystem.frontArc(false, TURN_SPEED, -90);
+        foundationGrabber(false);
+    }
+
+    private void moveToStone(int stoneNum) {
+        driveSystem.turn(-90, TURN_SPEED);
+        driveSystem.vertical(-12, VERTICAL_SPEED);
+        //driveSystem.adjustGrabberPos(false);
+        driveSystem.vertical(-15, VERTICAL_SPEED);
+        driveSystem.lateral(3 - (48 - 8 * stoneNum), LATERAL_SPEED);
+        driveSystem.vertical(11, VERTICAL_SPEED);
+        driveSystem.turn(90, TURN_SPEED);
+    }
+
+    private void moveToScanningPos() {
+        foundationGrabber(true);
+        driveSystem.lateral(12, LATERAL_SPEED);
+    }
+
+    private void suckStone() {
+        Timer armListener = getNewTimer();
+        while(!arm.intakeIsFull());
+        //stall the program until it has intaken the block
+        driveSystem.turn(30, TURN_SPEED);
+
+        TimerTask blockProcessing = new TimerTask(){
+            @Override
+            public void run(){
+                arm.intake(0);
+                arm.setClawPosition(false);
+            }
+        };
+        armListener.schedule(blockProcessing, 0);
+        driveSystem.vertical(11, VERTICAL_SPEED);
+        driveSystem.turn(-90, TURN_SPEED);
+        moveToFoundation(6);
+    }
+
+    private void moveToFoundation(int stoneNum) {
+        driveSystem.vertical(-72 - (48 - stoneNum * 8), VERTICAL_SPEED);
+        driveSystem.turn(90, TURN_SPEED);
+        driveSystem.vertical(24, VERTICAL_SPEED);
     }
 
     private void moveToSkystone(){
         //driveSystem.foundationGrabbers(1);
-        driveSystem.vertical(-15, 0.7);
+        driveSystem.vertical(-15, VERTICAL_SPEED);
         arm.intake(1);
-        driveSystem.lateral(5, 0.7);
-        driveSystem.vertical(-9,0.7);
-        driveSystem.turn(-30, 0.5);
-
+        driveSystem.lateral(5, LATERAL_SPEED);
+        driveSystem.vertical(-9,VERTICAL_SPEED);
+        driveSystem.turn(-30, TURN_SPEED);
     }
 
     private void foundationGrabber(final boolean open){
