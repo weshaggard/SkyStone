@@ -1,13 +1,20 @@
 package teamcode.robotComponents;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
+
+import static teamcode.common.Utils.sleep;
 
 public class TTArmSystem {
 
@@ -26,7 +33,9 @@ public class TTArmSystem {
     private final DcMotor lift;
     private final Servo wrist, claw, leftGrabber, rightGrabber;
     private final DcMotor leftIntake, rightIntake;
-    private final TouchSensor intakeSensor;
+    private final ColorSensor intakeSensor;
+
+    private final AbstractOpMode opMode;
 
     public TTArmSystem(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
@@ -37,9 +46,10 @@ public class TTArmSystem {
         rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
         wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
-        intakeSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
+        intakeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
         leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
         rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
+        this.opMode = opMode;
     }
 
     public void lift(double inches, double power) {
@@ -90,8 +100,28 @@ public class TTArmSystem {
         while (currentPosition >= WRIST_EXTENDED_POSITION) {
             currentPosition += WRIST_TICK_DELTA;
             wrist.setPosition(currentPosition);
-            Utils.sleep(100);
+            sleep(100);
         }
+    }
+
+    /**
+     * Moves the arm components into the posistion which they can be easily scored
+     */
+    //4,5
+    public void moveToScoringPos() {
+        intake(0);
+        setClawPosition(false);
+        sleep(2000);
+        Timer wrist = opMode.getNewTimer();
+        TimerTask wristTask = new TimerTask(){
+            @Override
+            public void run(){
+                setWristPosition(true);
+            }
+        };
+        wrist.schedule(wristTask, 100);
+        lift(2100, 1);
+        lift(-2100, -1 );
     }
 
     public boolean clawIsOpen() {
@@ -116,7 +146,11 @@ public class TTArmSystem {
     }
 
     public boolean intakeIsFull() {
-        return intakeSensor.isPressed();
+        int blue = intakeSensor.blue();
+        int red = intakeSensor.red();
+        int green = intakeSensor.green();
+        
+        return false;
     }
 
     public void grabFoundation(boolean open){
