@@ -16,7 +16,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double MAX_LIFT_HEIGHT_INCHES = 20.0;
     private static final double LIFT_SCORE_STEP_INCHES = 5.25;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
-    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 7;
+    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12;
     private static final double FIRST_SCORE_HEIGHT_INCHES = 4.5;
 
     private static final double TURN_SPEED_MODIFIER = 0.3;
@@ -102,7 +102,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     }
 
     private void intake() {
-        arm.intake(1.0);
+        arm.intake(0.5);
         intakeState = IntakeState.Ingress;
     }
 
@@ -129,10 +129,11 @@ public class TeleOpLeague2 extends AbstractOpMode {
     }
 
     private void extendArm(boolean wait) {
-        arm.setWristPosition(true);
-        if (wait) {
-            Utils.sleep(500);
-        }
+//        arm.setWristPosition(true);
+//        if (wait) {
+//            Utils.sleep(500);
+//        }
+        arm.extendWristIncrementally();
         armState = ArmState.Extended;
     }
 
