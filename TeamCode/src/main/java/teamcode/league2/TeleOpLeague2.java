@@ -17,7 +17,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double LIFT_SCORE_STEP_INCHES = 5.25;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
     private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 7;
-    private static final double FIRST_SCORE_HEIGHT_INCHES = 3.5;
+    private static final double FIRST_SCORE_HEIGHT_INCHES = 4.5;
 
     private static final double TURN_SPEED_MODIFIER = 0.3;
     private static final double STRAIGHT_SPEED_MODIFIER = 0.5;
@@ -211,8 +211,10 @@ public class TeleOpLeague2 extends AbstractOpMode {
         private void scorePosition() {
             //liftArm(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
             //Utils.sleep(500);
-            arm.lift(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
-            extendArm(true);
+            if (armState == ArmState.Retracted) {
+                arm.lift(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                extendArm(true);
+            }
 
             if (scoreLevel >= 0 && scoreLevel < 5) {
                 double newHeight = FIRST_SCORE_HEIGHT_INCHES + (scoreLevel * LIFT_SCORE_STEP_INCHES);
