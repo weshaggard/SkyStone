@@ -24,11 +24,18 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     private VisionLeague2 vision;
     private SkyStoneConfiguration config;
 
+    private Timer armTimer, blockProcessor, foundationTimer;
+
     @Override
     protected void onInitialize() {
         arm = new ArmSystemLeague2(this);
         driveSystem = new DriveSystemLeague2(hardwareMap);
         vision = new VisionLeague2(hardwareMap, VisionLeague2.CameraType.PHONE);
+        armTimer = getNewTimer();
+        blockProcessor = getNewTimer();
+        foundationTimer = getNewTimer();
+        armInit();
+
     }
 
     private void armInit() {
@@ -50,7 +57,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem.vertical(50, VERTICAL_SPEED);
         moveToStone(config.getFirstStone());
         suckStone(config.getFirstStone());
-        FoundationAndPark();
+        foundationAndPark();
     }
 
     private SkyStoneConfiguration determineSkystoneConfig(Vector3D skystonePosition) {
@@ -77,7 +84,6 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
 
     private void reposistionArm() {
         if (arm.intakeIsFull()) {
-            Timer armTimer = getNewTimer();
             TimerTask armScoring = new TimerTask() {
                 @Override
                 public void run() {
@@ -106,7 +112,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     }
 
     private void suckStone(int stoneNum) {
-        Timer armListener = getNewTimer();
+
         while (!arm.intakeIsFull()) ;
         //stall the program until it has intaken the block
 
@@ -117,7 +123,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
                 arm.setClawPosition(false);
             }
         };
-        armListener.schedule(blockProcessing, 0);
+        blockProcessor.schedule(blockProcessing, 0);
         driveSystem.vertical(11, VERTICAL_SPEED);
         driveSystem.turn(-90, TURN_SPEED);
         driveSystem.vertical(-72 - (48 - stoneNum * 8), VERTICAL_SPEED);
@@ -131,10 +137,10 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
                 arm.grabFoundation(open);
             }
         };
-        getNewTimer().schedule(activateGrabber, 0);
+        foundationTimer.schedule(activateGrabber, 0);
     }
 
-    private void FoundationAndPark() {
+    private void foundationAndPark() {
         reposistionArm();
         driveSystem.frontArc(true, TURN_SPEED, -90);
         driveSystem.lateral(24, LATERAL_SPEED);
@@ -145,6 +151,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
 
     @Override
     protected void onStop() {
+
     }
 
 }
