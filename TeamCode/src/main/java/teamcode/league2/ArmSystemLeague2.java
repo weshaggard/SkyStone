@@ -105,27 +105,6 @@ public class ArmSystemLeague2 {
         }
     }
 
-    /**
-     * Moves the arm components into the posistion which they can be easily scored
-     */
-    //4,5
-    public void moveToScoringPos() {
-        intake(0);
-        //setClawPosition(false);
-        //sleep(2000);
-        Timer wrist = opMode.getNewTimer();
-        TimerTask wristTask = new TimerTask(){
-            @Override
-            public void run(){
-                setWristPosition(true);
-            }
-        };
-        wrist.schedule(wristTask, 100);
-        lift(2100, 1);
-        lift(-1500, -1);
-        setClawPosition(true);
-    }
-
     public boolean clawIsOpen() {
         return Utils.servoNearPosition(claw, CLAW_OPEN_POSITION, CLAW_POSITION_ERROR_TOLERANCE);
     }
