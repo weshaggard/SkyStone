@@ -1,4 +1,4 @@
-package teamcode.opModes.league2;
+package teamcode.league2;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
