@@ -13,7 +13,7 @@ import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 
 
-@Autonomous(name = "Meta Blue Auto")
+@Autonomous(name = "Blue Side Auto")
 public class BlueSideAutoLeague2 extends AbstractOpMode {
     private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);
     private static final BoundingBox2D RIGHT_STONE_BOUNDS = new BoundingBox2D(120, 0, 500, 0);

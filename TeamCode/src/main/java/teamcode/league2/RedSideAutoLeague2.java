@@ -12,7 +12,7 @@ import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 
-@Autonomous(name = "RedSideAutoLeague2")
+@Autonomous(name = "Red Side Auto")
 public class RedSideAutoLeague2 extends AbstractOpMode {
 
     private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);

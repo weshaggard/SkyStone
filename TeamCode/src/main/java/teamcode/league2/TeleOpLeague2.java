@@ -10,8 +10,9 @@ import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@TeleOp(name = "TeleOpLeague2")
+@TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
+
     private static final double MAX_LIFT_HEIGHT_INCHES = 20.0;
     private static final double LIFT_SCORE_STEP_INCHES = 5.25;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
@@ -51,7 +52,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         new ScoreControl().start();
         new DriveControl().start();
 
-        while (opModeIsActive());
+        while (opModeIsActive()) ;
     }
 
     protected void onStop() {
@@ -79,17 +80,17 @@ public class TeleOpLeague2 extends AbstractOpMode {
         Full
     }
 
-    private enum ArmState{
+    private enum ArmState {
         Retracted,
         Extended
     }
 
-    private enum ClawState{
+    private enum ClawState {
         Open,
         Close
     }
 
-    private enum IntakeState{
+    private enum IntakeState {
         Ingress,
         Egress,
         Off
@@ -167,15 +168,13 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if ( gamepad1.dpad_right) {
+                if (gamepad1.dpad_right) {
                     // extend manually
                     extendArm(true);
-                }
-                else if (gamepad1.dpad_left) {
+                } else if (gamepad1.dpad_left) {
                     // retract manually
                     retractArm(true);
-                }
-                else if (gamepad1.dpad_up) {
+                } else if (gamepad1.dpad_up) {
                     // move lift up
                     double inches = Math.min(arm.getLiftHeight() + LIFT_MANUAL_STEP_INCHES, MAX_LIFT_HEIGHT_INCHES);
                     Debug.log("Lift up to: " + inches);
@@ -185,24 +184,19 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     double inches = Math.max(arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES, 0);
                     Debug.log("Lift down to: " + inches);
                     arm.lift(inches, 1.0);
-                }
-                else if (gamepad1.b) {
+                } else if (gamepad1.b) {
                     // first height
                     double inches = 2.5;
                     scoreLevel = 1;
                     Debug.log("Reset height: " + inches);
                     arm.lift(inches, 1.0);
-                }
-                else if (gamepad1.y) {
+                } else if (gamepad1.y) {
                     scorePosition();
-                }
-                else if (gamepad1.x) {
+                } else if (gamepad1.x) {
                     toggleClaw();
-                }
-                else if (gamepad1.a) {
+                } else if (gamepad1.a) {
                     homePosition();
-                }
-                else if (stoneBoxState == StoneBoxState.Full && scoreLevel == 0 && clawState == ClawState.Open) {
+                } else if (stoneBoxState == StoneBoxState.Full && scoreLevel == 0 && clawState == ClawState.Open) {
                     closeClaw(false);
                 }
             }
@@ -247,8 +241,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         private void toggleClaw() {
             if (clawState == ClawState.Open) {
                 closeClaw(true);
-            }
-            else {
+            } else {
                 openClaw(true);
             }
         }
@@ -273,12 +266,10 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
                     intakeOff();
-                }
-                else if (gamepad1.right_trigger > 0) {
+                } else if (gamepad1.right_trigger > 0) {
                     // Turn on the intake
                     intake();
-                }
-                else if (gamepad1.left_trigger > 0) {
+                } else if (gamepad1.left_trigger > 0) {
                     // Turn on the outtake
                     outtake(gamepad1.left_trigger);
                 }
@@ -292,8 +283,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
             while (opModeIsActive()) {
                 if (arm.intakeIsFull()) {
                     stoneBoxState = StoneBoxState.Full;
-                }
-                else {
+                } else {
                     stoneBoxState = StoneBoxState.Empty;
                 }
             }
