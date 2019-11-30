@@ -11,10 +11,13 @@ import teamcode.common.Vector2D;
 public class TTDriveSystem {
 
     // correct ticks = current ticks * correct distance / current distance
-    private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
-    private static final double INCHES_TO_TICKS_LATERAL = -50.6;
+    private static final double INCHES_TO_TICKS_VERTICAL = 45.3617021277;
+    private static final double INCHES_TO_TICKS_LATERAL = -49.6078431373;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = 8.98227425;
+
+    private static final double WHEEL_BASE_WIDTH_VERTICAL = 10.5;
+    private static final double DEGREES_TO_ARC_TICKS = (WHEEL_BASE_WIDTH_VERTICAL  * Math.PI) / 180.0;
 
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to
@@ -106,7 +109,7 @@ public class TTDriveSystem {
         while (!nearTarget()) ;
         brake();
     }
-
+    //positive is to the right and negative is to the left
     public void lateral(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
@@ -228,6 +231,48 @@ public class TTDriveSystem {
             }
         }
         return true;
+    }
+
+    /**
+     *
+     * @param left true for pivot point being front left
+     * @param power power of the motor between 0 and 1
+     */
+    public void frontArc(boolean left, double power, int degrees){
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        for(DcMotor motor: motors){
+            motor.setTargetPosition(degrees * (int)DEGREES_TO_ARC_TICKS);
+        }
+        setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        if(left){
+            if(degrees > 0) {
+                frontLeft.setPower(0);
+                frontRight.setPower(power);
+                backRight.setPower(power);
+                backLeft.setPower(power / 2.0);
+            }else{
+                frontLeft.setPower(0);
+                frontRight.setPower(-power);
+                backRight.setPower(-power);
+                backLeft.setPower(-power / 2.0);
+            }
+        }else{
+            if(degrees > 0) {
+                frontLeft.setPower(power);
+                frontRight.setPower(0);
+                backRight.setPower(power / 2.0);
+                backLeft.setPower(power);
+            }else{
+                frontLeft.setPower(-power);
+                frontRight.setPower(0);
+                backRight.setPower(-power / 2.0);
+                backLeft.setPower(-power);
+            }
+        }
+        while(!nearTarget());
+        brake();
+
     }
 
     private void setRunMode(DcMotor.RunMode mode) {

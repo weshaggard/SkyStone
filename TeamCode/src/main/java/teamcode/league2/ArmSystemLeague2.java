@@ -1,4 +1,4 @@
-package teamcode.robotComponents;
+package teamcode.league2;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,31 +11,32 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
+import teamcode.robotComponents.TTHardwareComponentNames;
 
 import static teamcode.common.Utils.sleep;
 
-public class TTArmSystem {
-
-    private static final double LIFT_INCHES_TO_TICKS = 300.0;
-    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100;
+public class ArmSystemLeague2 {
+    // 529.2 ticks per revolution
+    private static final double LIFT_INCHES_TO_TICKS = 162.33;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 40;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
-    private static final double WRIST_TICK_DELTA = -0.05;
+    private static final double WRIST_TICK_DELTA = 0.05;
 
-    private static final double CLAW_OPEN_POSITION = 0.4;
+    private static final double CLAW_OPEN_POSITION = 0.0;
     private static final double CLAW_CLOSE_POSITION = 1.0;
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
-    private final Servo wrist, claw, leftFoundationGrabber, rightFoundationGrabber;
+    private final Servo wrist, claw, leftGrabber, rightGrabber;
     private final DcMotor leftIntake, rightIntake;
     private final ColorSensor intakeSensor;
 
     private final AbstractOpMode opMode;
 
-    public TTArmSystem(AbstractOpMode opMode) {
+    public ArmSystemLeague2(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -45,23 +46,32 @@ public class TTArmSystem {
         wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         intakeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
-        leftFoundationGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_FOUNDATION_GRABBER);
-        rightFoundationGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_FOUNDATION_GRABBER);
+        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
+        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
         this.opMode = opMode;
     }
 
-    public void setLiftHeight(double inches, double power) {
+    /**
+     * Returns the current lift height in inches.
+     * @return the current lift height in inches.
+     */
+    public double getLiftHeight() {
+        int ticks = lift.getCurrentPosition();
+        return (ticks / LIFT_INCHES_TO_TICKS);
+    }
+
+    public void lift(double inches, double power) {
         int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
-        while (!liftIsNearTarget()) ;
+        //while (lift.isBusy());
+        while (!liftIsNearTarget()) {
+            int target = lift.getTargetPosition();
+            int current = lift.getCurrentPosition();
+            Debug.log("Target: " + target + ", Current: " + current);
+        }
         lift.setPower(0.0);
-    }
-
-    public void liftContinuously(double power) {
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift.setPower(power);
     }
 
     private boolean liftIsNearTarget() {
@@ -88,9 +98,9 @@ public class TTArmSystem {
      * IMPORTANT: BE SURE TO UPDATE RELATIONAL OPERATOR IF RETRACTED AND EXTENDED POSITIONS CHANGE.
      */
     public void extendWristIncrementally() {
-        double currentPosition = WRIST_RETRACTED_POSITION;
-        while (currentPosition >= WRIST_EXTENDED_POSITION) {
-            currentPosition += WRIST_TICK_DELTA;
+        double currentPosition = wrist.getPosition();
+        while (currentPosition > WRIST_EXTENDED_POSITION) {
+            currentPosition -= WRIST_TICK_DELTA;
             wrist.setPosition(currentPosition);
             sleep(100);
         }
@@ -112,8 +122,8 @@ public class TTArmSystem {
             }
         };
         wrist.schedule(wristTask, 100);
-        setLiftHeight(2100, 1);
-        setLiftHeight(-1500, -1);
+        lift(2100, 1);
+        lift(-1500, -1);
         setClawPosition(true);
     }
 
@@ -133,8 +143,7 @@ public class TTArmSystem {
      * @param power sucks if positive, spits if negative
      */
     public void intake(double power) {
-        power = -power;
-        leftIntake.setPower(power);
+        leftIntake.setPower(-power);
         rightIntake.setPower(power);
     }
 
@@ -149,14 +158,21 @@ public class TTArmSystem {
         return red > 2000 && green > 4000;
     }
 
-    public void setFoundationGrabberPosition(boolean open) {
+    public void grabFoundation(boolean open){
         if (open) {
-            leftFoundationGrabber.setPosition(1);
-            rightFoundationGrabber.setPosition(0);
+            closeGrabber();
         } else {
-            leftFoundationGrabber.setPosition(0);
-            rightFoundationGrabber.setPosition(1);
+            openGrabber();
         }
     }
 
+    private void openGrabber(){
+        leftGrabber.setPosition(1);
+        rightGrabber.setPosition(0);
+    }
+
+    private void closeGrabber(){
+        leftGrabber.setPosition(0);
+        rightGrabber.setPosition(1);
+    }
 }

@@ -2,6 +2,7 @@ package teamcode.opModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
@@ -53,6 +54,10 @@ public class TTAutoRedSide extends AbstractOpMode {
         }
         if (config.equals(SkyStoneConfiguration.THREE_SIX)) {
             suckSkystone(6);
+        }else if(config.equals(SkyStoneConfiguration.TWO_FIVE)){
+            suckSkystone(5);
+        }else{
+            suckSkystone(4);
         }
     }
 
@@ -96,6 +101,22 @@ public class TTAutoRedSide extends AbstractOpMode {
         driveSystem.turn(-90, 0.6);
         driveSystem.vertical(20, 0.6);
         arm.grabFoundation(true);
+        driveSystem.frontArc(true, 0.6, -90);
+        scoreStoneInFoundation();
+
+    }
+
+    private void scoreStoneInFoundation() {
+        Timer wrist = getNewTimer();
+
+        TimerTask wristTask = new TimerTask(){
+            @Override
+            public void run() {
+                arm.setWristPosition(true);
+            }
+        };
+        
+        wrist.schedule(wristTask, 100);
     }
 
     private void timedIntake() {
