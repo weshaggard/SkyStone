@@ -11,7 +11,6 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
-import teamcode.robotComponents.TTHardwareComponentNames;
 
 import static teamcode.common.Utils.sleep;
 
@@ -38,16 +37,16 @@ public class ArmSystemLeague2 {
 
     public ArmSystemLeague2(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
-        lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
+        lift = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.ARM_LIFT);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_LEFT);
-        rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
-        wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
-        claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
-        intakeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
-        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_FOUNDATION_GRABBER);
-        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_FOUNDATION_GRABBER);
+        leftIntake = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.INTAKE_LEFT);
+        rightIntake = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.INTAKE_RIGHT);
+        wrist = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.ARM_WRIST);
+        claw = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.ARM_CLAW);
+        intakeSensor = hardwareMap.get(ColorSensor.class, HardwareComponentNamesLeague2.INTAKE_SENSOR);
+        leftGrabber = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.LEFT_FOUNDATION_GRABBER);
+        rightGrabber = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.RIGHT_FOUNDATION_GRABBER);
         this.opMode = opMode;
     }
 

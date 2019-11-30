@@ -9,7 +9,6 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
-import teamcode.robotComponents.TTDriveSystem;
 
 @TeleOp(name = "TeleOpLeague2")
 public class TeleOpLeague2 extends AbstractOpMode {
@@ -27,7 +26,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
     private int scoreLevel;
 
-    private TTDriveSystem driveSystem;
+    private DriveSystemLeague2 driveSystem;
     private ArmSystemLeague2 arm;
     private Timer timer2;
 
@@ -38,7 +37,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        driveSystem = new TTDriveSystem(hardwareMap);
+        driveSystem = new DriveSystemLeague2(hardwareMap);
         arm = new ArmSystemLeague2(this);
         timer2 = getNewTimer();
     }
