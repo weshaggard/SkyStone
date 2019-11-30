@@ -46,8 +46,8 @@ public class ArmSystemLeague2 {
         wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         intakeSensor = hardwareMap.get(ColorSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
-        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_GRABBER);
-        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_GRABBER);
+        leftGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_FOUNDATION_GRABBER);
+        rightGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_FOUNDATION_GRABBER);
         this.opMode = opMode;
     }
 
