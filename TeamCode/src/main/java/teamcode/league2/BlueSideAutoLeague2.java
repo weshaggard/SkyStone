@@ -43,7 +43,6 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         arm.setWristPosition(false);
     }
 
-
     @Override
     protected void onStart() {
         moveToScanningPos();
