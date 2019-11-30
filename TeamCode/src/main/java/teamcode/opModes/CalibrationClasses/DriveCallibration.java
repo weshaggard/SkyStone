@@ -1,4 +1,4 @@
-package teamcode.opModes;
+package teamcode.opModes.CalibrationClasses;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -23,6 +23,7 @@ public class DriveCallibration extends AbstractOpMode {
     @Override
     protected void onStart() {
         returnTicks();
+        //driveSystem.vertical(-100, 0.6);
         driveSystem.lateral(100, 0.6);
     }
 

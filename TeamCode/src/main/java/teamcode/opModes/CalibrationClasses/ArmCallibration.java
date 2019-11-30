@@ -1,4 +1,4 @@
-package teamcode.opModes;
+package teamcode.opModes.CalibrationClasses;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 

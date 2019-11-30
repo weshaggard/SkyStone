@@ -1,31 +1,31 @@
-package teamcode.opModes;
-
+package teamcode.opModes.CalibrationClasses;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.obsolete.MetaTTArm;
+import teamcode.robotComponents.TTArmSystem;
 import teamcode.robotComponents.TTDriveSystem;
 
-@Autonomous(name = "Rotation Calibration")
-public class RotationCalibration extends AbstractOpMode {
+@Autonomous(name = "arcTest")
+public class arcTest extends AbstractOpMode {
 
-    public TTDriveSystem driveSystem;
-
+    private TTDriveSystem driveSystem;
+    private TTArmSystem arm;
 
     @Override
     protected void onInitialize() {
+        arm = new TTArmSystem(this);
         driveSystem = new TTDriveSystem(hardwareMap);
     }
 
     @Override
     protected void onStart() {
-        driveSystem.turn(360 * 6, 0.5);
+        driveSystem.frontArc(true, 0.6, 90);
     }
 
     @Override
     protected void onStop() {
 
     }
-
 }

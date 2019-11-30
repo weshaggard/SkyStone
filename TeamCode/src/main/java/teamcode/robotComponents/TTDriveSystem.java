@@ -11,8 +11,8 @@ import teamcode.common.Vector2D;
 public class TTDriveSystem {
 
     // correct ticks = current ticks * correct distance / current distance
-    private static final double INCHES_TO_TICKS_VERTICAL = 42.64;
-    private static final double INCHES_TO_TICKS_LATERAL = -50.6;
+    private static final double INCHES_TO_TICKS_VERTICAL = 45.3617021277;
+    private static final double INCHES_TO_TICKS_LATERAL = -49.6078431373;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = 8.98227425;
 
@@ -109,7 +109,7 @@ public class TTDriveSystem {
         while (!nearTarget()) ;
         brake();
     }
-
+    //positive is to the right and negative is to the left
     public void lateral(double inches, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);

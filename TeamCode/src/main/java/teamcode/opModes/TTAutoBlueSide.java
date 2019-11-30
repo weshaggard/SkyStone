@@ -62,32 +62,45 @@ public class TTAutoBlueSide extends AbstractOpMode {
             moveToStone(6);
             moveToSkystone();
             suckStone();
-            scoreFoundation();
+            repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
             moveToStone(3);
             moveToSkystone();
             suckStone();
-            
 
         }else if(config.equals(SkyStoneConfiguration.TWO_FIVE)){
             moveToStone(5);
             moveToSkystone();
             suckStone();
-            scoreFoundation();
+            repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
+            moveToStone(2);
+            moveToSkystone();
+            suckStone();
+
         }else{
             moveToStone(4);
             moveToSkystone();
             suckStone();
-            scoreFoundation();
+            repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
+            moveToStone(1);
+            moveToSkystone();
+            suckStone();
         }
     }
 
-    private void scoreFoundation() {
-        Timer armTimer = getNewTimer();
-
+    private void repositionFoundation() {
+        driveSystem.turn(90, TURN_SPEED);
+        driveSystem.vertical(24, VERTICAL_SPEED);
         foundationGrabber(true);
+        reposistionArm();
+        driveSystem.frontArc(false, TURN_SPEED, -90);
+        foundationGrabber(false);
+    }
+
+    private void reposistionArm(){
+        Timer armTimer = getNewTimer();
         TimerTask armScoring = new TimerTask() {
             @Override
             public void run() {
@@ -95,8 +108,6 @@ public class TTAutoBlueSide extends AbstractOpMode {
             }
         };
         armTimer.schedule(armScoring, 0);
-        driveSystem.frontArc(false, TURN_SPEED, -90);
-        foundationGrabber(false);
     }
 
     private void moveToStone(int stoneNum) {
@@ -135,8 +146,7 @@ public class TTAutoBlueSide extends AbstractOpMode {
 
     private void moveToFoundation(int stoneNum) {
         driveSystem.vertical(-72 - (48 - stoneNum * 8), VERTICAL_SPEED);
-        driveSystem.turn(90, TURN_SPEED);
-        driveSystem.vertical(24, VERTICAL_SPEED);
+
     }
 
     private void moveToSkystone(){
@@ -168,6 +178,15 @@ public class TTAutoBlueSide extends AbstractOpMode {
             return SkyStoneConfiguration.THREE_SIX;
         }
     }
+
+    private void FoundationAndPark(){
+        driveSystem.frontArc(true, TURN_SPEED, -90);
+        driveSystem.lateral(24, LATERAL_SPEED);
+        driveSystem.vertical(-18, VERTICAL_SPEED);
+        driveSystem.lateral(24, LATERAL_SPEED);
+
+    }
+
 
     @Override
     protected void onStop() {
