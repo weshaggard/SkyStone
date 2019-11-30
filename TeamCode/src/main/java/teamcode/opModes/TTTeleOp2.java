@@ -1,6 +1,5 @@
-package teamcode.obsolete;
+package teamcode.opModes;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
@@ -10,10 +9,9 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
-import teamcode.robotComponents.TTArmSystem;
+import teamcode.robotComponents.TTArm2;
 import teamcode.robotComponents.TTDriveSystem;
 
-@Disabled
 @TeleOp(name = "TT TeleOp 2")
 public class TTTeleOp2 extends AbstractOpMode {
 
@@ -21,12 +19,12 @@ public class TTTeleOp2 extends AbstractOpMode {
     private static final double STRAIGHT_SPEED_MODIFIER = 0.5;
     private static final int SCORING_TICKS = 2000;
     private static final int LIFT_STEP_TICKS = 100;
-    private static final long CLOSE_CLAW_DELAY = 1000;
-    private static final long OPEN_CLAW_DELAY = 2500;
 
+    public static final long CLOSE_CLAW_DELAY = 1000;
+    public static final long OPEN_CLAW_DELAY = 2500;
 
     private TTDriveSystem driveSystem;
-    private TTArmSystem arm;
+    private TTArm2 arm;
     private Timer timer2;
 
 
@@ -38,7 +36,7 @@ public class TTTeleOp2 extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new TTDriveSystem(hardwareMap);
-        arm = new TTArmSystem(this);
+        arm = new TTArm2(this);
         timer2 = getNewTimer();
     }
 
@@ -51,43 +49,44 @@ public class TTTeleOp2 extends AbstractOpMode {
         new ScoreControl().start();
         new DriveControl().start();
 
-        while (opModeIsActive());
+        while (opModeIsActive()) ;
     }
 
+    @Override
     protected void onStop() {
     }
 
     private void setStartState() {
-        // Open the claw
+        // close the claw
         arm.setClawPosition(true);
-        clawState = ClawState.Open;
-        armState = ArmState.Retracted;
+        clawState = ClawState.OPEN;
+        armState = ArmState.RETRACTED;
 
-        // Turn off the intake
+        // turn off the intake
         arm.intake(0.0);
-        intakeState = IntakeState.Off;
-        stoneBoxState = StoneBoxState.Empty;
+        intakeState = IntakeState.OFF;
+        stoneBoxState = StoneBoxState.EMPTY;
     }
 
     private enum StoneBoxState {
-        Empty,
-        Full
+        EMPTY,
+        FULL
     }
 
-    private enum ArmState{
-        Retracted,
-        Extended
+    private enum ArmState {
+        RETRACTED,
+        EXTENDED
     }
 
-    private enum ClawState{
-        Open,
-        Close
+    private enum ClawState {
+        OPEN,
+        CLOSE
     }
 
-    private enum IntakeState{
-        On_Forward,
-        On_Reverse,
-        Off
+    private enum IntakeState {
+        ON_FORWARD,
+        ON_REVERSE,
+        OFF
     }
 
     private class DriveControl extends Thread {
@@ -113,45 +112,38 @@ public class TTTeleOp2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if ( gamepad1.dpad_right) {
+                if (gamepad1.dpad_right) {
                     // extend manually
                     extendArm();
-                }
-                else if (gamepad1.dpad_left) {
+                } else if (gamepad1.dpad_left) {
                     // retract manually
                     retractArm();
-                }
-                else if (gamepad1.dpad_up) {
+                } else if (gamepad1.dpad_up) {
                     // move lift up
-//                    int ticks = Math.min(arm.getLiftHeight() + LIFT_STEP_TICKS, SCORING_TICKS);
-//                    Debug.log("Lift up to: " + ticks);
-//                    arm.lift(ticks, 1.0);
+                    int ticks = Math.min(arm.getLiftHeight() + LIFT_STEP_TICKS, SCORING_TICKS);
+                    Debug.log("Lift up to: " + ticks);
+                    arm.lift(ticks, 1.0);
                 } else if (gamepad1.dpad_down) {
                     // move lift down
-//                    int ticks = Math.max(arm.getLiftHeight() - LIFT_STEP_TICKS, 0);
-//                    Debug.log("Lift down to: " + ticks);
-//                    arm.lift(ticks, 1.0);
-                }
-                else if (gamepad1.b) {
+                    int ticks = Math.max(arm.getLiftHeight() - LIFT_STEP_TICKS, 0);
+                    Debug.log("Lift down to: " + ticks);
+                    arm.lift(ticks, 1.0);
+                } else if (gamepad1.b) {
                     // first height
                     int ticks = 300;
                     Debug.log("Lift to 1st: " + ticks);
                     arm.lift(ticks, 1.0);
-                }
-                else if (gamepad1.y) {
+                } else if (gamepad1.y) {
                     // second height
                     int ticks = 1300;
                     Debug.log("Lift to 2nd: " + ticks);
                     arm.lift(ticks, 1.0);
-                }
-                else if (gamepad1.x) {
+                } else if (gamepad1.x) {
                     toggleClaw();
-                }
-                else if (armState == ArmState.Retracted && stoneBoxState == StoneBoxState.Full) {
+                } else if (armState == ArmState.RETRACTED && stoneBoxState == StoneBoxState.FULL) {
                     // extend to score
                     scorePosition();
-                }
-                else if (armState == ArmState.Extended && stoneBoxState == StoneBoxState.Empty) {
+                } else if (armState == ArmState.EXTENDED && stoneBoxState == StoneBoxState.EMPTY) {
                     // retract to home
                     homePosition();
                 }
@@ -161,45 +153,44 @@ public class TTTeleOp2 extends AbstractOpMode {
         private void extendArm() {
             arm.setWristPosition(true);
             Utils.sleep(500);
-            armState = ArmState.Extended;
+            armState = ArmState.EXTENDED;
         }
 
         private void retractArm() {
             arm.setWristPosition(false);
             Utils.sleep(500);
-            armState = ArmState.Retracted;
+            armState = ArmState.RETRACTED;
         }
 
         private void scorePosition() {
             closeClaw();
-//            int ticks = arm.getLiftHeight() + SCORING_TICKS;
-//            Debug.log("Score Lift to: " + ticks);
-//            arm.lift(ticks, 1.0);
-//            arm.extendWristIncrementally();
-//            ticks = arm.getLiftHeight() - SCORING_TICKS;
-//            Debug.log("Score Lift to: " + ticks);
-//            arm.lift(ticks, 1.0);
-            armState = ArmState.Extended;
+            int ticks = arm.getLiftHeight() + SCORING_TICKS;
+            Debug.log("Score Lift to: " + ticks);
+            arm.lift(ticks, 1.0);
+            arm.extendWristIncrementally();
+            ticks = arm.getLiftHeight() - SCORING_TICKS;
+            Debug.log("Score Lift to: " + ticks);
+            arm.lift(ticks, 1.0);
+            armState = ArmState.EXTENDED;
         }
 
         private void homePosition() {
-//            int c = 1200;
-//            int t = arm.getLiftHeight() + c;
-//            liftArm(t, 1.0);
-//            Utils.sleep(500);
-//            arm.setWristPosition(false);
-//            Utils.sleep(500);
-//            t = arm.getLiftHeight() - c;
-//            liftArm(t, 0.7);
-//            openClaw();
-//            armState = ArmState.Retracted;
+            int c = 1200;
+            int t = arm.getLiftHeight() + c;
+            liftArm(t, 1.0);
+            Utils.sleep(500);
+            arm.setWristPosition(false);
+            Utils.sleep(500);
+            t = arm.getLiftHeight() - c;
+            liftArm(t, 0.7);
+            openClaw();
+            armState = ArmState.RETRACTED;
         }
 
         private void toggleClaw() {
-            if (clawState == ClawState.Open) {
+            if (clawState == ClawState.OPEN) {
                 closeClaw();
-            }
-            else {
+            } else {
                 openClaw();
             }
         }
@@ -207,13 +198,13 @@ public class TTTeleOp2 extends AbstractOpMode {
         private void closeClaw() {
             arm.setClawPosition(false);
             Utils.sleep(CLOSE_CLAW_DELAY);
-            clawState = ClawState.Close;
+            clawState = ClawState.CLOSE;
         }
 
         private void openClaw() {
             arm.setClawPosition(true);
             Utils.sleep(OPEN_CLAW_DELAY);
-            clawState = ClawState.Open;
+            clawState = ClawState.OPEN;
         }
 
         private void liftArm(final int ticks, final double power) {
@@ -235,18 +226,16 @@ public class TTTeleOp2 extends AbstractOpMode {
                 if (gamepad1.right_trigger > 0) {
                     // Turn on the intake
                     arm.intake(1.0);
-                    intakeState = IntakeState.On_Forward;
-                }
-                else if (gamepad1.left_trigger > 0) {
+                    intakeState = IntakeState.ON_FORWARD;
+                } else if (gamepad1.left_trigger > 0) {
                     // Turn on the outtake
                     arm.intake(gamepad1.left_trigger);
-                    intakeState = IntakeState.On_Reverse;
-                }
-                else if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.Full) {
+                    intakeState = IntakeState.ON_REVERSE;
+                } else if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.FULL) {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
                     arm.intake(0.0);
-                    intakeState = IntakeState.Off;
+                    intakeState = IntakeState.OFF;
                 }
             }
         }
@@ -257,10 +246,9 @@ public class TTTeleOp2 extends AbstractOpMode {
         public void run() {
             while (opModeIsActive()) {
                 if (arm.intakeIsFull()) {
-                    stoneBoxState = StoneBoxState.Full;
-                }
-                else {
-                    stoneBoxState = StoneBoxState.Empty;
+                    stoneBoxState = StoneBoxState.FULL;
+                } else {
+                    stoneBoxState = StoneBoxState.EMPTY;
                 }
             }
         }

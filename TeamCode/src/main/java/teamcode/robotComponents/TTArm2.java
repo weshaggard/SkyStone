@@ -8,10 +8,9 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 
-public class TTArmSystem {
+public class TTArm2 {
 
-    private static final double LIFT_INCHES_TO_TICKS = 300.0;
-    private static final double LIFT_POSITION_ERROR_TOLERANCE = 40;
+    private static final double LIFT_POSITION_ERROR_TOLERANCE = 100.0;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
@@ -23,38 +22,34 @@ public class TTArmSystem {
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
-    private final Servo wrist, claw, leftFoundationGrabber, rightFoundationGrabber;
+    private final Servo wrist, claw;
     private final DcMotor leftIntake, rightIntake;
     private final TouchSensor intakeSensor;
 
-    public TTArmSystem(AbstractOpMode opMode) {
+    public TTArm2(AbstractOpMode opMode) {
         HardwareMap hardwareMap = opMode.hardwareMap;
         lift = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.ARM_LIFT);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_LEFT);
         rightIntake = hardwareMap.get(DcMotor.class, TTHardwareComponentNames.INTAKE_RIGHT);
         wrist = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, TTHardwareComponentNames.ARM_CLAW);
         intakeSensor = hardwareMap.get(TouchSensor.class, TTHardwareComponentNames.INTAKE_SENSOR);
-        leftFoundationGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.LEFT_FOUNDATION_GRABBER);
-        rightFoundationGrabber = hardwareMap.get(Servo.class, TTHardwareComponentNames.RIGHT_FOUNDATION_GRABBER);
     }
 
-    public void lift(double inches, double power) {
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        int ticks = (int) (inches * LIFT_INCHES_TO_TICKS);
+    /**
+     * In ticks.
+     */
+    public int getLiftHeight() {
+        return lift.getCurrentPosition();
+    }
+
+    public void lift(int ticks, double power) {
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
-        //while (lift.isBusy());
         while (!liftIsNearTarget()) ;
         lift.setPower(0.0);
-    }
-
-    public void liftContinuously(double power) {
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift.setPower(power);
     }
 
     private boolean liftIsNearTarget() {
@@ -112,16 +107,6 @@ public class TTArmSystem {
 
     public boolean intakeIsFull() {
         return intakeSensor.isPressed();
-    }
-
-    public void setFoundationGrabberPosition(boolean open) {
-        if (open) {
-            leftFoundationGrabber.setPosition(1);
-            rightFoundationGrabber.setPosition(0);
-        } else {
-            leftFoundationGrabber.setPosition(0);
-            rightFoundationGrabber.setPosition(1);
-        }
     }
 
 }
