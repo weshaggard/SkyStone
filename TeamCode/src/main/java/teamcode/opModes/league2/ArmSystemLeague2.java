@@ -1,4 +1,4 @@
-package teamcode.league2;
+package teamcode.opModes.league2;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -145,6 +145,10 @@ public class ArmSystemLeague2 {
     public void intake(double power) {
         leftIntake.setPower(-power);
         rightIntake.setPower(power);
+    }
+    public void intake(double leftPower, double rightPower){
+        leftIntake.setPower(-leftPower);
+        rightIntake.setPower(rightPower);
     }
 
     public boolean intakeIsFull() {

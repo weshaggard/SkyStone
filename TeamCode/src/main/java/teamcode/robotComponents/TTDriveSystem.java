@@ -1,4 +1,4 @@
-package teamcode.robotComponents;
+ package teamcode.robotComponents;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,7 +14,7 @@ public class TTDriveSystem {
     private static final double INCHES_TO_TICKS_VERTICAL = 45.3617021277;
     private static final double INCHES_TO_TICKS_LATERAL = -49.6078431373;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
-    private static final double DEGREES_TO_TICKS = 8.98227425;
+    private static final double DEGREES_TO_TICKS = 9.08617635929;
 
     private static final double WHEEL_BASE_WIDTH_VERTICAL = 10.5;
     private static final double DEGREES_TO_ARC_TICKS = (WHEEL_BASE_WIDTH_VERTICAL  * Math.PI) / 180.0;
@@ -197,6 +197,7 @@ public class TTDriveSystem {
      * @param degrees degrees to turn clockwise
      * @param speed   [0.0, 1.0]
      */
+    //positive is clockwise and negative is counterclockwise
     public void turn(double degrees, double speed) {
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (degrees * DEGREES_TO_TICKS);

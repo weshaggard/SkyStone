@@ -11,7 +11,7 @@ import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
-import teamcode.robotComponents.TTArmSystem;
+import teamcode.opModes.league2.ArmSystemLeague2;
 import teamcode.robotComponents.TTDriveSystem;
 import teamcode.robotComponents.TTVision;
 
@@ -21,7 +21,7 @@ public class TTAutoBlueSide extends AbstractOpMode {
     private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);
     private static final BoundingBox2D RIGHT_STONE_BOUNDS = new BoundingBox2D(120, 0, 500, 0);
 
-    private TTArmSystem arm;
+    private ArmSystemLeague2 arm;
     private TTDriveSystem driveSystem;
     private TTVision vision;
     private SkyStoneConfiguration config;
@@ -29,14 +29,21 @@ public class TTAutoBlueSide extends AbstractOpMode {
     private final double VERTICAL_SPEED = 0.7;
     private final double LATERAL_SPEED = 0.7;
     private final double TURN_SPEED = 0.5;
+    private final double INTAKE_LEFT_SPEED = 0.4;
+    private final double INTAKE_RIGHT_SPEED = 0.6;
 
     @Override
     protected void onInitialize() {
-        arm = new TTArmSystem(this);
+        arm = new ArmSystemLeague2(this);
         driveSystem = new TTDriveSystem(hardwareMap);
         vision = new TTVision(hardwareMap, TTVision.CameraType.PHONE);
+        armInit();
     }
 
+    private void armInit() {
+        arm.setClawPosition(true);
+        arm.setWristPosition(false);
+    }
 
 
     @Override
@@ -60,34 +67,29 @@ public class TTAutoBlueSide extends AbstractOpMode {
         }
         if(config.equals(SkyStoneConfiguration.THREE_SIX)){
             moveToStone(6);
-            moveToSkystone();
-            suckStone();
+            suckStone(6);
             repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
             moveToStone(3);
-            moveToSkystone();
-            suckStone();
+            suckStone(3);
 
         }else if(config.equals(SkyStoneConfiguration.TWO_FIVE)){
             moveToStone(5);
-            moveToSkystone();
-            suckStone();
+            suckStone(5);
             repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
             moveToStone(2);
-            moveToSkystone();
-            suckStone();
+            suckStone(2);
 
         }else{
             moveToStone(4);
-            moveToSkystone();
-            suckStone();
+            suckStone(4);
             repositionFoundation();
             driveSystem.vertical(50, VERTICAL_SPEED);
             moveToStone(1);
-            moveToSkystone();
-            suckStone();
+            suckStone(1);
         }
+        FoundationAndPark();
     }
 
     private void repositionFoundation() {
@@ -100,14 +102,16 @@ public class TTAutoBlueSide extends AbstractOpMode {
     }
 
     private void reposistionArm(){
-        Timer armTimer = getNewTimer();
-        TimerTask armScoring = new TimerTask() {
-            @Override
-            public void run() {
-                arm.moveToScoringPos();
-            }
-        };
-        armTimer.schedule(armScoring, 0);
+        if(arm.intakeIsFull()) {
+            Timer armTimer = getNewTimer();
+            TimerTask armScoring = new TimerTask() {
+                @Override
+                public void run() {
+                    arm.moveToScoringPos();
+                }
+            };
+            armTimer.schedule(armScoring, 0);
+        }
     }
 
     private void moveToStone(int stoneNum) {
@@ -115,9 +119,11 @@ public class TTAutoBlueSide extends AbstractOpMode {
         driveSystem.vertical(-12, VERTICAL_SPEED);
         //driveSystem.adjustGrabberPos(false);
         driveSystem.vertical(-15, VERTICAL_SPEED);
-        driveSystem.lateral(3 - (48 - 8 * stoneNum), LATERAL_SPEED);
-        driveSystem.vertical(11, VERTICAL_SPEED);
-        driveSystem.turn(90, TURN_SPEED);
+        driveSystem.lateral(-3 - (48 - 8 * stoneNum), LATERAL_SPEED);
+        arm.intake(INTAKE_LEFT_SPEED, INTAKE_RIGHT_SPEED);
+        driveSystem.vertical(-9,VERTICAL_SPEED);
+        driveSystem.turn(30, TURN_SPEED);
+        //driveSystem.turn(90, TURN_SPEED);
     }
 
     private void moveToScanningPos() {
@@ -125,11 +131,10 @@ public class TTAutoBlueSide extends AbstractOpMode {
         driveSystem.lateral(12, LATERAL_SPEED);
     }
 
-    private void suckStone() {
+    private void suckStone(int stoneNum) {
         Timer armListener = getNewTimer();
         while(!arm.intakeIsFull());
         //stall the program until it has intaken the block
-        driveSystem.turn(30, TURN_SPEED);
 
         TimerTask blockProcessing = new TimerTask(){
             @Override
@@ -141,22 +146,10 @@ public class TTAutoBlueSide extends AbstractOpMode {
         armListener.schedule(blockProcessing, 0);
         driveSystem.vertical(11, VERTICAL_SPEED);
         driveSystem.turn(-90, TURN_SPEED);
-        moveToFoundation(6);
-    }
-
-    private void moveToFoundation(int stoneNum) {
         driveSystem.vertical(-72 - (48 - stoneNum * 8), VERTICAL_SPEED);
-
     }
 
-    private void moveToSkystone(){
-        //driveSystem.foundationGrabbers(1);
-        driveSystem.vertical(-15, VERTICAL_SPEED);
-        arm.intake(1);
-        driveSystem.lateral(5, LATERAL_SPEED);
-        driveSystem.vertical(-9,VERTICAL_SPEED);
-        driveSystem.turn(-30, TURN_SPEED);
-    }
+
 
     private void foundationGrabber(final boolean open){
         TimerTask activateGrabber = new TimerTask(){
@@ -180,6 +173,7 @@ public class TTAutoBlueSide extends AbstractOpMode {
     }
 
     private void FoundationAndPark(){
+        reposistionArm();
         driveSystem.frontArc(true, TURN_SPEED, -90);
         driveSystem.lateral(24, LATERAL_SPEED);
         driveSystem.vertical(-18, VERTICAL_SPEED);
