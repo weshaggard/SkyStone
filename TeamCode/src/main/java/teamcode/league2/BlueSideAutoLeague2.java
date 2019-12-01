@@ -43,6 +43,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         arm.setWristPosition(false);
     }
 
+
     @Override
     protected void onStart() {
         moveToScanningPos();
@@ -56,7 +57,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem.vertical(50, VERTICAL_SPEED);
         moveToStone(config.getFirstStone());
         suckStone(config.getFirstStone());
-        foundationAndPark();
+        FoundationAndPark();
     }
 
     private SkyStoneConfiguration determineSkystoneConfig(Vector3D skystonePosition) {
@@ -146,7 +147,6 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem.lateral(24, LATERAL_SPEED);
         driveSystem.vertical(-18, VERTICAL_SPEED);
         driveSystem.lateral(24, LATERAL_SPEED);
-
     }
 
     @Override
