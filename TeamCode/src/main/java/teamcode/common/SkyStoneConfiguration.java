@@ -1,7 +1,7 @@
 package teamcode.common;
 
 /**
- * Represents a way in which a pair of SkyStones can be placed. One means closest to the wall and 6
+ * Represents a way in which a pair of SkyStones can be placed. 1 means closest to the wall and 6
  * means farthest from the wall.
  */
 public enum SkyStoneConfiguration {
