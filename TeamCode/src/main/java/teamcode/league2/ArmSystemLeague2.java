@@ -16,15 +16,15 @@ import static teamcode.common.Utils.sleep;
 
 public class ArmSystemLeague2 {
     // 529.2 ticks per revolution
-    private static final double LIFT_INCHES_TO_TICKS = 162.33;
+    private static final double LIFT_INCHES_TO_TICKS = 146.972519894;
     private static final double LIFT_POSITION_ERROR_TOLERANCE = 40;
 
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
-    private static final double WRIST_TICK_DELTA = 0.05;
+    private static final double WRIST_TICK_DELTA = 0.08;
 
-    private static final double CLAW_OPEN_POSITION = 0.0;
+    private static final double CLAW_OPEN_POSITION = 0.2;
     private static final double CLAW_CLOSE_POSITION = 1.0;
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
@@ -52,6 +52,7 @@ public class ArmSystemLeague2 {
 
     /**
      * Returns the current lift height in inches.
+     *
      * @return the current lift height in inches.
      */
     public double getLiftHeight() {
@@ -105,26 +106,6 @@ public class ArmSystemLeague2 {
         }
     }
 
-    /**
-     * Moves the arm components into the posistion which they can be easily scored
-     */
-    //4,5
-    public void moveToScoringPos() {
-        intake(0);
-        //setClawPosition(false);
-        //sleep(2000);
-        Timer wrist = opMode.getNewTimer();
-        TimerTask wristTask = new TimerTask(){
-            @Override
-            public void run(){
-                setWristPosition(true);
-            }
-        };
-        wrist.schedule(wristTask, 100);
-        lift(2100, 1);
-        lift(-1500, -1);
-        setClawPosition(true);
-    }
 
     public boolean clawIsOpen() {
         return Utils.servoNearPosition(claw, CLAW_OPEN_POSITION, CLAW_POSITION_ERROR_TOLERANCE);
@@ -145,23 +126,32 @@ public class ArmSystemLeague2 {
         leftIntake.setPower(-power);
         rightIntake.setPower(power);
     }
-    public void intake(double leftPower, double rightPower){
+
+    public void intake(double leftPower, double rightPower) {
         leftIntake.setPower(-leftPower);
         rightIntake.setPower(rightPower);
     }
+
+    double period = 2;
+    double time = 0;
 
     public boolean intakeIsFull() {
         intakeSensor.enableLed(true);
         int blue = intakeSensor.blue();
         int red = intakeSensor.red();
         int green = intakeSensor.green();
-        Debug.log("Red: " + red);
-        Debug.log("Green: " + green);
-        Debug.log("Blue: " + blue);
-        return red > 2000 && green > 4000;
+        double runtime = opMode.getRuntime();
+        if (runtime > time + period) {
+            time = runtime;
+            Debug.log("Red: " + red);
+            Debug.log("Green: " + green);
+            Debug.log("Blue: " + blue);
+            Debug.log("ARGB: " + intakeSensor.argb());
+        }
+        return red > 400;
     }
 
-    public void grabFoundation(boolean open){
+    public void grabFoundation(boolean open) {
         if (open) {
             closeGrabber();
         } else {
@@ -169,12 +159,12 @@ public class ArmSystemLeague2 {
         }
     }
 
-    private void openGrabber(){
+    private void openGrabber() {
         leftGrabber.setPosition(1);
         rightGrabber.setPosition(0);
     }
 
-    private void closeGrabber(){
+    private void closeGrabber() {
         leftGrabber.setPosition(0);
         rightGrabber.setPosition(1);
     }

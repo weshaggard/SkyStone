@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
+import teamcode.common.Debug;
 import teamcode.common.Vector2D;
 
 public class DriveSystemLeague2 {
@@ -240,11 +241,14 @@ public class DriveSystemLeague2 {
      * @param power power of the motor between 0 and 1
      */
     public void frontArc(boolean left, double power, int degrees) {
+        Debug.log("gets here");
+
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         for (DcMotor motor : motors) {
             motor.setTargetPosition(degrees * (int) DEGREES_TO_ARC_TICKS);
         }
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+
 
         if (left) {
             if (degrees > 0) {
@@ -272,7 +276,7 @@ public class DriveSystemLeague2 {
             }
         }
         while (!nearTarget()) ;
-        brake();
+        //brake();
 
     }
 

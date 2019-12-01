@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
+import teamcode.league2.ArmSystemLeague2;
 
 @Autonomous(name = "Arm Callibration")
 public class ArmCallibration extends AbstractOpMode {
@@ -11,11 +12,11 @@ public class ArmCallibration extends AbstractOpMode {
     private static final int TICKS = 1500;
     private static final double POWER = 0.5;
 
-    private TTArmSystem arm;
+    private ArmSystemLeague2 arm;
 
     @Override
     protected void onInitialize() {
-        arm = new TTArmSystem(this);
+        arm = new ArmSystemLeague2(this);
     }
 
     @Override

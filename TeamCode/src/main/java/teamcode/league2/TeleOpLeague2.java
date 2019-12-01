@@ -13,14 +13,15 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
 
-    private static final double MAX_LIFT_HEIGHT_INCHES = 20.0;
+    private static final double MAX_LIFT_HEIGHT_INCHES = 14;
     private static final double LIFT_SCORE_STEP_INCHES = 5.25;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
     private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12;
     private static final double FIRST_SCORE_HEIGHT_INCHES = 4.5;
 
-    private static final double TURN_SPEED_MODIFIER = 0.3;
-    private static final double STRAIGHT_SPEED_MODIFIER = 0.5;
+    private static final double TURN_SPEED_MODIFIER = 0.45;
+    private static final double VERTICAL_SPEED_MODIFIER = 0.5;
+    private static final double LATERAL_SPEED_MODIFIER = 0.3;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 2500;
@@ -32,7 +33,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private Timer timer2;
 
     private StoneBoxState stoneBoxState;
-    private ArmState armState;
+    private WristState armState;
     private ClawState clawState;
     private IntakeState intakeState;
 
@@ -66,7 +67,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         openClaw(false);
 
         // Retract arm
-        retractArm(false);
+        //retractArm(false);
 
         // Turn off the intake
         intakeOff();
@@ -80,7 +81,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         Full
     }
 
-    private enum ArmState {
+    private enum WristState {
         Retracted,
         Extended
     }
@@ -107,7 +108,6 @@ public class TeleOpLeague2 extends AbstractOpMode {
     }
 
     private void outtake(double power) {
-
         arm.intake(-power);
         intakeState = IntakeState.Egress;
     }
@@ -128,13 +128,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
         clawState = ClawState.Open;
     }
 
-    private void extendArm(boolean wait) {
-//        arm.setWristPosition(true);
-//        if (wait) {
-//            Utils.sleep(500);
-//        }
+    private void extendWrist() {
         arm.extendWristIncrementally();
-        armState = ArmState.Extended;
+        armState = WristState.Extended;
     }
 
     private void retractArm(boolean wait) {
@@ -142,24 +138,27 @@ public class TeleOpLeague2 extends AbstractOpMode {
         if (wait) {
             Utils.sleep(500);
         }
-        armState = ArmState.Retracted;
+        armState = WristState.Retracted;
     }
 
     private class DriveControl extends Thread {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                double vertical = gamepad1.right_stick_y * STRAIGHT_SPEED_MODIFIER;
-                double horizontal = gamepad1.right_stick_x;
-                double turn = -gamepad1.left_stick_x * TURN_SPEED_MODIFIER;
-                if (gamepad1.right_bumper) {
-                    vertical = 1.0;
-                    Vector2D velocity = new Vector2D(horizontal, vertical);
-                    driveSystem.continuous(velocity, turn);
-                } else {
-                    Vector2D velocity = new Vector2D(horizontal, vertical);
-                    driveSystem.continuous(velocity, turn);
+                double vertical = gamepad1.right_stick_y;
+                double lateral = gamepad1.right_stick_x;
+                double turn = gamepad1.left_stick_x;
+                if (!gamepad1.right_bumper) {
+                    vertical *= VERTICAL_SPEED_MODIFIER;
+                    lateral *= LATERAL_SPEED_MODIFIER;
+                    turn *= TURN_SPEED_MODIFIER;
                 }
+                if (clawState == ClawState.Close) {
+                    vertical *= -1;
+                    lateral *= -1;
+                }
+                Vector2D velocity = new Vector2D(lateral, vertical);
+                driveSystem.continuous(velocity, turn);
             }
         }
     }
@@ -167,10 +166,11 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private class ScoreControl extends Thread {
         @Override
         public void run() {
+            boolean yDown = false;
             while (opModeIsActive()) {
                 if (gamepad1.dpad_right) {
                     // extend manually
-                    extendArm(true);
+                    extendWrist();
                 } else if (gamepad1.dpad_left) {
                     // retract manually
                     retractArm(true);
@@ -190,9 +190,16 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     scoreLevel = 1;
                     Debug.log("Reset height: " + inches);
                     arm.lift(inches, 1.0);
-                } else if (gamepad1.y) {
-                    scorePosition();
-                } else if (gamepad1.x) {
+                }
+                if (gamepad1.y) {
+                    if (!yDown) {
+                        scorePosition();
+                    }
+                    yDown = true;
+                } else {
+                    yDown = false;
+                }
+                if (gamepad1.x) {
                     toggleClaw();
                 } else if (gamepad1.a) {
                     homePosition();
@@ -203,14 +210,12 @@ public class TeleOpLeague2 extends AbstractOpMode {
         }
 
         private void scorePosition() {
-            //liftArm(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
-            //Utils.sleep(500);
-            if (armState == ArmState.Retracted) {
+            if (armState == WristState.Retracted) {
                 arm.lift(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
-                extendArm(true);
+                extendWrist();
             }
 
-            if (scoreLevel >= 0 && scoreLevel < 5) {
+            if (scoreLevel <= 3) {
                 double newHeight = FIRST_SCORE_HEIGHT_INCHES + (scoreLevel * LIFT_SCORE_STEP_INCHES);
                 newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES);
                 scoreLevel++;
@@ -220,7 +225,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         }
 
         private void homePosition() {
-            if (armState == ArmState.Extended) {
+            if (armState == WristState.Extended) {
                 double height = arm.getLiftHeight();
 
                 if (height < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {

@@ -24,7 +24,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     private VisionLeague2 vision;
     private SkyStoneConfiguration config;
 
-    private Timer armTimer, blockProcessor, foundationTimer;
+    private Timer armTimer, wristTimer, foundationTimer;
 
     @Override
     protected void onInitialize() {
@@ -32,7 +32,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem = new DriveSystemLeague2(hardwareMap);
         vision = new VisionLeague2(hardwareMap, VisionLeague2.CameraType.PHONE);
         armTimer = getNewTimer();
-        blockProcessor = getNewTimer();
+        wristTimer = getNewTimer();
         foundationTimer = getNewTimer();
         armInit();
 
@@ -75,10 +75,10 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     private void repositionFoundation() {
         driveSystem.turn(90, TURN_SPEED);
         driveSystem.vertical(24, VERTICAL_SPEED);
-        foundationGrabber(true);
+        arm.grabFoundation(true);
         reposistionArm();
         driveSystem.frontArc(false, TURN_SPEED, -90);
-        foundationGrabber(false);
+        arm.grabFoundation(false);
     }
 
     private void reposistionArm() {
@@ -86,11 +86,30 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
             TimerTask armScoring = new TimerTask() {
                 @Override
                 public void run() {
-                    arm.moveToScoringPos();
+                   score();
                 }
             };
             armTimer.schedule(armScoring, 0);
         }
+    }
+
+    /**
+     * Moves the arm components into the posistion which they can be easily scored
+     */
+    //4,5
+    public void score() {
+        arm.intake(0);
+
+        TimerTask wristTask = new TimerTask(){
+            @Override
+            public void run(){
+                arm.setWristPosition(true);
+            }
+        };
+        wristTimer.schedule(wristTask, 1500);
+        arm.lift(12, 1);
+        arm.lift(-4, -1);
+        arm.setClawPosition(true);
     }
 
     private void moveToStone(int stoneNum) {
@@ -99,44 +118,26 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         //driveSystem.adjustGrabberPos(false);
         driveSystem.vertical(-15, VERTICAL_SPEED);
         driveSystem.lateral(-3 - (48 - 8 * stoneNum), LATERAL_SPEED);
-        arm.intake(INTAKE_LEFT_SPEED, INTAKE_RIGHT_SPEED);
-        driveSystem.vertical(-9, VERTICAL_SPEED);
-        driveSystem.turn(30, TURN_SPEED);
-        //driveSystem.turn(90, TURN_SPEED);
     }
 
     private void moveToScanningPos() {
-        foundationGrabber(true);
+        arm.grabFoundation(true);
         driveSystem.lateral(12, LATERAL_SPEED);
     }
 
     private void suckStone(int stoneNum) {
-
-        while (!arm.intakeIsFull()) ;
+        double apex = getRuntime();
+        arm.intake(INTAKE_LEFT_SPEED, INTAKE_RIGHT_SPEED);
+        driveSystem.vertical(-9, VERTICAL_SPEED);
+        driveSystem.turn(30, TURN_SPEED);
+        while (!arm.intakeIsFull() && getRuntime() - apex < INTAKE_DURATION) ;
         //stall the program until it has intaken the block
-
-        TimerTask blockProcessing = new TimerTask() {
-            @Override
-            public void run() {
-                arm.intake(0);
-                arm.setClawPosition(false);
-            }
-        };
-        blockProcessor.schedule(blockProcessing, 0);
+        arm.intake(0);
+        arm.setClawPosition(false);
+        driveSystem.turn(-30, TURN_SPEED);
         driveSystem.vertical(11, VERTICAL_SPEED);
         driveSystem.turn(-90, TURN_SPEED);
         driveSystem.vertical(-72 - (48 - stoneNum * 8), VERTICAL_SPEED);
-    }
-
-
-    private void foundationGrabber(final boolean open) {
-        TimerTask activateGrabber = new TimerTask() {
-            @Override
-            public void run() {
-                arm.grabFoundation(open);
-            }
-        };
-        foundationTimer.schedule(activateGrabber, 0);
     }
 
     private void foundationAndPark() {
