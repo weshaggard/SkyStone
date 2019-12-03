@@ -244,6 +244,7 @@ public class DriveSystemLeague2 {
      * @param power power of the motor between 0 and 1
      */
     public void frontArc(boolean counterClockwise, double power, int degrees, double radius) {
+        //http://robotsforroboticists.com/drive-kinematics/
         //velocity_right = w(RADIUS_OF_ARC_TO_DRIVE + WHEEL_BASE/2)
         //velocity_left = w(RADIUS_OF_ARC_TO_DRIVE – WHEEL_BASE/2)
 
