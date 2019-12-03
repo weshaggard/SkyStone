@@ -108,8 +108,8 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
             }
         };
         wristTimer.schedule(wristTask, 1500);
-        arm.lift(12, 1);
-        arm.lift(-4, -1);
+        arm.setLiftHeight(12, 1);
+        arm.setLiftHeight(-4, -1);
         arm.setClawPosition(true);
     }
 
