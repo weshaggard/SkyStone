@@ -90,7 +90,9 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
                 arm.setWristPosition(true);
             }
         };
-        timer.schedule(wristTask, 100);
+        timer.schedule(wristTask, 1000);
+        arm.lift(8, 1);
+
     }
 
     @Override

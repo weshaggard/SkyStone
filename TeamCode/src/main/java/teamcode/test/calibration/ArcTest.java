@@ -3,6 +3,7 @@ package teamcode.test.calibration;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.league2.DriveSystemLeague2;
 
 @Autonomous(name = "ArcTest")
@@ -19,7 +20,7 @@ public class ArcTest extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-
+        Debug.log("here");
         driveSystem.frontArc(true, 0.6, 90);
     }
 
