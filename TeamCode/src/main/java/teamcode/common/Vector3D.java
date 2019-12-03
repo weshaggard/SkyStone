@@ -59,12 +59,7 @@ public class Vector3D {
 
     @Override
     public Vector3D clone() {
-        Vector3D clone = null;
-        try {
-            clone = (Vector3D) super.clone();
-        } catch (CloneNotSupportedException e) {
-        }
-        return clone;
+        return new Vector3D(x, y, z);
     }
 
 }

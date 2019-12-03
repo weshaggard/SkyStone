@@ -28,7 +28,7 @@ public class VisionCalibrator extends AbstractOpMode {
         while (opModeIsActive()) {
             Vector3D pos = vision.getSkystonePosition();
             double horizontalDistanceFromRobot = pos.getY();
-            Debug.log(horizontalDistanceFromRobot);
+            Debug.log("skystone pos: " + horizontalDistanceFromRobot);
 //            SkyStoneConfiguration config = determineSkystoneConfig(horizontalDistanceFromRobot);
 //            Debug.log(config);
         }

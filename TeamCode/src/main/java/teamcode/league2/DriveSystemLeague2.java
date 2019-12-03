@@ -237,7 +237,6 @@ public class DriveSystemLeague2 {
     }
 
 
-
     /**
      * @param left  true for pivot point being front left
      * @param power power of the motor between 0 and 1
@@ -251,12 +250,12 @@ public class DriveSystemLeague2 {
         }
 
         double arcLengthChange = ((degrees * Math.PI * WHEEL_BASE_WIDTH_LATERAL) - (2 * degrees * Math.PI * (WHEEL_BASE_WIDTH_LATERAL / 2))) / 180.0;
-        if(left){
+        if (left) {
             frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            backLeft.setTargetPosition(ticks - (int)(arcLengthChange * DEGREES_TO_ARC_TICKS));
-        }else{
-            frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER );
-            backRight.setTargetPosition(ticks - (int)(arcLengthChange * DEGREES_TO_ARC_TICKS));
+            backLeft.setTargetPosition(ticks - (int) (arcLengthChange * DEGREES_TO_ARC_TICKS));
+        } else {
+            frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            backRight.setTargetPosition(ticks - (int) (arcLengthChange * DEGREES_TO_ARC_TICKS));
         }
 
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -289,7 +288,7 @@ public class DriveSystemLeague2 {
                 backLeft.setPower(-power);
             }
         }
-        while (!nearTargetArc()){
+        while (!nearTargetArc()) {
             Debug.log("current fl " + frontLeft.getCurrentPosition());
             Debug.log("current fr " + frontRight.getCurrentPosition());
             Debug.log("current bl" + backLeft.getCurrentPosition());
@@ -298,7 +297,8 @@ public class DriveSystemLeague2 {
         }
         brake();
     }
-    private boolean nearTargetArc(){
+
+    private boolean nearTargetArc() {
         for (DcMotor motor : motors) {
             int targetPosition = motor.getTargetPosition();
             int currentPosition = motor.getCurrentPosition();
