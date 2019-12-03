@@ -80,6 +80,7 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
         driveSystem.turn(-90, 0.6);
         driveSystem.vertical(20, 0.6);
         arm.grabFoundation(true);
+        scoreStoneInFoundation();
         driveSystem.frontArc(true, 0.6, -90,6);
         //radius is arbetrary, need to fix
     }
@@ -88,16 +89,31 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
         TimerTask wristTask = new TimerTask() {
             @Override
             public void run() {
-                arm.setWristPosition(true);
+                score();
             }
         };
         timer.schedule(wristTask, 1000);
+    }
 
+    private void score() {
+        arm.intake(0);
 
+        TimerTask wristTask = new TimerTask(){
+            @Override
+            public void run(){
+                arm.setWristPosition(true);
+            }
+        };
+        timer.schedule(wristTask, 1500);
+        arm.setLiftHeight(12, 1);
+        arm.setLiftHeight(-4, -1);
+        arm.setClawPosition(true);
     }
 
     @Override
-    protected void onStop() {
+    public void onStop(){
+
     }
+
 
 }

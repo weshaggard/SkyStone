@@ -26,7 +26,7 @@ public class ArmSystemLeague2 {
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
-    private final Servo wrist, claw, leftGrabber, rightGrabber;
+    private final Servo wrist, claw, grabber;
     private final DcMotor leftIntake, rightIntake;
     private final ColorSensor intakeSensor;
     private final TouchSensor liftSensor;
@@ -44,8 +44,7 @@ public class ArmSystemLeague2 {
         wrist = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.ARM_WRIST);
         claw = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.ARM_CLAW);
         intakeSensor = hardwareMap.get(ColorSensor.class, HardwareComponentNamesLeague2.INTAKE_SENSOR);
-        leftGrabber = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.LEFT_FOUNDATION_GRABBER);
-        rightGrabber = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.RIGHT_FOUNDATION_GRABBER);
+        grabber = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.GRABBER);
         this.opMode = opMode;
     }
 
@@ -147,19 +146,10 @@ public class ArmSystemLeague2 {
 
     public void grabFoundation(boolean open) {
         if (open) {
-            openGrabber();
+            grabber.setPosition(1);
         } else {
-            closeGrabber();
+            grabber.setPosition(0);
         }
     }
 
-    private void openGrabber() {
-        leftGrabber.setPosition(1);
-        rightGrabber.setPosition(0);
-    }
-
-    private void closeGrabber() {
-        leftGrabber.setPosition(0);
-        rightGrabber.setPosition(1);
-    }
 }
