@@ -22,7 +22,7 @@ public class ArmCallibration extends AbstractOpMode {
     @Override
     protected void onStart() {
         Debug.log("Raising: " + TICKS);
-        arm.lift(4, POWER);
+        arm.setLiftHeight(4, POWER);
         while (opModeIsActive()) ;
     }
 

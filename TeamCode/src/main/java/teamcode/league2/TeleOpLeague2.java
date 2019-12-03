@@ -16,24 +16,23 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double MAX_LIFT_HEIGHT_INCHES = 14;
     private static final double LIFT_SCORE_STEP_INCHES = 5.25;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
-    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12;
-    private static final double FIRST_SCORE_HEIGHT_INCHES = 4.5;
+    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 10.5;
+
+    private static final long CLOSE_CLAW_DELAY = 1000;
+    private static final long OPEN_CLAW_DELAY = 2500;
 
     private static final double TURN_SPEED_MODIFIER = 0.45;
     private static final double VERTICAL_SPEED_MODIFIER = 0.5;
     private static final double LATERAL_SPEED_MODIFIER = 0.3;
 
-    private static final long CLOSE_CLAW_DELAY = 1000;
-    private static final long OPEN_CLAW_DELAY = 2500;
-
     private int scoreLevel;
 
     private DriveSystemLeague2 driveSystem;
     private ArmSystemLeague2 arm;
-    private Timer timer2;
+    private Timer timer;
 
     private StoneBoxState stoneBoxState;
-    private WristState armState;
+    private WristState wristState;
     private ClawState clawState;
     private IntakeState intakeState;
 
@@ -41,7 +40,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     protected void onInitialize() {
         driveSystem = new DriveSystemLeague2(hardwareMap);
         arm = new ArmSystemLeague2(this);
-        timer2 = getNewTimer();
+        timer = getNewTimer();
     }
 
     @Override
@@ -61,55 +60,57 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
     private void setStartState() {
         // reset the current skystone score level height
-        scoreLevel = 0;
+        scoreLevel = 1;
 
-        // Open the claw
+        // OPEN the claw
         openClaw(false);
 
         // Retract arm
-        //retractArm(false);
+        retractArm(false);
+
+        arm.resetLift();
 
         // Turn off the intake
         intakeOff();
 
         // The stone box should be empty
-        stoneBoxState = StoneBoxState.Empty;
+        stoneBoxState = StoneBoxState.EMPTY;
     }
 
     private enum StoneBoxState {
-        Empty,
-        Full
+        EMPTY,
+        FULL
     }
 
     private enum WristState {
-        Retracted,
-        Extended
+        RETRACTED,
+        EXTENDED
     }
 
     private enum ClawState {
-        Open,
-        Close
+        OPEN,
+        CLOSED
     }
 
     private enum IntakeState {
-        Ingress,
-        Egress,
-        Off
+        INGRESS,
+        EGRESS,
+        OFF
     }
 
     private void intakeOff() {
         arm.intake(0.0);
-        intakeState = IntakeState.Off;
+        intakeState = IntakeState.OFF;
     }
 
     private void intake() {
         arm.intake(0.5);
-        intakeState = IntakeState.Ingress;
+        intakeState = IntakeState.INGRESS;
     }
 
     private void outtake(double power) {
         arm.intake(-power);
-        intakeState = IntakeState.Egress;
+        intakeState = IntakeState.EGRESS;
     }
 
     private void closeClaw(boolean wait) {
@@ -117,7 +118,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         if (wait) {
             Utils.sleep(CLOSE_CLAW_DELAY);
         }
-        clawState = ClawState.Close;
+        clawState = ClawState.CLOSED;
     }
 
     private void openClaw(boolean wait) {
@@ -125,12 +126,12 @@ public class TeleOpLeague2 extends AbstractOpMode {
         if (wait) {
             Utils.sleep(OPEN_CLAW_DELAY);
         }
-        clawState = ClawState.Open;
+        clawState = ClawState.OPEN;
     }
 
     private void extendWrist() {
         arm.extendWristIncrementally();
-        armState = WristState.Extended;
+        wristState = WristState.EXTENDED;
     }
 
     private void retractArm(boolean wait) {
@@ -138,7 +139,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         if (wait) {
             Utils.sleep(500);
         }
-        armState = WristState.Retracted;
+        wristState = WristState.RETRACTED;
     }
 
     private class DriveControl extends Thread {
@@ -153,7 +154,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     lateral *= LATERAL_SPEED_MODIFIER;
                     turn *= TURN_SPEED_MODIFIER;
                 }
-                if (clawState == ClawState.Close) {
+                if (clawState == ClawState.CLOSED) {
                     vertical *= -1;
                     lateral *= -1;
                 }
@@ -168,28 +169,26 @@ public class TeleOpLeague2 extends AbstractOpMode {
         public void run() {
             boolean yDown = false;
             while (opModeIsActive()) {
-                if (gamepad1.dpad_right) {
+                if (gamepad1.dpad_left) {
                     // extend manually
                     extendWrist();
-                } else if (gamepad1.dpad_left) {
+                } else if (gamepad1.dpad_right) {
                     // retract manually
                     retractArm(true);
                 } else if (gamepad1.dpad_up) {
-                    // move lift up
+                    // move setLiftHeight up
                     double inches = Math.min(arm.getLiftHeight() + LIFT_MANUAL_STEP_INCHES, MAX_LIFT_HEIGHT_INCHES);
                     Debug.log("Lift up to: " + inches);
-                    arm.lift(inches, 1.0);
+                    arm.setLiftHeight(inches, 1.0);
                 } else if (gamepad1.dpad_down) {
                     // move lift down
                     double inches = Math.max(arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES, 0);
                     Debug.log("Lift down to: " + inches);
-                    arm.lift(inches, 1.0);
+                    arm.setLiftHeight(inches, 1.0);
                 } else if (gamepad1.b) {
                     // first height
-                    double inches = 2.5;
                     scoreLevel = 1;
-                    Debug.log("Reset height: " + inches);
-                    arm.lift(inches, 1.0);
+                    Debug.log("Reset height");
                 }
                 if (gamepad1.y) {
                     if (!yDown) {
@@ -203,63 +202,53 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     toggleClaw();
                 } else if (gamepad1.a) {
                     homePosition();
-                } else if (stoneBoxState == StoneBoxState.Full && scoreLevel == 0 && clawState == ClawState.Open) {
+                } else if (stoneBoxState == StoneBoxState.FULL && clawState == ClawState.OPEN) {
                     closeClaw(false);
                 }
             }
         }
 
         private void scorePosition() {
-            if (armState == WristState.Retracted) {
-                arm.lift(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+            if (wristState == WristState.EXTENDED) {
+                return;
+            }
+            double newHeight = scoreLevel * LIFT_SCORE_STEP_INCHES;
+            newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES); // janky solution to be removed later
+            Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
+            if (newHeight < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
+                arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                extendWrist();
+                arm.setLiftHeight(newHeight, 1.0);
+            } else {
+                arm.setLiftHeight(newHeight, 1.0);
                 extendWrist();
             }
-
-            if (scoreLevel <= 3) {
-                double newHeight = FIRST_SCORE_HEIGHT_INCHES + (scoreLevel * LIFT_SCORE_STEP_INCHES);
-                newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES);
-                scoreLevel++;
-                Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
-                liftArm(newHeight, 1.0);
+            scoreLevel++;
+            if (scoreLevel > 3) {
+                scoreLevel = 3;
             }
         }
 
         private void homePosition() {
-            if (armState == WristState.Extended) {
+            if (wristState == WristState.EXTENDED) {
                 double height = arm.getLiftHeight();
-
                 if (height < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
-                    //liftArm(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
-                    //Utils.sleep(500);
-                    arm.lift(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                    arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
                 }
-
                 retractArm(false);
             }
 
             openClaw(false);
             Utils.sleep(500);
-            liftArm(0, 1.0);
-            scoreLevel = 0;
+            arm.resetLift();
         }
 
         private void toggleClaw() {
-            if (clawState == ClawState.Open) {
+            if (clawState == ClawState.OPEN) {
                 closeClaw(true);
             } else {
                 openClaw(true);
             }
-        }
-
-        private void liftArm(final double inches, final double power) {
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    Debug.log("Lift to: " + inches);
-                    arm.lift(inches, power);
-                }
-            };
-            timer2.schedule(task, 0);
         }
     }
 
@@ -267,7 +256,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.Full) {
+                if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.FULL) {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
                     intakeOff();
@@ -287,9 +276,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
         public void run() {
             while (opModeIsActive()) {
                 if (arm.intakeIsFull()) {
-                    stoneBoxState = StoneBoxState.Full;
+                    stoneBoxState = StoneBoxState.FULL;
                 } else {
-                    stoneBoxState = StoneBoxState.Empty;
+                    stoneBoxState = StoneBoxState.EMPTY;
                 }
             }
         }

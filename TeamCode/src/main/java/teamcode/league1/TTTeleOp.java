@@ -101,7 +101,7 @@ public class TTTeleOp extends AbstractOpMode {
                 }
             }
 
-            // lift
+            // setLiftHeight
             if (gamepad1.b) {
                 arm.lift(SCORING_TICKS - arm.getLiftHeight(), 1);
             } else if (gamepad1.dpad_up) {
