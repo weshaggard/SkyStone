@@ -147,9 +147,9 @@ public class ArmSystemLeague2 {
 
     public void grabFoundation(boolean open) {
         if (open) {
-            closeGrabber();
-        } else {
             openGrabber();
+        } else {
+            closeGrabber();
         }
     }
 
