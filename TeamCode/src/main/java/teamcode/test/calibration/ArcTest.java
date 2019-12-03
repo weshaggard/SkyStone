@@ -21,7 +21,8 @@ public class ArcTest extends AbstractOpMode {
     @Override
     protected void onStart() {
         Debug.log("here");
-        driveSystem.frontArc(true, 0.6,90);
+        driveSystem.frontArc(true, 0.6,90, 9);
+        while (opModeIsActive());
     }
 
     @Override
