@@ -21,7 +21,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final long OPEN_CLAW_DELAY = 1000;
 
     private static final double TURN_SPEED_MODIFIER = 0.45;
-    private static final double VERTICAL_SPEED_MODIFIER = 0.3;
+    private static final double VERTICAL_SPEED_MODIFIER = 0.5;
     private static final double LATERAL_SPEED_MODIFIER = 0.3;
 
     private int scoreLevel;
@@ -190,7 +190,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     scoreLevel = 1;
                     Debug.log("Reset height");
                 }
-                if (gamepad1.y) {
+                if (gamepad1.right_bumper) {
                     if (!yDown) {
                         scorePosition();
                     }
@@ -260,7 +260,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.FULL) {
+                if (gamepad1.y || stoneBoxState == StoneBoxState.FULL) {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
                     intakeOff();

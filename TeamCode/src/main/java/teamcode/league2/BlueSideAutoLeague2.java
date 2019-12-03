@@ -99,7 +99,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
      * Moves the arm components into the posistion which they can be easily scored
      */
     //4,5
-    public void score() {
+    private void score() {
         arm.intake(0);
 
         TimerTask wristTask = new TimerTask(){

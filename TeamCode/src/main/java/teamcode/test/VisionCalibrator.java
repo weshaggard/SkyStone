@@ -1,4 +1,4 @@
-package teamcode.test.calibration;
+package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -26,11 +26,14 @@ public class VisionCalibrator extends AbstractOpMode {
     @Override
     protected void onStart() {
         while (opModeIsActive()) {
+            // forward 12
             Vector3D pos = vision.getSkystonePosition();
-            double horizontalDistanceFromRobot = pos.getY();
-            Debug.log("skystone pos: " + horizontalDistanceFromRobot);
+            if (pos != null) {
+                double horizontalDistanceFromRobot = pos.getY();
+                Debug.log("skystone pos: " + horizontalDistanceFromRobot);
 //            SkyStoneConfiguration config = determineSkystoneConfig(horizontalDistanceFromRobot);
 //            Debug.log(config);
+            }
         }
     }
 
