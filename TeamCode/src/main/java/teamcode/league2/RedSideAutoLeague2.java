@@ -64,7 +64,7 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
 
     private void suckSkystone(int skystoneNum) {
         driveSystem.turn(-90, 0.6);
-        arm.intake(0.6, 0.4);
+        arm.intake(1.0);
         driveSystem.lateral(42 - skystoneNum * 8, 0.6);
         driveSystem.vertical(-20, 0.6);
         driveSystem.vertical(-8, 0.2);
