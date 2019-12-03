@@ -80,7 +80,8 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
         driveSystem.turn(-90, 0.6);
         driveSystem.vertical(20, 0.6);
         arm.grabFoundation(true);
-        driveSystem.frontArc(true, 0.6, -90);
+        driveSystem.frontArc(true, 0.6, -90,6);
+        //radius is arbetrary, need to fix
     }
 
     private void scoreStoneInFoundation() {

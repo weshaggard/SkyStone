@@ -239,56 +239,63 @@ public class DriveSystemLeague2 {
 
 
     /**
-     * @param left  true for pivot point being front left
+     * @param counterClockwise  true for pivot point being front left
      * @param power power of the motor between 0 and 1
      */
-    public void frontArc(boolean left, double power, int degrees) {
+    public void frontArc(boolean counterClockwise, double outerPower, int degrees, double radius) {
         Debug.log("gets here" + degrees);
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = degrees * (int) DEGREES_TO_ARC_TICKS;
-        for (DcMotor motor : motors) {
-            motor.setTargetPosition(ticks);
+        double length1 = (degrees * Math.PI * radius) / 180.0;
+        double length2 =  (degrees * Math.PI * (radius + WHEEL_BASE_WIDTH_LATERAL)) / 180.0;
+        double arcLengthChange = length2 - length1;
+        if(counterClockwise){
+            frontLeft.setTargetPosition(ticks);
+            backLeft.setTargetPosition(ticks);
+            frontRight.setTargetPosition(ticks + (int)arcLengthChange);
+            backRight.setTargetPosition(ticks + (int)arcLengthChange);
+        }else{
+            frontRight.setTargetPosition(ticks);
+            backRight.setTargetPosition(ticks);
+            frontLeft.setTargetPosition(ticks + (int)arcLengthChange);
+            backLeft.setTargetPosition(ticks + (int)arcLengthChange);
         }
 
-        double arcLengthChange = ((degrees * Math.PI * WHEEL_BASE_WIDTH_LATERAL) - (2 * degrees * Math.PI * (WHEEL_BASE_WIDTH_LATERAL / 2))) / 180.0;
-        if(left){
-            frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            backLeft.setTargetPosition(ticks - (int)(arcLengthChange * DEGREES_TO_ARC_TICKS));
-        }else{
-            frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER );
-            backRight.setTargetPosition(ticks - (int)(arcLengthChange * DEGREES_TO_ARC_TICKS));
-        }
+        double innerPower = outerPower * (radius / (radius + WHEEL_BASE_WIDTH_LATERAL));
 
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
         Debug.log("target fl " + frontLeft.getTargetPosition());
         Debug.log("target fr " + frontRight.getTargetPosition());
         Debug.log("target bl" + backLeft.getTargetPosition());
         Debug.log("target fl " + backRight.getTargetPosition());
-        if (left) {
+        if (counterClockwise) {
             if (degrees > 0) {
-                frontLeft.setPower(0);
-                frontRight.setPower(power);
-                backRight.setPower(power);
-                backLeft.setPower(power / 3);
+                frontLeft.setPower(innerPower);
+                frontRight.setPower(outerPower);
+                backRight.setPower(outerPower);
+                backLeft.setPower(innerPower);
             } else {
-                frontLeft.setPower(0);
-                frontRight.setPower(-power);
-                backRight.setPower(-power);
-                backLeft.setPower(-power / 3);
+                frontLeft.setPower(innerPower);
+                frontRight.setPower(outerPower);
+                backRight.setPower(outerPower);
+                backLeft.setPower(innerPower);
             }
         } else {
             if (degrees > 0) {
-                frontLeft.setPower(power);
-                frontRight.setPower(0);
-                backRight.setPower(power / 2.0);
-                backLeft.setPower(power);
+                frontLeft.setPower(outerPower);
+                frontRight.setPower(innerPower);
+                backRight.setPower(innerPower);
+                backLeft.setPower(outerPower);
             } else {
-                frontLeft.setPower(-power);
-                frontRight.setPower(0);
-                backRight.setPower(-power / 2.0);
-                backLeft.setPower(-power);
+                frontLeft.setPower(-outerPower);
+                frontRight.setPower(innerPower);
+                backRight.setPower(-innerPower);
+                backLeft.setPower(-outerPower);
             }
         }
+
+
+
         while (!nearTargetArc()){
             Debug.log("current fl " + frontLeft.getCurrentPosition());
             Debug.log("current fr " + frontRight.getCurrentPosition());

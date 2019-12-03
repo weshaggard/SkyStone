@@ -78,7 +78,8 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem.vertical(24, VERTICAL_SPEED);
         arm.grabFoundation(true);
         reposistionArm();
-        driveSystem.frontArc(false, TURN_SPEED, -90);
+        driveSystem.frontArc(false, TURN_SPEED, -90, 12);
+        //arbetrary value
         arm.grabFoundation(false);
     }
 
