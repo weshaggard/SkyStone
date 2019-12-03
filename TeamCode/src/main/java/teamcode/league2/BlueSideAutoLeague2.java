@@ -143,10 +143,11 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
 
     private void foundationAndPark() {
         reposistionArm();
-        driveSystem.frontArc(true, TURN_SPEED, -90);
-        driveSystem.lateral(24, LATERAL_SPEED);
-        driveSystem.vertical(-18, VERTICAL_SPEED);
-        driveSystem.lateral(24, LATERAL_SPEED);
+        arm.grabFoundation(true);
+        driveSystem.vertical(20, VERTICAL_SPEED);
+        //measure this value
+        arm.grabFoundation(false);
+        driveSystem.vertical(-70, VERTICAL_SPEED);
     }
 
     @Override
