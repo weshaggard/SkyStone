@@ -3,7 +3,6 @@ package teamcode.league2;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -283,4 +282,5 @@ public class TeleOpLeague2 extends AbstractOpMode {
             }
         }
     }
+
 }
