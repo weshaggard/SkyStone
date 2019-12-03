@@ -91,7 +91,7 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
             }
         };
         timer.schedule(wristTask, 1000);
-        arm.lift(8, 1);
+
 
     }
 
