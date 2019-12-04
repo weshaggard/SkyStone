@@ -240,7 +240,7 @@ public class DriveSystemLeague2 {
 
     /**
      * @param counterClockwise  true for pivot point being front left
-     * @param power power of the motor between 0 and 1
+     * @param outerPower power of the motor on the outside of the arc between 0 and 1
      */
     public void frontArc(boolean counterClockwise, double outerPower, int degrees, double radius) {
         Debug.log("gets here" + degrees);
