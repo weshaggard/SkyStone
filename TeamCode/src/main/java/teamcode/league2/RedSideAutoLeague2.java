@@ -34,19 +34,19 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-//        moveToScanningPosition();
-//        Vector3D skystonePos = vision.getSkystonePosition();
-//        config = determineConfigRedSide(skystonePos);
-//        Debug.log(config);
+        setStartState();
+        moveToScanningPosition();
+        Vector3D skystonePos = vision.getSkystonePosition();
+        config = determineConfigRedSide(skystonePos);
+        Debug.log(config);
 
-//        suckSkystone(config.getSecondStone());
-//        moveToFoundation(config.getSecondStone());
-//        scoreStoneInFoundation();
-        arm.setClawPosition(false);
-        arm.setClawPosition(true);
-        arm.grabFoundation(true);
+        suckSkystone(config.getSecondStone());
+        moveToFoundation(config.getSecondStone());
+        scoreStoneInFoundation();
+    }
+
+    private void setStartState(){
         arm.grabFoundation(false);
-        while (opModeIsActive()) ;
     }
 
     private SkyStoneConfiguration determineConfigRedSide(Vector3D skystonePos) {
@@ -63,7 +63,6 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
 
 
     private void moveToScanningPosition() {
-        arm.grabFoundation(true);
         driveSystem.vertical(4.9, 0.4);
         driveSystem.lateral(16, 0.4);
     }

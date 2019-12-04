@@ -16,8 +16,6 @@ public class HardwareComponentNamesLeague2 {
     public static final String INTAKE_RIGHT = "RightIntake";
     public static final String INTAKE_SENSOR = "IntakeColorSensor";
 
-    public static final String TAPE_COLOR_SENSOR = "TapeColorSensor";
-
     public static final String GRABBER = "Grabber";
 
 }
