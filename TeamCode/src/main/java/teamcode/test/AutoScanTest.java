@@ -31,7 +31,6 @@ public class AutoScanTest extends AbstractOpMode {
     }
 
     private void scanRedSide() {
-        drive.lateral(16,0.4);
         sleep(500);
         Vector3D skystonePos = vision.getSkystonePosition();
         SkyStoneConfiguration config = determineConfigRedSide(skystonePos);

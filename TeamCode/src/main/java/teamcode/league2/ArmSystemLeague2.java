@@ -23,6 +23,8 @@ public class ArmSystemLeague2 {
 
     private static final double CLAW_OPEN_POSITION = 0.2;
     private static final double CLAW_CLOSE_POSITION = 1.0;
+    private static final double GRABBER_OPEN_POSITION = 0.5;
+    private static final double GRABBER_CLOSE_POSITION = 0;
     private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
@@ -146,9 +148,9 @@ public class ArmSystemLeague2 {
 
     public void grabFoundation(boolean open) {
         if (open) {
-            grabber.setPosition(1);
+            grabber.setPosition(GRABBER_OPEN_POSITION);
         } else {
-            grabber.setPosition(0);
+            grabber.setPosition(GRABBER_CLOSE_POSITION);
         }
     }
 
