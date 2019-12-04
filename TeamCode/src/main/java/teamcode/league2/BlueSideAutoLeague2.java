@@ -6,9 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.common.BoundingBox2D;
+import teamcode.common.Interval;
 import teamcode.common.SkyStoneConfiguration;
-import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 
 import static teamcode.league2.AutoUtilsLeague2.*;
@@ -16,8 +15,8 @@ import static teamcode.league2.AutoUtilsLeague2.*;
 @Autonomous(name = "Blue Side Auto")
 public class BlueSideAutoLeague2 extends AbstractOpMode {
 
-    private static final BoundingBox2D LEFT_STONE_BOUNDS = new BoundingBox2D(120, 0, 500, 0);
-    private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);
+    private static final Interval LEFT_STONE_BOUNDS = new Interval(-200, -50);
+    private static final Interval MIDDLE_STONE_BOUNDS = new Interval(50, 200);
 
     private ArmSystemLeague2 arm;
     private DriveSystemLeague2 driveSystem;
@@ -61,12 +60,11 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     }
 
     private SkyStoneConfiguration determineSkystoneConfig(Vector3D skystonePosition) {
-        double horizontalDistanceFromRobot = skystonePosition.getY();
-        Vector2D visionPos = new Vector2D(horizontalDistanceFromRobot, 0);
-        if (visionPos != null) {
-            if (LEFT_STONE_BOUNDS.contains(visionPos)) {
+        if (skystonePosition != null) {
+            double horizontalDistanceFromRobot = -skystonePosition.getY();
+            if (LEFT_STONE_BOUNDS.contains(horizontalDistanceFromRobot)) {
                 return SkyStoneConfiguration.THREE_SIX;
-            } else if (MIDDLE_STONE_BOUNDS.contains(visionPos)) {
+            } else if (MIDDLE_STONE_BOUNDS.contains(horizontalDistanceFromRobot)) {
                 return SkyStoneConfiguration.TWO_FIVE;
             }
         }
@@ -88,7 +86,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
             TimerTask armScoring = new TimerTask() {
                 @Override
                 public void run() {
-                   score();
+                    score();
                 }
             };
             armTimer.schedule(armScoring, 0);
@@ -102,9 +100,9 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     private void score() {
         arm.intake(0);
 
-        TimerTask wristTask = new TimerTask(){
+        TimerTask wristTask = new TimerTask() {
             @Override
-            public void run(){
+            public void run() {
                 arm.setWristPosition(true);
             }
         };
@@ -153,7 +151,6 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
 
     @Override
     protected void onStop() {
-
     }
 
 }
