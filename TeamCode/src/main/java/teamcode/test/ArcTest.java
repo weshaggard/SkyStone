@@ -1,4 +1,4 @@
-package teamcode.test.calibration;
+package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -22,6 +22,7 @@ public class ArcTest extends AbstractOpMode {
     protected void onStart() {
         Debug.log("here");
         driveSystem.frontArc(true, 0.6,90, 9);
+        while (opModeIsActive());
     }
 
     @Override

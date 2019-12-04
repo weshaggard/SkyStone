@@ -11,7 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import teamcode.common.Debug;
 import teamcode.common.Vector3D;
 
 public class VisionLeague2 {
@@ -46,15 +45,11 @@ public class VisionLeague2 {
 
     public Vector3D getSkystonePosition() {
         VuforiaTrackable skystone = trackables.get(0);
-        Debug.log("cp0");
         OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) skystone.getListener()).getPose();
-        Debug.log("cp1");
         if (pose == null) {
             return null;
         }
-        Debug.log("cp2");
         VectorF position = pose.getTranslation();
-        Debug.log("cp3");
         double x = position.get(0);
         double y = position.get(1);
         double z = position.get(2);

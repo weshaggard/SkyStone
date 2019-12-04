@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 import teamcode.common.Debug;
+import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 public class DriveSystemLeague2 {
@@ -237,75 +238,88 @@ public class DriveSystemLeague2 {
     }
 
 
-
     /**
      * @param counterClockwise  true for pivot point being front left
      * @param outerPower power of the motor on the outside of the arc between 0 and 1
      */
-    public void frontArc(boolean counterClockwise, double outerPower, int degrees, double radius) {
-        Debug.log("gets here" + degrees);
-        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        int ticks = degrees * (int) DEGREES_TO_ARC_TICKS;
-        double length1 = (degrees * Math.PI * radius) / 180.0;
-        double length2 =  (degrees * Math.PI * (radius + WHEEL_BASE_WIDTH_LATERAL)) / 180.0;
-        double arcLengthChange = length2 - length1;
-        if(counterClockwise){
-            frontLeft.setTargetPosition(ticks);
-            backLeft.setTargetPosition(ticks);
-            frontRight.setTargetPosition(ticks + (int)arcLengthChange);
-            backRight.setTargetPosition(ticks + (int)arcLengthChange);
-        }else{
-            frontRight.setTargetPosition(ticks);
-            backRight.setTargetPosition(ticks);
-            frontLeft.setTargetPosition(ticks + (int)arcLengthChange);
-            backLeft.setTargetPosition(ticks + (int)arcLengthChange);
-        }
+    public void frontArc(boolean counterClockwise, double power, int degrees, double radius) {
+        double w = Math.PI / 4; // 45 degrees / sec
+        double robotHalfLength = WHEEL_BASE_WIDTH_LATERAL / 2;
+        double p2 =  w * (radius + robotHalfLength);
+        double p1 = w * (radius - robotHalfLength);
 
-        double innerPower = outerPower * (radius / (radius + WHEEL_BASE_WIDTH_LATERAL));
+        Debug.log("w: " + w);
+        Debug.log("p1: " + p1);
+        Debug.log("p2: " + p2);
+        p1 = 0.5 * (p1 / p2);
+        p2 = 0.5;
 
-        setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Debug.log("target fl " + frontLeft.getTargetPosition());
-        Debug.log("target fr " + frontRight.getTargetPosition());
-        Debug.log("target bl" + backLeft.getTargetPosition());
-        Debug.log("target fl " + backRight.getTargetPosition());
-        if (counterClockwise) {
-            if (degrees > 0) {
-                frontLeft.setPower(innerPower);
-                frontRight.setPower(outerPower);
-                backRight.setPower(outerPower);
-                backLeft.setPower(innerPower);
-            } else {
-                frontLeft.setPower(innerPower);
-                frontRight.setPower(outerPower);
-                backRight.setPower(outerPower);
-                backLeft.setPower(innerPower);
-            }
-        } else {
-            if (degrees > 0) {
-                frontLeft.setPower(outerPower);
-                frontRight.setPower(innerPower);
-                backRight.setPower(innerPower);
-                backLeft.setPower(outerPower);
-            } else {
-                frontLeft.setPower(-outerPower);
-                frontRight.setPower(innerPower);
-                backRight.setPower(-innerPower);
-                backLeft.setPower(-outerPower);
-            }
-        }
+        Utils.sleep(6000);
+
+        setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setPower(p1);
+        backLeft.setPower(p1);
+        frontRight.setPower(p2);
+        backRight.setPower(p2);
+
+//        Debug.log("gets here" + degrees);
+//        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        int ticks = degrees * (int) DEGREES_TO_ARC_TICKS;
+//        double length1 = (degrees * Math.PI * radius) / 180.0;
+//        double length2 =  (degrees * Math.PI * (radius + WHEEL_BASE_WIDTH_LATERAL)) / 180.0;
+//        double arcLengthChange = length2 - length1;
+//        if(counterClockwise){
+//            frontLeft.setTargetPosition(ticks);
+//            backLeft.setTargetPosition(ticks);
+//            frontRight.setTargetPosition(ticks + (int)arcLengthChange);
+//            backRight.setTargetPosition(ticks + (int)arcLengthChange);
+//        }else{
+//            frontRight.setTargetPosition(ticks);
+//            backRight.setTargetPosition(ticks);
+//            frontLeft.setTargetPosition(ticks + (int)arcLengthChange);
+//            backLeft.setTargetPosition(ticks + (int)arcLengthChange);
+//        }
+//
+//        double innerPower = outerPower * (length1 / length2);
+//
+//        setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Debug.log("target fl " + frontLeft.getTargetPosition());
+//        Debug.log("target fr " + frontRight.getTargetPosition());
+//        Debug.log("target bl" + backLeft.getTargetPosition());
+//        Debug.log("target fl " + backRight.getTargetPosition());
+//        if (counterClockwise) {
+//            if (degrees > 0) {
+//                frontLeft.setPower(innerPower);
+//                frontRight.setPower(outerPower);
+//                backRight.setPower(outerPower);
+//                backLeft.setPower(innerPower);
+//            } else {
+//                frontLeft.setPower(innerPower);
+//                frontRight.setPower(outerPower);
+//                backRight.setPower(outerPower);
+//                backLeft.setPower(innerPower);
+//            }
+//        } else {
+//            if (degrees > 0) {
+//                frontLeft.setPower(outerPower);
+//                frontRight.setPower(innerPower);
+//                backRight.setPower(innerPower);
+//                backLeft.setPower(outerPower);
+//            } else {
+//                frontLeft.setPower(-outerPower);
+//                frontRight.setPower(innerPower);
+//                backRight.setPower(-innerPower);
+//                backLeft.setPower(-outerPower);
+//            }
+//        }
 
 
 
-        while (!nearTargetArc()){
-            Debug.log("current fl " + frontLeft.getCurrentPosition());
-            Debug.log("current fr " + frontRight.getCurrentPosition());
-            Debug.log("current bl" + backLeft.getCurrentPosition());
-            Debug.log("Current fl " + backRight.getCurrentPosition());
-
-        }
-        brake();
+        Debug.log("P1: " + p1);
+        Debug.log("P2: " + p2);
     }
-    private boolean nearTargetArc(){
+
+    private boolean nearTargetArc() {
         for (DcMotor motor : motors) {
             int targetPosition = motor.getTargetPosition();
             int currentPosition = motor.getCurrentPosition();

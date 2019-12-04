@@ -3,7 +3,6 @@ package teamcode.league2;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -13,13 +12,13 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
 
-    private static final double MAX_LIFT_HEIGHT_INCHES = 14;
-    private static final double LIFT_SCORE_STEP_INCHES = 5.25;
+    private static final double MAX_LIFT_HEIGHT_INCHES = 17;
+    private static final double LIFT_SCORE_STEP_INCHES = 5.0;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
-    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 10.5;
+    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12.0;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
-    private static final long OPEN_CLAW_DELAY = 2500;
+    private static final long OPEN_CLAW_DELAY = 1000;
 
     private static final double TURN_SPEED_MODIFIER = 0.45;
     private static final double VERTICAL_SPEED_MODIFIER = 0.5;
@@ -62,7 +61,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         // reset the current skystone score level height
         scoreLevel = 1;
 
-        // OPEN the claw
+        // Open the claw
         openClaw(false);
 
         // Retract arm
@@ -70,6 +69,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
         arm.resetLift();
 
+        arm.grabFoundation(false);
         // Turn off the intake
         intakeOff();
 
@@ -149,7 +149,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 double vertical = gamepad1.right_stick_y;
                 double lateral = gamepad1.right_stick_x;
                 double turn = gamepad1.left_stick_x;
-                if (!gamepad1.right_bumper) {
+                if (gamepad1.left_trigger == 0) {
                     vertical *= VERTICAL_SPEED_MODIFIER;
                     lateral *= LATERAL_SPEED_MODIFIER;
                     turn *= TURN_SPEED_MODIFIER;
@@ -190,7 +190,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     scoreLevel = 1;
                     Debug.log("Reset height");
                 }
-                if (gamepad1.y) {
+                if (gamepad1.right_bumper) {
                     if (!yDown) {
                         scorePosition();
                     }
@@ -214,7 +214,11 @@ public class TeleOpLeague2 extends AbstractOpMode {
             }
             double newHeight = scoreLevel * LIFT_SCORE_STEP_INCHES;
             newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES); // janky solution to be removed later
+            if (scoreLevel == 1) {
+                newHeight = 7.2;
+            }
             Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
+
             if (newHeight < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
                 arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
                 extendWrist();
@@ -256,16 +260,16 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (gamepad1.left_bumper || stoneBoxState == StoneBoxState.FULL) {
+                if (gamepad1.y || stoneBoxState == StoneBoxState.FULL) {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
                     intakeOff();
                 } else if (gamepad1.right_trigger > 0) {
                     // Turn on the intake
                     intake();
-                } else if (gamepad1.left_trigger > 0) {
+                } else if (gamepad1.left_bumper) {
                     // Turn on the outtake
-                    outtake(gamepad1.left_trigger);
+                    outtake(1);
                 }
             }
         }
@@ -283,4 +287,5 @@ public class TeleOpLeague2 extends AbstractOpMode {
             }
         }
     }
+
 }

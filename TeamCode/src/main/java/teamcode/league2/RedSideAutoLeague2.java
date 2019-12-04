@@ -8,15 +8,15 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.BoundingBox2D;
 import teamcode.common.Debug;
+import teamcode.common.Interval;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 
 @Autonomous(name = "Red Side Auto")
 public class RedSideAutoLeague2 extends AbstractOpMode {
-
-    private static final BoundingBox2D MIDDLE_STONE_BOUNDS = new BoundingBox2D(-10, 0, 110, 0);
-    private static final BoundingBox2D RIGHT_STONE_BOUNDS = new BoundingBox2D(120, 0, 500, 0);
+    private static final Interval MID_RED = new Interval(-200, -50);
+    private static final Interval RIGHT_RED = new Interval(50, 200);
 
     private ArmSystemLeague2 arm;
     private DriveSystemLeague2 driveSystem;
@@ -34,53 +34,63 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        moveToScanningPosition();
-        Vector3D skystonePos = vision.getSkystonePosition();
-        config = determineSkystoneConfig(skystonePos);
-        Debug.log(config);
+//        moveToScanningPosition();
+//        Vector3D skystonePos = vision.getSkystonePosition();
+//        config = determineConfigRedSide(skystonePos);
+//        Debug.log(config);
 
-        suckSkystone(config.getSecondStone());
-        moveToFoundation(config.getSecondStone());
-        scoreStoneInFoundation();
+//        suckSkystone(config.getSecondStone());
+//        moveToFoundation(config.getSecondStone());
+//        scoreStoneInFoundation();
+        arm.setClawPosition(false);
+        arm.setClawPosition(true);
+        arm.grabFoundation(true);
+        arm.grabFoundation(false);
+        while (opModeIsActive()) ;
     }
 
-    private SkyStoneConfiguration determineSkystoneConfig(Vector3D skystonePosition) {
-        if (skystonePosition != null) {
-            double horizontalDistanceFromRobot = skystonePosition.getY();
-            Vector2D visionPos = new Vector2D(horizontalDistanceFromRobot, 0);
-            if (MIDDLE_STONE_BOUNDS.contains(visionPos)) {
+    private SkyStoneConfiguration determineConfigRedSide(Vector3D skystonePos) {
+        if (skystonePos != null) {
+            double horizontalDistanceFromRobot = -skystonePos.getY();
+            if (MID_RED.contains(horizontalDistanceFromRobot)) {
                 return SkyStoneConfiguration.TWO_FIVE;
-            } else if (RIGHT_STONE_BOUNDS.contains(visionPos)) {
-                return SkyStoneConfiguration.ONE_FOUR;
+            } else if (RIGHT_RED.contains(horizontalDistanceFromRobot)) {
+                return SkyStoneConfiguration.THREE_SIX;
             }
         }
         return SkyStoneConfiguration.ONE_FOUR;
     }
 
+
     private void moveToScanningPosition() {
         arm.grabFoundation(true);
-        driveSystem.lateral(12, 0.6);
+        driveSystem.vertical(4.9, 0.4);
+        driveSystem.lateral(16, 0.4);
     }
 
     private void suckSkystone(int skystoneNum) {
         driveSystem.turn(-90, 0.6);
         arm.intake(1.0);
-        driveSystem.lateral(42 - skystoneNum * 8, 0.6);
-        driveSystem.vertical(-20, 0.6);
+        driveSystem.lateral(37.1 - skystoneNum * 8, 0.6);
+        driveSystem.vertical(-16, 0.6);
         driveSystem.vertical(-8, 0.2);
         arm.intake(0);
+        arm.setClawPosition(false);
+        sleep(1000);
         driveSystem.vertical(24, 0.6);
-        arm.setClawPosition(true);
         driveSystem.turn(-90, 0.6);
     }
 
+
     private void moveToFoundation(int skystoneNum) {
         arm.grabFoundation(false);
-        driveSystem.vertical(123 - skystoneNum * 8, 0.6);
+        driveSystem.vertical(135 - skystoneNum * 8, 0.6);
         driveSystem.turn(-90, 0.6);
         driveSystem.vertical(20, 0.6);
-        arm.grabFoundation(true);
-        driveSystem.frontArc(true, 0.6, -90,6);
+        arm.grabFoundation(false);
+        driveSystem.turn(180, 0.4);
+        scoreStoneInFoundation();
+        driveSystem.vertical(12, 0.6);
         //radius is arbetrary, need to fix
     }
 
@@ -88,16 +98,40 @@ public class RedSideAutoLeague2 extends AbstractOpMode {
         TimerTask wristTask = new TimerTask() {
             @Override
             public void run() {
+                score();
+            }
+        };
+        timer.schedule(wristTask, 0);
+    }
+
+    private void score() {
+        arm.intake(0);
+
+        TimerTask wristTask = new TimerTask() {
+            @Override
+            public void run() {
                 arm.setWristPosition(true);
             }
         };
-        timer.schedule(wristTask, 1000);
-
-
+        timer.schedule(wristTask, 100);
+        arm.setLiftHeight(12, 1);
+        arm.setLiftHeight(-4, -1);
+        arm.setClawPosition(true);
     }
+
+    private void scanRedSide() {
+        sleep(500);
+        Vector3D skystonePos = vision.getSkystonePosition();
+        SkyStoneConfiguration config = determineConfigRedSide(skystonePos);
+        Debug.log(config);
+        while (opModeIsActive()) ;
+    }
+
 
     @Override
-    protected void onStop() {
+    public void onStop() {
+
     }
+
 
 }

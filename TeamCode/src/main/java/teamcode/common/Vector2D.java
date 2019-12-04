@@ -86,12 +86,7 @@ public final class Vector2D implements Cloneable {
 
     @Override
     public Vector2D clone() {
-        Vector2D clone = null;
-        try {
-            clone = (Vector2D) super.clone();
-        } catch (CloneNotSupportedException e) {
-        }
-        return clone;
+        return new Vector2D(x, y);
     }
 
 }
