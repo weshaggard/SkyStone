@@ -1,4 +1,4 @@
-package teamcode.league2;
+package teamcode.test;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -6,15 +6,22 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
+import teamcode.common.Debug;
+import teamcode.common.Utils;
 import teamcode.common.Vector2D;
+import teamcode.league2.HardwareComponentNamesLeague2;
 
-public class DriveSystemLeague2 {
+public class DriveSystemArcTest {
 
     // correct ticks = current ticks * correct distance / current distance
     private static final double INCHES_TO_TICKS_VERTICAL = 45.3617021277;
     private static final double INCHES_TO_TICKS_LATERAL = -49.6078431373;
     private static final double INCHES_TO_TICKS_DIAGONAL = -64.29;
     private static final double DEGREES_TO_TICKS = 9.08617635929;
+
+    private static final double WHEEL_BASE_WIDTH_LATERAL = 12.5;
+    private static final double DEGREES_TO_ARC_TICKS = 22.22;
+
     /**
      * Maximum number of ticks a motor's current position must be away from it's target for it to
      * be considered near its target.
@@ -36,7 +43,7 @@ public class DriveSystemLeague2 {
     private final DcMotor frontLeft, frontRight, backLeft, backRight;
     private final DcMotor[] motors;
 
-    public DriveSystemLeague2(HardwareMap hardwareMap) {
+    public DriveSystemArcTest(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.FRONT_LEFT_DRIVE);
         frontRight = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.FRONT_RIGHT_DRIVE);
         backLeft = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.BACK_LEFT_DRIVE);
@@ -44,7 +51,6 @@ public class DriveSystemLeague2 {
         motors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
         correctDirections();
         setPID();
-        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     private void correctDirections() {
@@ -67,6 +73,7 @@ public class DriveSystemLeague2 {
     public DcMotor[] getMotors() {
         return motors;
     }
+
 
     public void continuous(Vector2D velocity, double turnSpeed) {
         setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -91,23 +98,31 @@ public class DriveSystemLeague2 {
     }
 
     public void vertical(double inches, double speed) {
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_VERTICAL);
-        setTargetPosition(ticks, ticks, ticks, ticks);
+
+        for (DcMotor motor : motors) {
+            motor.setTargetPosition(ticks);
+        }
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         for (DcMotor motor : motors) {
             motor.setPower(speed);
         }
+
         while (!nearTarget()) ;
         brake();
     }
 
-    /**
-     * @param inches positive to drive to the right, negative to drive to the left
-     */
+    //positive is to the right and negative is to the left
     public void lateral(double inches, double speed) {
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
 
-        setTargetPosition(-ticks, ticks, ticks, -ticks);
+        frontLeft.setTargetPosition(-ticks);
+        frontRight.setTargetPosition(ticks);
+        backLeft.setTargetPosition(ticks);
+        backRight.setTargetPosition(-ticks);
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         for (DcMotor motor : motors) {
@@ -117,7 +132,6 @@ public class DriveSystemLeague2 {
         while (!nearTarget()) ;
         brake();
     }
-
 
     /**
      * Drives at an angle whose reference angle is 45 degrees and lies in the specified quadrant.
@@ -127,6 +141,7 @@ public class DriveSystemLeague2 {
      * @param speed    [0.0, 1.0]
      */
     public void diagonal(int quadrant, double inches, double speed) {
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (inches * INCHES_TO_TICKS_DIAGONAL);
         int[] targets = new int[4];
         double[] powers = new double[4];
@@ -168,7 +183,10 @@ public class DriveSystemLeague2 {
                 throw new IllegalArgumentException("quadrant must be 0, 1, 2, or 3");
         }
 
-        setTargetPosition(targets[0], targets[1], targets[2], targets[3]);
+        for (int i = 0; i < 4; i++) {
+            DcMotor motor = motors[i];
+            motor.setTargetPosition(targets[i]);
+        }
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         for (int i = 0; i < 4; i++) {
@@ -186,8 +204,12 @@ public class DriveSystemLeague2 {
      */
     //positive is clockwise and negative is counterclockwise
     public void turn(double degrees, double speed) {
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         int ticks = (int) (degrees * DEGREES_TO_TICKS);
-        setTargetPosition(ticks, -ticks, ticks, -ticks);
+        frontLeft.setTargetPosition(ticks);
+        frontRight.setTargetPosition(-ticks);
+        backLeft.setTargetPosition(ticks);
+        backRight.setTargetPosition(-ticks);
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         for (DcMotor motor : motors) {
@@ -195,20 +217,14 @@ public class DriveSystemLeague2 {
         }
 
         while (!nearTarget()) ;
-        brake();
+        //brake();
+        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void brake() {
         for (DcMotor motor : motors) {
             motor.setPower(0.0);
         }
-    }
-
-    private void setTargetPosition(int frontLeftPos, int frontRightPos, int backLeftPos, int backRightPos) {
-        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + frontLeftPos);
-        frontRight.setTargetPosition(frontRight.getCurrentPosition() + frontRightPos);
-        backLeft.setTargetPosition(backLeft.getTargetPosition() + backLeftPos);
-        backRight.setTargetPosition(backRight.getTargetPosition() + backRightPos);
     }
 
     private boolean nearTarget() {
@@ -222,6 +238,98 @@ public class DriveSystemLeague2 {
         }
         return true;
     }
+
+
+    /**
+     * @param counterClockwise true for pivot point being front left
+     * @param power            power of the motor between 0 and 1
+     */
+    public void frontArc(boolean counterClockwise, double power, int degrees, double radius) {
+        double w = Math.PI / 4; // 45 degrees / sec
+        double robotHalfLength = WHEEL_BASE_WIDTH_LATERAL / 2;
+        double p2 = w * (radius + robotHalfLength);
+        double p1 = w * (radius - robotHalfLength);
+
+        Debug.log("w: " + w);
+        Debug.log("p1: " + p1);
+        Debug.log("p2: " + p2);
+        p1 = 0.5 * (p1 / p2);
+        p2 = 0.5;
+
+        Utils.sleep(6000);
+
+        setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setPower(p1);
+        backLeft.setPower(p1);
+        frontRight.setPower(p2);
+        backRight.setPower(p2);
+
+//        Debug.log("gets here" + degrees);
+//        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        int ticks = degrees * (int) DEGREES_TO_ARC_TICKS;
+//        double length1 = (degrees * Math.PI * radius) / 180.0;
+//        double length2 =  (degrees * Math.PI * (radius + WHEEL_BASE_WIDTH_LATERAL)) / 180.0;
+//        double arcLengthChange = length2 - length1;
+//        if(counterClockwise){
+//            frontLeft.setTargetPosition(ticks);
+//            backLeft.setTargetPosition(ticks);
+//            frontRight.setTargetPosition(ticks + (int)arcLengthChange);
+//            backRight.setTargetPosition(ticks + (int)arcLengthChange);
+//        }else{
+//            frontRight.setTargetPosition(ticks);
+//            backRight.setTargetPosition(ticks);
+//            frontLeft.setTargetPosition(ticks + (int)arcLengthChange);
+//            backLeft.setTargetPosition(ticks + (int)arcLengthChange);
+//        }
+//
+//        double innerPower = outerPower * (length1 / length2);
+//
+//        setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Debug.log("target fl " + frontLeft.getTargetPosition());
+//        Debug.log("target fr " + frontRight.getTargetPosition());
+//        Debug.log("target bl" + backLeft.getTargetPosition());
+//        Debug.log("target fl " + backRight.getTargetPosition());
+//        if (counterClockwise) {
+//            if (degrees > 0) {
+//                frontLeft.setPower(innerPower);
+//                frontRight.setPower(outerPower);
+//                backRight.setPower(outerPower);
+//                backLeft.setPower(innerPower);
+//            } else {
+//                frontLeft.setPower(innerPower);
+//                frontRight.setPower(outerPower);
+//                backRight.setPower(outerPower);
+//                backLeft.setPower(innerPower);
+//            }
+//        } else {
+//            if (degrees > 0) {
+//                frontLeft.setPower(outerPower);
+//                frontRight.setPower(innerPower);
+//                backRight.setPower(innerPower);
+//                backLeft.setPower(outerPower);
+//            } else {
+//                frontLeft.setPower(-outerPower);
+//                frontRight.setPower(innerPower);
+//                backRight.setPower(-innerPower);
+//                backLeft.setPower(-outerPower);
+//            }
+//        }
+        Debug.log("P1: " + p1);
+        Debug.log("P2: " + p2);
+    }
+
+    private boolean nearTargetArc() {
+        for (DcMotor motor : motors) {
+            int targetPosition = motor.getTargetPosition();
+            int currentPosition = motor.getCurrentPosition();
+            double ticksFromTarget = Math.abs(targetPosition - currentPosition);
+            if (ticksFromTarget >= TICK_ERROR_TOLERANCE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     private void setRunMode(DcMotor.RunMode mode) {
         for (DcMotor motor : motors) {

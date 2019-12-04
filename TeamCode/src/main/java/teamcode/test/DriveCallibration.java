@@ -1,6 +1,7 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.TimerTask;
 
@@ -20,24 +21,33 @@ public class DriveCallibration extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        returnTicks();
-        //driveSystem.vertical(-100, 0.6);
-        driveSystem.lateral(100, 0.6);
+        debug();
+        driveSystem.vertical(48, 0.4);
+        driveSystem.vertical(-48, 0.4);
+        driveSystem.lateral(24, 0.4);
+        driveSystem.lateral(-24, 0.4);
+        driveSystem.turn(360, 0.4);
     }
 
-    private void returnTicks() {
-        TimerTask returnMotorTicks = new TimerTask() {
+    private void debug() {
+        TimerTask debug = new TimerTask() {
             @Override
             public void run() {
-                while(opModeIsActive()) {
-                    Debug.log("FrontLeft: " + driveSystem.getMotors()[0].getTargetPosition() + ", " + driveSystem.getMotors()[0].getCurrentPosition());
-                    Debug.log("FrontRight: " + driveSystem.getMotors()[1].getTargetPosition() + ", " + driveSystem.getMotors()[1].getCurrentPosition());
-                    Debug.log("BackLeft: " + driveSystem.getMotors()[2].getTargetPosition() + ", " + driveSystem.getMotors()[2].getCurrentPosition());
-                    Debug.log("BackRight: " + driveSystem.getMotors()[3].getTargetPosition() + ", " + driveSystem.getMotors()[3].getCurrentPosition());
+                while (opModeIsActive()) {
+                    DcMotor[] motors = driveSystem.getMotors();
+                    DcMotor frontLeft = motors[0];
+                    DcMotor frontRight = motors[1];
+                    DcMotor backLeft = motors[2];
+                    DcMotor backRight = motors[3];
+
+                    Debug.log("front left: " + frontLeft.getCurrentPosition() + " / " + frontLeft.getTargetPosition());
+                    Debug.log("front right: " + frontRight.getCurrentPosition() + " / " + frontRight.getTargetPosition());
+                    Debug.log("back left: " + backLeft.getCurrentPosition() + " / " + backLeft.getTargetPosition());
+                    Debug.log("back right: " + backRight.getCurrentPosition() + " / " + backRight.getTargetPosition());
                 }
             }
         };
-        getNewTimer().schedule(returnMotorTicks, 0);
+        getNewTimer().schedule(debug, 0);
     }
 
     @Override
