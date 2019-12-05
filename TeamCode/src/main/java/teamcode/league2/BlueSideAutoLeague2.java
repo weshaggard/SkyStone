@@ -49,7 +49,9 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
 
         Vector3D skystonePos = vision.getSkystonePosition();
         config = determineSkystoneConfig(skystonePos);
-
+        if(config == SkyStoneConfiguration.THREE_SIX){
+            driveSystem.vertical(-8, VERTICAL_SPEED);
+        }
         moveToStone(config.getSecondStone());
         suckStone(config.getSecondStone());
         repositionFoundation();
@@ -76,7 +78,7 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
         driveSystem.vertical(24, VERTICAL_SPEED);
         arm.grabFoundation(true);
         reposistionArm();
-        driveSystem.frontArc(false, TURN_SPEED, -90, 12);
+       // driveSystem.frontArc(false, TURN_SPEED, -90, 12);
         //arbetrary value
         arm.grabFoundation(false);
     }
@@ -113,11 +115,12 @@ public class BlueSideAutoLeague2 extends AbstractOpMode {
     }
 
     private void moveToStone(int stoneNum) {
-        driveSystem.turn(-90, TURN_SPEED);
-        driveSystem.vertical(-12, VERTICAL_SPEED);
+        //driveSystem.turn(-90, TURN_SPEED);
+        driveSystem.lateral(-12, LATERAL_SPEED);
         //driveSystem.adjustGrabberPos(false);
-        driveSystem.vertical(-15, VERTICAL_SPEED);
-        driveSystem.lateral(-3 - (48 - 8 * stoneNum), LATERAL_SPEED);
+        driveSystem.lateral(-15, LATERAL_SPEED);
+        driveSystem.vertical(56 - 8 * stoneNum , VERTICAL_SPEED);
+
     }
 
     private void moveToScanningPos() {

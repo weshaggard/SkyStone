@@ -17,12 +17,11 @@ public class AutoUtilsLeague2 {
     public static final double ARM_CLEARANCE_HEIGHT = 12;
     public static final double SCORE_HEIGHT = 5;
 
-    public static void armScoreSequence(ArmSystemLeague2 arm) {
+    public static void armScorePosition(ArmSystemLeague2 arm) {
         arm.setLiftHeight(ARM_CLEARANCE_HEIGHT, 1);
         arm.setWristPosition(true);
         Utils.sleep(1000);
         arm.setLiftHeight(SCORE_HEIGHT, 1);
-        arm.setClawPosition(true);
     }
 
     public static void armRetractSequence(ArmSystemLeague2 arm) {

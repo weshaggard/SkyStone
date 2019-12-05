@@ -3,6 +3,7 @@ package teamcode.league2;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -20,13 +21,14 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     private DriveSystemLeague2 drive;
     private ArmSystemLeague2 arm;
     private VisionLeague2 vision;
-    private Timer intakeTimer;
+    private Timer timer;
 
     @Override
     protected void onInitialize() {
         drive = new DriveSystemLeague2(hardwareMap);
         arm = new ArmSystemLeague2(this);
         vision = new VisionLeague2(hardwareMap);
+        timer = new Timer();
     }
 
     @Override
@@ -96,7 +98,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
             arm.intake(0.4, 0.6);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
             drive.vertical(-10, 1);
-            drive.lateral(16, 0.6);
+            drive.lateral(18, 0.6);
         }
     }
 
@@ -110,9 +112,15 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         drive.vertical(distance, 1);
         // get ready to pull foundation
         arm.grabFoundation(true);
+        TimerTask scorePositionTask = new TimerTask(){
+            @Override
+            public void run(){
+                AutoUtilsLeague2.armScorePosition(arm);
+            }
+        };
+        timer.schedule(scorePositionTask,0);
         drive.turn(-90, 0.6);
-        drive.vertical(4, 0.5);
-        AutoUtilsLeague2.armScoreSequence(arm);
+        drive.vertical(8, 0.5);
         sleep(1000);
         AutoUtilsLeague2.armRetractSequence(arm);
     }
@@ -140,7 +148,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     private void scoreSecondStone(SkyStoneConfiguration config) {
         int stone = config.getFirstStone();
         drive.vertical((6 - stone) * Utils.SKYSTONE_LENGTH_INCHES + 48, 1);
-        AutoUtilsLeague2.armScoreSequence(arm);
+        AutoUtilsLeague2.armScorePosition(arm);
         AutoUtilsLeague2.armRetractSequence(arm);
     }
 
