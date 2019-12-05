@@ -15,7 +15,7 @@ public class AutoUtilsLeague2 {
     public static final double INTAKE_RIGHT_SPEED = 0.6;
     public static final double INTAKE_DURATION = 2.0;
     public static final double ARM_CLEARANCE_HEIGHT = 12;
-    public static final double SCORE_HEIGHT = 5;
+    public static final double SCORE_HEIGHT = 6;
 
     public static void armScorePosition(ArmSystemLeague2 arm) {
         arm.setLiftHeight(ARM_CLEARANCE_HEIGHT, 1);
@@ -29,7 +29,6 @@ public class AutoUtilsLeague2 {
         arm.setWristPosition(false);
         Utils.sleep(1000);
         arm.resetLift();
-        arm.setClawPosition(true);
     }
 
     public static void stopIntakeWhenFull(final ArmSystemLeague2 arm) {
