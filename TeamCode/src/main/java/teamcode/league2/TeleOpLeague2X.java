@@ -9,8 +9,8 @@ import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@TeleOp(name = "Tele Op")
-public class TeleOpLeague2 extends AbstractOpMode {
+@TeleOp(name = "Tele Op X")
+public class TeleOpLeague2X extends AbstractOpMode {
 
     private static final double MAX_LIFT_HEIGHT_INCHES = 17;
     private static final double LIFT_SCORE_STEP_INCHES = 5.0;
@@ -50,7 +50,6 @@ public class TeleOpLeague2 extends AbstractOpMode {
         new IntakeControl().start();
         new ScoreControl().start();
         new DriveControl().start();
-
         while (opModeIsActive()) ;
     }
 
@@ -154,10 +153,6 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     lateral *= LATERAL_SPEED_MODIFIER;
                     turn *= TURN_SPEED_MODIFIER;
                 }
-                if (clawState == ClawState.CLOSED) {
-                    vertical *= -1;
-                    lateral *= -1;
-                }
                 Vector2D velocity = new Vector2D(lateral, vertical);
                 driveSystem.continuous(velocity, turn);
             }
@@ -199,13 +194,19 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     yDown = false;
                 }
                 if (gamepad1.x) {
-                    if(arm.intakeIsFull()){
+                    if (arm.intakeIsFull()) {
                         arm.setClawPosition(true);
+                        Utils.sleep(1000);
+                        Debug.log("Before vertical");
                         driveSystem.vertical(-10, 0.3);
+                        Debug.log("After vertical");
                         homePosition();
                     } else {
                         toggleClaw();
                     }
+                }
+                else if (gamepad1.a) {
+                    homePosition();
                 } else if (stoneBoxState == StoneBoxState.FULL && clawState == ClawState.OPEN) {
                     closeClaw(false);
                 }
@@ -263,7 +264,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private class IntakeControl extends Thread {
         @Override
         public void run() {
+
             while (opModeIsActive()) {
+                Debug.log(arm.intakeIsFull());
                 if (gamepad1.y || stoneBoxState == StoneBoxState.FULL) {
                     // Turn off the intake when left bumper is pressed
                     // or stone box is full
