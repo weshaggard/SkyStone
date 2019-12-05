@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import teamcode.common.AbstractOpMode;
@@ -15,14 +16,16 @@ import static java.lang.Math.*;
 
 public class SecondDraftOdometryWheels {
     private static final double DISTANCE_TOLERANCE = 10;
-    private static final double Y_POINT_TOLERANCE = 0.003;
-    private static final double X_POINT_TOLERANCE = 0.003;
+    private static final double Y_POINT_TOLERANCE_INTERSECT = 0.003;
+    private static final double X_POINT_TOLERANCE_INTERSECT = 0.003;
     private final DcMotor xWheelLeft;
     private final DcMotor xWheelRight;
     private final DcMotor yWheel;
     private final double apex;
     private final double INCHES_FROM_CENTER_X;
     private Vector2D current;
+    private final double DISTANCE_TOLERANCE_X = 5;
+    private final double DISTANCE_TOLERANCE_Y = 5;
 
     private int encoderValueX;
     private int previousEncoderValueX;
@@ -30,10 +33,12 @@ public class SecondDraftOdometryWheels {
     private int encoderValueY;
     private int previousEncoderValueY;
 
-    private double globalXPositon;
-    private double globalYPosition;
+    private Point globalRobotPosition;
     private double globalDirection;
     //Inches
+
+    private Point perpendicularPointToRobot;
+    //for generating
     //Fields to be moved into the drive System once this is fully implemented
     double xPower;
     double yPower;
@@ -46,8 +51,7 @@ public class SecondDraftOdometryWheels {
         xWheelLeft = hardwareMap.get(DcMotor.class, "Odometry Left X Wheel");
         xWheelRight = hardwareMap.get(DcMotor.class, "Odometry Right X Wheel");
         yWheel = hardwareMap.get(DcMotor.class, "Odometry Y Wheel");
-        globalXPositon = 0;
-        globalYPosition = 0;
+        globalRobotPosition = new Point(0, 0);
         globalDirection = 0;
         apex = opMode.getRuntime();
         INCHES_FROM_CENTER_X = inches;
@@ -62,6 +66,65 @@ public class SecondDraftOdometryWheels {
         previousEncoderValueY = encoderValueY;
     }
 
+    public CurvePoint getFollowPointPath(ArrayList<CurvePoint> path, Point robotLocation, double followRadius){
+        CurvePoint followMe = new CurvePoint(path.get(0));
+        for(int i = 0; i < path.size() - 1; i++){
+            CurvePoint startLine = path.get(i);
+            CurvePoint endLine = path.get(i + 1);
+            ArrayList<Point> intersections = lineCircleIntersection(robotLocation, followRadius,startLine.toPoint(), endLine.toPoint());
+            double closestAngle = Double.MAX_VALUE;
+            for(Point currentIntersection: intersections) {
+                double angle = atan2(currentIntersection.y - globalRobotPosition.y, currentIntersection.x - globalRobotPosition.x) * 180 / PI;
+                double deltaAngle = abs(angleWrapper(angle - globalDirection));
+                if(deltaAngle < closestAngle){
+                    closestAngle = deltaAngle;
+                    followMe.setPoint(currentIntersection);
+                }
+
+            }
+        }
+        return followMe;
+    }
+    //TODO implement a method to stop oscillation at the end of the path
+    //TODO using a list of path points, figure out where I am in the path using perpendicular lines. Timestamp 15:00 in the GF tutorial
+
+    public int getPositionInPath(ArrayList<CurvePoint> pathPoints){
+        for(int i = 0; i < pathPoints.size() - 1; i++){
+            CurvePoint current = pathPoints.get(i);
+            if(i + 1 < pathPoints.size()) {
+                CurvePoint next = pathPoints.get(i + 1);
+                Point nextPoint = next.toPoint();
+                Point currentPoint = current.toPoint();
+                double slope = currentPoint.slope(nextPoint);
+                double perpendicularSlope = 1.0 / slope;
+                Point perpendicularPoint = new Point(globalRobotPosition.x + 1, perpendicularSlope + globalRobotPosition.y);
+
+
+            }else{
+                if(robotIsNearPoint(current)) {
+                    //return current;
+                }else{
+                    //return globalRobotPosition;
+                }
+            }
+
+
+        }
+        return 0;
+    }
+
+    private boolean robotIsNearPoint(CurvePoint current) {
+        Point currentPoint = current.toPoint();
+        return abs(currentPoint.x - globalRobotPosition.x) < DISTANCE_TOLERANCE_X && abs(currentPoint.y - globalRobotPosition.y) < DISTANCE_TOLERANCE_Y;
+    }
+
+    //To be implemented into the new Drive System for league 3
+    public void followCurve(ArrayList<CurvePoint> allPoints, double followAngle){
+        CurvePoint followMe = getFollowPointPath(allPoints, globalRobotPosition, allPoints.get(0).followDistance);
+        goToPosition(followMe.x, followMe.y, followMe.moveSpeed, followAngle, followMe.turnSpeed );
+
+    }
+
     /**
      * moves to any point on the field with a defined coordinate plane
      * @param x The X coordinate to be moved to
@@ -70,8 +133,8 @@ public class SecondDraftOdometryWheels {
      * @param preferredAngle angle the robot should be moving at
      */
     public void goToPosition(double x, double y, double power, double preferredAngle, double turnPower){
-        double deltaX = x - globalXPositon;
-        double deltaY = y - globalYPosition;
+        double deltaX = x - globalRobotPosition.x;
+        double deltaY = y - globalRobotPosition.y;
         double distanceTravelled = pow(deltaX, 2) + pow(deltaY, 2);
         //change in robots position throughout this function
         double absoluteAngle = toDegrees(atan2(deltaY, deltaX));
@@ -91,10 +154,7 @@ public class SecondDraftOdometryWheels {
         if(distanceTravelled < DISTANCE_TOLERANCE){
             this.turnPower = 0;
         }
-        globalDirection += relativeAngle;
-        globalXPositon = x;
-        globalYPosition = y;
-        //updating robot position + orientation
+
     }
 
     /**
@@ -116,25 +176,50 @@ public class SecondDraftOdometryWheels {
 
     private ArrayList<Point> lineCircleIntersection(Point circleCenter, double radius, Point linePoint1, Point linePoint2){
         //(mx+b)^2 = r^2 + x^2
-        if(Math.abs(linePoint1.y - linePoint2.y) < Y_POINT_TOLERANCE){
-            linePoint1.y = linePoint2.y + Y_POINT_TOLERANCE;
+        if(Math.abs(linePoint1.y - linePoint2.y) < Y_POINT_TOLERANCE_INTERSECT){
+            linePoint1.y = linePoint2.y + Y_POINT_TOLERANCE_INTERSECT;
         }
-        if(Math.abs(linePoint1.x - linePoint2.x) < X_POINT_TOLERANCE){
-            linePoint1.x = linePoint2.x + X_POINT_TOLERANCE;
+        if(Math.abs(linePoint1.x - linePoint2.x) < X_POINT_TOLERANCE_INTERSECT){
+            linePoint1.x = linePoint2.x + X_POINT_TOLERANCE_INTERSECT;
         }
 
         double slope1 = linePoint2.slope(linePoint1);
 
         double x1 = linePoint1.x - circleCenter.x;
         double y1 = linePoint1.y - circleCenter.y;
-        double x2 = linePoint2.x - circleCenter.x;
-        double y2 = linePoint2.y - circleCenter.y;
-        //simplifies the math
+        //Defines everything in terms of the Circle center by offsetting it which is added back later, this simplifies the math
 
         double a =  1.0 + pow(slope1, 2);
         double b = (2 * slope1 * y1) - (2 * pow(slope1,2) * x1);
-        double c = (pow(slope1,2) * pow(x1, 2)) - (2 * slope1 * y1 * x1) + pow(y1,2) + ;
-        return null;
+        double c = (pow(slope1,2) * pow(x1, 2)) - (2 * slope1 * y1 * x1) + pow(y1,2) - pow(radius, 2);
+        ArrayList<Point> allPoints = new ArrayList();
+        try{
+            double xRoot1 = (-b + sqrt(pow(b,2) - (4 * a * c))) / (2 *a);
+            double xRoot2 = (-b - sqrt(pow(b,2) - (4 * a * c))) / (2 *a);
+
+            double yRoot1 = slope1 * (xRoot1 - x1) + y1;
+            double yRoot2 = slope1 * (xRoot2 - x1) + y1;
+            xRoot1 += circleCenter.x;
+            yRoot1 += circleCenter.y;
+            xRoot2 += circleCenter.x;
+            yRoot2 += circleCenter.y;
+
+            double minX = linePoint1.x < linePoint2.x ? linePoint1.x: linePoint2.x;
+            double maxX = linePoint1.x > linePoint2.x ? linePoint1.x: linePoint2.x;
+            if(xRoot1 > minX && xRoot1 < maxX){
+                allPoints.add(new Point(xRoot1, yRoot1));
+            }
+            if(xRoot2 > minX && xRoot2 < maxX){
+                allPoints.add(new Point(xRoot2, yRoot2));
+            }
+
+
+        }catch(ArithmeticException e){
+
+
+        }
+        return allPoints;
+
     }
 
 
