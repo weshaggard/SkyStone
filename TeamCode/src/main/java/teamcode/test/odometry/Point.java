@@ -8,6 +8,8 @@ public class Point {
         this.x = x;
         this.y = y;
     }
+    public Point(){
+    }
 
     /**
      * calculate the slope
@@ -16,6 +18,10 @@ public class Point {
      */
     public double slope(Point p2){
         return (y - p2.y) / (x - p2.x);
+    }
+
+    public boolean equals(Point other){
+        return this.y == other.y && this.x == other.x;
     }
 
 
