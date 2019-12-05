@@ -1,5 +1,6 @@
 package teamcode.common;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Utils {
@@ -15,6 +16,14 @@ public class Utils {
         errorTolerance = Math.abs(errorTolerance);
         Debug.log("pos = " + servo.getPosition() + ", target = " + position);
         return Math.abs(servo.getPosition() - position) <= errorTolerance;
+    }
+
+    public static boolean motorNearTarget(DcMotor motor, int errorTolerance) {
+        int current = motor.getCurrentPosition();
+        int target = motor.getTargetPosition();
+        int distance = Math.abs(target - current);
+        Debug.log("Distance = " + distance);
+        return distance <= errorTolerance;
     }
 
     public static void sleep(long milliseconds) {

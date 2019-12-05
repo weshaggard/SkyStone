@@ -29,7 +29,6 @@ public class AutoUtilsLeague2 {
         arm.setWristPosition(false);
         Utils.sleep(1000);
         arm.resetLift();
-        arm.setClawPosition(true);
     }
 
     public static void stopIntakeWhenFull(final ArmSystemLeague2 arm) {

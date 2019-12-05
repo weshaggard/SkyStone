@@ -29,6 +29,7 @@ public abstract class AbstractOpMode extends LinearOpMode {
         for (Timer timer : timers) {
             timer.cancel();
         }
+        Debug.clear();
     }
 
     protected abstract void onInitialize();
@@ -51,7 +52,7 @@ public abstract class AbstractOpMode extends LinearOpMode {
         return timer;
     }
 
-    public void cancelTimer(Timer timer){
+    public void cancelTimer(Timer timer) {
         timer.cancel();
         timers.remove(timer);
     }
