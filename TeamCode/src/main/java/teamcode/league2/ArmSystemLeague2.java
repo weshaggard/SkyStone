@@ -21,11 +21,12 @@ public class ArmSystemLeague2 {
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
     private static final double WRIST_TICK_DELTA = 0.08;
 
-    private static final double CLAW_OPEN_POSITION = 0.2;
+    private static final double CLAW_OPEN_POSITION = 0.0;
     private static final double CLAW_CLOSE_POSITION = 1.0;
+    private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
+
     private static final double GRABBER_OPEN_POSITION = 0.5;
     private static final double GRABBER_CLOSE_POSITION = 1;
-    private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
     private final Servo wrist, claw, grabber;

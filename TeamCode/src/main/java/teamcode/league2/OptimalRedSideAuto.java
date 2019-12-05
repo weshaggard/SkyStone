@@ -89,11 +89,12 @@ public class OptimalRedSideAuto extends AbstractOpMode {
             arm.intake(0.1, 0.75);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
             // come in diagonally if stone is at the end
-            drive.turn(60, 0.6);
+            drive.turn(30, 0.6);
             drive.vertical(-18, 0.4);
             arm.setClawPosition(false);
+            sleep(500);
             drive.vertical(21, 0.4);
-            drive.turn(-60, 0.6);
+            drive.turn(-30, 0.6);
         } else {
             drive.turn(180, 0.6);
             drive.vertical((stone - 6) * Utils.SKYSTONE_LENGTH_INCHES + 27, 1);
@@ -101,6 +102,8 @@ public class OptimalRedSideAuto extends AbstractOpMode {
             arm.intake(0.4, 0.6);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
             drive.vertical(-10, 1);
+            arm.setClawPosition(false);
+            sleep(500);
             drive.lateral(18, 0.6);
         }
     }
@@ -123,11 +126,12 @@ public class OptimalRedSideAuto extends AbstractOpMode {
             }
         };
         timer.schedule(scorePositionTask, 0);
-        drive.turn(-90, 0.6);
+        drive.turn(-90, 0.4);
         drive.vertical(12, 0.5);
-        arm.setClawPosition(true);
         arm.grabFoundation(false);
         sleep(1000);
+        arm.setClawPosition(true);
+        sleep(750);
         TimerTask retractArmTask = new TimerTask() {
             @Override
             public void run() {

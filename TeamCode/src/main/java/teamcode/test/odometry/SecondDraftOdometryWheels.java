@@ -133,7 +133,7 @@ public class SecondDraftOdometryWheels {
 
         double a =  1.0 + pow(slope1, 2);
         double b = (2 * slope1 * y1) - (2 * pow(slope1,2) * x1);
-        double c = (pow(slope1,2) * pow(x1, 2)) - (2 * slope1 * y1 * x1) + pow(y1,2) + ;
+        double c = (pow(slope1,2) * pow(x1, 2)) - (2 * slope1 * y1 * x1) + pow(y1,2);
         return null;
     }
 

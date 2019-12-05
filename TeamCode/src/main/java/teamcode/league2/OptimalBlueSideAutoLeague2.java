@@ -81,23 +81,26 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         int stone = config.getSecondStone();
         if (stone == 6) {
             // travel toward the tape to set up for intake
-            drive.vertical(24, 0.6);
-            drive.lateral(-6, 0.6);
-            arm.intake(0.1, 0.75);
+            drive.vertical(12, 0.6);
+            drive.lateral(8.5, 0.6);
+            arm.intake(0.75, 0.1);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
             // come in diagonally if stone is at the end
-            drive.turn(-60, 0.6);
+            drive.turn(-45, 0.4);
             drive.vertical(-18, 0.4);
             arm.setClawPosition(false);
+            sleep(500);
             drive.vertical(21, 0.4);
-            drive.turn(60, 0.6);
+            // turn extra to account for error
+            drive.turn(48, 0.6);
         } else {
-            // change = -16
             drive.vertical((stone - 6) * Utils.SKYSTONE_LENGTH_INCHES + 11, 1);
             drive.lateral(24, 0.6);
-            arm.intake(0.4, 0.6);
+            arm.intake(0.6, 0.4);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
             drive.vertical(-10, 1);
+            arm.setClawPosition(false);
+            sleep(500);
             drive.lateral(-18, 0.6);
         }
     }
@@ -107,9 +110,8 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         double distance = 60 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
         if (stone == 6) {
             // account for special case when stone is at end
-            distance -= 8;
+            distance -= 16;
         }
-        drive.vertical(distance, 1);
 
         // get ready to pull foundation
         arm.grabFoundation(true);
@@ -119,12 +121,14 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
                 AutoUtilsLeague2.armScorePosition(arm);
             }
         };
-        timer.schedule(scorePositionTask, 0);
-        drive.turn(90, 0.6);
-        drive.vertical(12, 0.5);
-        arm.setClawPosition(true);
+        timer.schedule(scorePositionTask, 1250);
+
+        drive.vertical(distance, 1);
+        drive.turn(90, 0.4);
+        drive.vertical(18, 0.5);
         arm.grabFoundation(false);
-        sleep(1000);
+        arm.setClawPosition(true);
+        sleep(750);
         TimerTask retractArmTask = new TimerTask() {
             @Override
             public void run() {
@@ -166,7 +170,7 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         int skystone = config.getFirstStone();
         drive.vertical(-(Utils.SKYSTONE_LENGTH_INCHES * (6 - skystone) + 24), 1);
         drive.lateral(-18, 1);
-        arm.intake(0.4, 0.6);
+        arm.intake(0.6, 0.4);
         AutoUtilsLeague2.stopIntakeWhenFull(arm);
         drive.vertical(-10, 1);
         drive.lateral(18, 1);
