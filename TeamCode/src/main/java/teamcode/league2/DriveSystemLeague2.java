@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
-import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
@@ -211,13 +210,6 @@ public class DriveSystemLeague2 {
         }
     }
 
-    private void setTargetPosition(int frontLeftPos, int frontRightPos, int backLeftPos, int backRightPos) {
-        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + frontLeftPos);
-        frontRight.setTargetPosition(frontRight.getCurrentPosition() + frontRightPos);
-        backLeft.setTargetPosition(backLeft.getTargetPosition() + backLeftPos);
-        backRight.setTargetPosition(backRight.getTargetPosition() + backRightPos);
-    }
-
     private boolean nearTarget() {
         for (DcMotor motor : motors) {
             if (!Utils.motorNearTarget(motor, TICK_ERROR_TOLERANCE)) {
@@ -235,6 +227,13 @@ public class DriveSystemLeague2 {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
         }
+    }
+
+    private void setTargetPosition(int frontLeftTicks, int frontRightTicks, int backLeftTicks, int backRightTicks) {
+        frontLeft.setTargetPosition(frontLeftTicks);
+        frontRight.setTargetPosition(frontRightTicks);
+        backLeft.setTargetPosition(backLeftTicks);
+        backRight.setTargetPosition(backRightTicks);
     }
 
 }

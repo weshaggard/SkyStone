@@ -9,19 +9,19 @@ import teamcode.league2.DriveSystemLeague2;
 @Autonomous(name = "Arc Test")
 public class ArcTest extends AbstractOpMode {
 
-    private DriveSystemLeague2 driveSystem;
+    private DriveSystemArcTest driveSystem;
     //private TTArmSystem arm;
 
     @Override
     protected void onInitialize() {
         //arm = new TTArmSystem(this);
-        driveSystem = new DriveSystemLeague2(hardwareMap);
+        driveSystem = new DriveSystemArcTest(hardwareMap);
     }
 
     @Override
     protected void onStart() {
         Debug.log("here");
-        // driveSystem.frontArc(true, 0.6,90, 9);
+        driveSystem.frontArc(true, 0.6,90, 9);
         while (opModeIsActive());
     }
 

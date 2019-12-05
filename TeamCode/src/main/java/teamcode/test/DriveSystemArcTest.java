@@ -256,13 +256,17 @@ public class DriveSystemArcTest {
         p1 = 0.5 * (p1 / p2);
         p2 = 0.5;
 
+        double arcLengthInner = Math.PI * degrees * radius / 180.0;
+        double arcLengthOuter = Math.PI * degrees * (radius + WHEEL_BASE_WIDTH_LATERAL) / 180.0;
+        int innerTicks = (int)(arcLengthInner * DEGREES_TO_ARC_TICKS);
+        int outerTicks = (int)(arcLengthOuter * DEGREES_TO_ARC_TICKS);
+        setTargetPosition(innerTicks, outerTicks, innerTicks, outerTicks);
         Utils.sleep(6000);
-
-        setRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setPower(p1);
         backLeft.setPower(p1);
         frontRight.setPower(p2);
         backRight.setPower(p2);
+
 
 //        Debug.log("gets here" + degrees);
 //        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -335,6 +339,12 @@ public class DriveSystemArcTest {
         for (DcMotor motor : motors) {
             motor.setMode(mode);
         }
+    }
+    private void setTargetPosition(int frontLeftTicks, int frontRightTicks, int backLeftTicks, int backRightTicks){
+        frontLeft.setTargetPosition(frontLeftTicks);
+        frontRight.setTargetPosition(frontRightTicks);
+        backLeft.setTargetPosition(backLeftTicks);
+        backRight.setTargetPosition(backRightTicks);
     }
 
 }
