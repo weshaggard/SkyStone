@@ -27,7 +27,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         drive = new DriveSystemLeague2(hardwareMap);
-        arm = new ArmSystemLeague2(this);
+        arm = new ArmSystemLeague2(hardwareMap);
         vision = new VisionLeague2(hardwareMap);
         timer = new Timer();
     }

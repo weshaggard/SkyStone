@@ -38,7 +38,7 @@ public class TeleOpLeague2X extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new DriveSystemLeague2(hardwareMap);
-        arm = new ArmSystemLeague2(this);
+        arm = new ArmSystemLeague2(hardwareMap);
         timer = getNewTimer();
     }
 
