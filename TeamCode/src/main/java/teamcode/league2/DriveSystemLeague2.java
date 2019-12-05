@@ -230,10 +230,10 @@ public class DriveSystemLeague2 {
     }
 
     private void setTargetPosition(int frontLeftTicks, int frontRightTicks, int backLeftTicks, int backRightTicks) {
-        frontLeft.setTargetPosition(frontLeftTicks);
-        frontRight.setTargetPosition(frontRightTicks);
-        backLeft.setTargetPosition(backLeftTicks);
-        backRight.setTargetPosition(backRightTicks);
+        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + frontLeftTicks);
+        frontRight.setTargetPosition(frontRight.getCurrentPosition() + frontRightTicks);
+        backLeft.setTargetPosition(backLeft.getCurrentPosition() + backLeftTicks);
+        backRight.setTargetPosition(backRight.getCurrentPosition() + backRightTicks);
     }
 
 }
