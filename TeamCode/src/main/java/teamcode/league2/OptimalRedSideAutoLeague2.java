@@ -14,7 +14,7 @@ import teamcode.common.Utils;
 import teamcode.common.Vector3D;
 
 @Autonomous(name = "Optimal Red Side Auto")
-public class OptimalRedSideAuto extends AbstractOpMode {
+public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
 
     private static final Interval MIDDLE_STONE_BOUNDS = new Interval(-200, -50);
     private static final Interval RIGHT_STONE_BOUNDS = new Interval(50, 200);
@@ -66,10 +66,11 @@ public class OptimalRedSideAuto extends AbstractOpMode {
 
     private SkyStoneConfiguration scan() {
         // allow some time for Vuforia to process image
-        sleep(1000);
+        sleep(2000);
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
+            Debug.log(horizontalPos);
             if (MIDDLE_STONE_BOUNDS.contains(horizontalPos)) {
                 return SkyStoneConfiguration.TWO_FIVE;
             } else if (RIGHT_STONE_BOUNDS.contains(horizontalPos)) {
@@ -118,7 +119,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         drive.vertical(distance, 1);
 
         // get ready to pull foundation
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         TimerTask scorePositionTask = new TimerTask() {
             @Override
             public void run() {
@@ -128,7 +129,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         timer.schedule(scorePositionTask, 0);
         drive.turn(-90, 0.4);
         drive.vertical(12, 0.5);
-        arm.grabFoundation(false);
+        arm.toggleFoundationGrabbers(false);
         sleep(1000);
         arm.setClawPosition(true);
         sleep(750);
@@ -144,7 +145,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
 
     private void pullfoundation() {
         // arcMotion();
-//        arm.grabFoundation(false);
+//        arm.toggleFoundationGrabbers(false);
 //        sleep(1000);
     }
 
@@ -191,7 +192,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         };
         timer.schedule(scorePositionTask, 0);
         arm.setClawPosition(true);
-        arm.grabFoundation(false);
+        arm.toggleFoundationGrabbers(false);
         sleep(1000);
         TimerTask retractArmTask = new TimerTask() {
             @Override
@@ -205,9 +206,9 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     }
 
     private void pushFoundation() {
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         drive.vertical(48, 1);
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         sleep(500);
     }
 

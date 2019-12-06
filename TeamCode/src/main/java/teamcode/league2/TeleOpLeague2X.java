@@ -68,7 +68,7 @@ public class TeleOpLeague2X extends AbstractOpMode {
 
         arm.resetLift();
 
-        arm.grabFoundation(false);
+        arm.toggleFoundationGrabbers(false);
         // Turn off the intake
         intakeOff();
 
