@@ -16,7 +16,7 @@ public class ArmCallibration extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        arm = new ArmSystemLeague2(this);
+        arm = new ArmSystemLeague2(hardwareMap);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package teamcode.league2;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,23 +26,20 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         drive = new DriveSystemLeague2(hardwareMap);
-        arm = new ArmSystemLeague2(this);
+        arm = new ArmSystemLeague2(hardwareMap);
         vision = new VisionLeague2(hardwareMap);
         timer = new Timer();
     }
 
     @Override
     protected void onStart() {
-        Debug.log(1);
         setStartState();
-        Debug.log(2);
         toScanningPos();
-        Debug.log(3);
         SkyStoneConfiguration config = scan();
         Debug.log(config);
         intakeFirstStone(config);
         scoreFirstStoneAndGrabFoundation(config);
-        pullfoundation();
+        // pullfoundation();
 
         while (opModeIsActive()) ;
 //        intakeSecondStone(config);
@@ -95,38 +91,38 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
             drive.turn(48, 0.6);
         } else {
             drive.vertical((stone - 6) * Utils.SKYSTONE_LENGTH_INCHES + 11, 1);
-            drive.lateral(24, 0.6);
+            drive.lateral(28, 0.6);
             arm.intake(0.6, 0.4);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
-            drive.vertical(-10, 1);
+            drive.vertical(-10, 0.4);
             arm.setClawPosition(false);
             sleep(500);
-            drive.lateral(-18, 0.6);
+            drive.lateral(-22, 0.6);
         }
     }
 
     private void scoreFirstStoneAndGrabFoundation(SkyStoneConfiguration config) {
         int stone = config.getSecondStone();
-        double distance = 60 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
+        double distance = 64 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
         if (stone == 6) {
             // account for special case when stone is at end
             distance -= 16;
         }
 
         // get ready to pull foundation
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         TimerTask scorePositionTask = new TimerTask() {
             @Override
             public void run() {
                 AutoUtilsLeague2.armScorePosition(arm);
             }
         };
-        timer.schedule(scorePositionTask, 1250);
+        timer.schedule(scorePositionTask, 1500);
 
         drive.vertical(distance, 1);
         drive.turn(90, 0.4);
         drive.vertical(18, 0.5);
-        arm.grabFoundation(false);
+        arm.toggleFoundationGrabbers(false);
         arm.setClawPosition(true);
         sleep(750);
         TimerTask retractArmTask = new TimerTask() {
@@ -141,29 +137,8 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
 
     private void pullfoundation() {
         // arcMotion();
-//        arm.grabFoundation(false);
+//        arm.toggleFoundationGrabbers(false);
 //        sleep(1000);
-    }
-
-    private void arcMotion() {
-        DcMotor[] motors = drive.getMotors();
-        DcMotor frontLeft = motors[0];
-        DcMotor frontRight = motors[1];
-        DcMotor backLeft = motors[2];
-        DcMotor backRight = motors[3];
-
-        int frontLeftTicks = frontLeft.getCurrentPosition();
-
-        double frontLeftPow = 0;
-        double frontRightPow = 0;
-        double backLeftPow = 0;
-        double backRightPow = 0;
-
-        frontLeft.setTargetPosition(frontLeftTicks);
-        frontLeft.setPower(frontLeftPow);
-        frontRight.setPower(frontRightPow);
-        backLeft.setPower(backLeftPow);
-        backRight.setPower(backRightPow);
     }
 
     private void intakeSecondStone(SkyStoneConfiguration config) {
@@ -188,7 +163,7 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         };
         timer.schedule(scorePositionTask, 0);
         arm.setClawPosition(true);
-        arm.grabFoundation(false);
+        arm.toggleFoundationGrabbers(false);
         sleep(1000);
         TimerTask retractArmTask = new TimerTask() {
             @Override
@@ -202,9 +177,9 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
     }
 
     private void pushFoundation() {
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         drive.vertical(48, 1);
-        arm.grabFoundation(true);
+        arm.toggleFoundationGrabbers(true);
         sleep(500);
     }
 
