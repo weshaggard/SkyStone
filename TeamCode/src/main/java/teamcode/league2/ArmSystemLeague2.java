@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.common.Debug;
 import teamcode.common.Utils;
 
+import static teamcode.common.Utils.servoNearPosition;
 import static teamcode.common.Utils.sleep;
 
 public class ArmSystemLeague2 {
@@ -22,14 +22,15 @@ public class ArmSystemLeague2 {
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
     private static final double WRIST_TICK_DELTA = 0.08;
 
-    private static final double CLAW_OPEN_POSITION = 0.0;
+    private static final double CLAW_OPEN_POSITION = 0.2;
     private static final double CLAW_CLOSED_POSITION = 1.0;
-    private static final double CLAW_POSITION_ERROR_TOLERANCE = 0.05;
 
-    private static final double LEFT_GRABBER_OPEN_POSITION = 0.5;
+    private static final double LEFT_GRABBER_OPEN_POSITION = 0;
     private static final double LEFT_GRABBER_CLOSED_POSITION = 1;
-    private static final double RIGHT_GRABBER_OPEN_POSITION = 0.5;
+    private static final double RIGHT_GRABBER_OPEN_POSITION = 1;
     private static final double RIGHT_GRABBER_CLOSED_POSITION = 0;
+
+    private static final double SERVO_POSITION_ERROR_TOLERANCE = 0.05;
 
     private final DcMotor lift;
     private final Servo wrist, claw;
@@ -106,7 +107,7 @@ public class ArmSystemLeague2 {
     }
 
     public boolean clawIsOpen() {
-        return Utils.servoNearPosition(claw, CLAW_OPEN_POSITION, CLAW_POSITION_ERROR_TOLERANCE);
+        return Utils.servoNearPosition(claw, CLAW_OPEN_POSITION, SERVO_POSITION_ERROR_TOLERANCE);
     }
 
     public void setClawPosition(boolean open) {
@@ -144,6 +145,10 @@ public class ArmSystemLeague2 {
             leftGrabber.setPosition(LEFT_GRABBER_CLOSED_POSITION);
             rightGrabber.setPosition(RIGHT_GRABBER_CLOSED_POSITION);
         }
+    }
+
+    public boolean foundationGrabbersAreOpen() {
+        return servoNearPosition(leftGrabber, LEFT_GRABBER_OPEN_POSITION, SERVO_POSITION_ERROR_TOLERANCE);
     }
 
 }

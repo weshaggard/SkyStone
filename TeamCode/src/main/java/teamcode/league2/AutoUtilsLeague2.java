@@ -1,9 +1,12 @@
 package teamcode.league2;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
@@ -23,7 +26,7 @@ public class AutoUtilsLeague2 {
         arm.setLiftHeight(ARM_CLEARANCE_HEIGHT, 0.5);
         arm.setWristPosition(false);
         Utils.sleep(1000);
-        arm.setLiftHeight(0,1);
+        arm.setLiftHeight(0, 1);
     }
 
     public static void stopIntakeWhenFull(final ArmSystemLeague2 arm) {
@@ -39,12 +42,6 @@ public class AutoUtilsLeague2 {
             }
         };
         timer.schedule(stopIntake, 0);
-    }
-
-    public static void arcMotionBlueSide(DriveSystemLeague2 drive) {
-        Vector2D velocity = new Vector2D(0, -0.2);
-        double turn = -0.12;
-        drive.continuous(velocity, turn);
     }
 
 }

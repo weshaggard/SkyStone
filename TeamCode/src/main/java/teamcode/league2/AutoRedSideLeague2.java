@@ -13,8 +13,8 @@ import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Utils;
 import teamcode.common.Vector3D;
 
-@Autonomous(name = "Optimal Red Side Auto")
-public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
+@Autonomous(name = "Red Side Auto")
+public class AutoRedSideLeague2 extends AbstractOpMode {
 
     private static final Interval MIDDLE_STONE_BOUNDS = new Interval(-200, -50);
     private static final Interval RIGHT_STONE_BOUNDS = new Interval(50, 200);
@@ -40,7 +40,7 @@ public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
         Debug.log(config);
         intakeFirstStone(config);
         scoreFirstStoneAndGrabFoundation(config);
-        pullfoundation();
+        pullFoundation();
 
         while (opModeIsActive()) ;
 //        intakeSecondStone(config);
@@ -54,7 +54,7 @@ public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
     private void setStartState() {
         arm.setClawPosition(true);
         arm.setWristPosition(false);
-        arm.resetLift();
+        arm.toggleFoundationGrabbers(true);
     }
 
     private void toScanningPos() {
@@ -65,12 +65,11 @@ public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
     }
 
     private SkyStoneConfiguration scan() {
-        // allow some time for Vuforia to process image
-        sleep(2000);
+        // pause to process image
+        sleep(500);
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
-            Debug.log(horizontalPos);
             if (MIDDLE_STONE_BOUNDS.contains(horizontalPos)) {
                 return SkyStoneConfiguration.TWO_FIVE;
             } else if (RIGHT_STONE_BOUNDS.contains(horizontalPos)) {
@@ -143,7 +142,7 @@ public class OptimalRedSideAutoLeague2 extends AbstractOpMode {
         timer.schedule(retractArmTask, 0);
     }
 
-    private void pullfoundation() {
+    private void pullFoundation() {
         // arcMotion();
 //        arm.toggleFoundationGrabbers(false);
 //        sleep(1000);

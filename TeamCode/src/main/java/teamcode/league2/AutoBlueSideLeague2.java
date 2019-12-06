@@ -12,8 +12,8 @@ import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Utils;
 import teamcode.common.Vector3D;
 
-@Autonomous(name = "Optimal Blue Side Auto")
-public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
+@Autonomous(name = "Blue Side Auto")
+public class AutoBlueSideLeague2 extends AbstractOpMode {
 
     private static final Interval LEFT_STONE_BOUNDS = new Interval(-200, -50);
     private static final Interval MIDDLE_STONE_BOUNDS = new Interval(50, 200);
@@ -39,7 +39,7 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         Debug.log(config);
         intakeFirstStone(config);
         scoreFirstStoneAndGrabFoundation(config);
-        // pullfoundation();
+        pullFoundation();
 
         while (opModeIsActive()) ;
 //        intakeSecondStone(config);
@@ -50,17 +50,17 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
     private void setStartState() {
         arm.setClawPosition(true);
         arm.setWristPosition(false);
-        arm.resetLift();
+        arm.toggleFoundationGrabbers(true);
     }
 
     private void toScanningPos() {
         // move toward the stones
-        drive.lateral(16, 0.6);
+        drive.lateral(16, 0.4);
     }
 
     private SkyStoneConfiguration scan() {
-        // allow some time for Vuforia to process image
-        sleep(1000);
+        // pause to process image
+        sleep(500);
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
@@ -86,27 +86,26 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
             drive.vertical(-18, 0.4);
             arm.setClawPosition(false);
             sleep(500);
-            drive.vertical(21, 0.4);
+            drive.vertical(18, 0.4);
             // turn extra to account for error
             drive.turn(48, 0.6);
         } else {
             drive.vertical((stone - 6) * Utils.SKYSTONE_LENGTH_INCHES + 11, 1);
-            drive.lateral(28, 0.6);
-            arm.intake(0.6, 0.4);
+            drive.lateral(25, 0.4);
+            arm.intake(0.8, 0.6);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
-            drive.vertical(-10, 0.4);
+            drive.vertical(-10, 0.2);
             arm.setClawPosition(false);
-            sleep(500);
-            drive.lateral(-22, 0.6);
+            drive.lateral(-17, 0.6);
         }
     }
 
     private void scoreFirstStoneAndGrabFoundation(SkyStoneConfiguration config) {
         int stone = config.getSecondStone();
-        double distance = 64 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
+        double distance = 69 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES; // 69!
         if (stone == 6) {
             // account for special case when stone is at end
-            distance -= 16;
+            distance -= 8;
         }
 
         // get ready to pull foundation
@@ -119,9 +118,9 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         };
         timer.schedule(scorePositionTask, 1500);
 
-        drive.vertical(distance, 1);
+        drive.vertical(distance, 0.6);
         drive.turn(90, 0.4);
-        drive.vertical(18, 0.5);
+        drive.vertical(10, 0.2);
         arm.toggleFoundationGrabbers(false);
         arm.setClawPosition(true);
         sleep(750);
@@ -135,8 +134,13 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         timer.schedule(retractArmTask, 0);
     }
 
-    private void pullfoundation() {
-        // arcMotion();
+    private void pullFoundation() {
+        // arc
+        drive.customMotion(5600, -0.64, -0.16, -0.64, -0.16);
+        arm.toggleFoundationGrabbers(true);
+        sleep(750);
+        drive.turn(20,0.4);
+        drive.lateral(4,0.4);
 //        arm.toggleFoundationGrabbers(false);
 //        sleep(1000);
     }
@@ -145,7 +149,7 @@ public class OptimalBlueSideAutoLeague2 extends AbstractOpMode {
         int skystone = config.getFirstStone();
         drive.vertical(-(Utils.SKYSTONE_LENGTH_INCHES * (6 - skystone) + 24), 1);
         drive.lateral(-18, 1);
-        arm.intake(0.6, 0.4);
+        arm.intake(0.8, 0.6);
         AutoUtilsLeague2.stopIntakeWhenFull(arm);
         drive.vertical(-10, 1);
         drive.lateral(18, 1);

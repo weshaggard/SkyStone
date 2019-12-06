@@ -3,6 +3,7 @@ package teamcode.league2;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -19,6 +20,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 1000;
+    private static final long GRABBERS_COOLDOWN = 500;
 
     private static final double TURN_SPEED_MODIFIER = 0.3;
     private static final double VERTICAL_SPEED_MODIFIER = 0.3;
@@ -143,6 +145,8 @@ public class TeleOpLeague2 extends AbstractOpMode {
     }
 
     private class DriveControl extends Thread {
+        private boolean canUseGrabbers = true;
+
         @Override
         public void run() {
             while (opModeIsActive()) {
@@ -160,8 +164,24 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 }
                 Vector2D velocity = new Vector2D(lateral, vertical);
                 driveSystem.continuous(velocity, turn);
+                if (gamepad1.dpad_left && canUseGrabbers) {
+                    arm.toggleFoundationGrabbers(!arm.foundationGrabbersAreOpen());
+                    grabberCooldown();
+                }
             }
         }
+
+        private void grabberCooldown() {
+            canUseGrabbers = false;
+            TimerTask enableGrabbers = new TimerTask() {
+                @Override
+                public void run() {
+                    canUseGrabbers = true;
+                }
+            };
+            timer.schedule(enableGrabbers, GRABBERS_COOLDOWN);
+        }
+
     }
 
     private class ScoreControl extends Thread {
@@ -171,7 +191,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
             while (opModeIsActive()) {
                 if (gamepad1.dpad_left) {
                     // extend manually
-                    extendWrist();
+                    //extendWrist();
                 } else if (gamepad1.dpad_right) {
                     // retract manually
                     retractArm(true);
@@ -199,7 +219,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     yDown = false;
                 }
                 if (gamepad1.x) {
-                    if(arm.intakeIsFull()){
+                    if (arm.intakeIsFull()) {
                         arm.setClawPosition(true);
                         driveSystem.vertical(-10, 0.3);
                         homePosition();

@@ -21,7 +21,7 @@ public class DriveSystemLeague2 {
      * Maximum number of ticks a motor's current position must be away from it's target for it to
      * be considered near its target.
      */
-    private static final int TICK_ERROR_TOLERANCE = 25;
+    private static final int TICK_ERROR_TOLERANCE = 30;
     /**
      * Proportional.
      */
@@ -96,9 +96,6 @@ public class DriveSystemLeague2 {
     }
 
     public void vertical(double inches, double speed) {
-        if (getRunMode() == DcMotor.RunMode.STOP_AND_RESET_ENCODER) {
-            setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
         int ticks = (int) (inches * INCHES_TO_TICKS_VERTICAL);
         setTargetPosition(ticks, ticks, ticks, ticks);
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -106,15 +103,13 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
      * @param inches positive to drive to the right, negative to drive to the left
      */
     public void lateral(double inches, double speed) {
-        if (getRunMode() == DcMotor.RunMode.STOP_AND_RESET_ENCODER) {
-            setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
         int ticks = (int) (inches * INCHES_TO_TICKS_LATERAL);
         setTargetPosition(-ticks, ticks, ticks, -ticks);
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -122,6 +117,7 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
@@ -132,9 +128,6 @@ public class DriveSystemLeague2 {
      * @param speed    [0.0, 1.0]
      */
     public void diagonal(int quadrant, double inches, double speed) {
-        if (getRunMode() == DcMotor.RunMode.STOP_AND_RESET_ENCODER) {
-            setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
         int ticks = (int) (inches * INCHES_TO_TICKS_DIAGONAL);
         int[] targets = new int[4];
         double[] powers = new double[4];
@@ -185,6 +178,7 @@ public class DriveSystemLeague2 {
         }
 
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
@@ -192,9 +186,6 @@ public class DriveSystemLeague2 {
      * @param speed   [0.0, 1.0]
      */
     public void turn(double degrees, double speed) {
-        if (getRunMode() == DcMotor.RunMode.STOP_AND_RESET_ENCODER) {
-            setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
         int ticks = (int) (degrees * DEGREES_TO_TICKS);
         setTargetPosition(ticks, -ticks, ticks, -ticks);
         setRunMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -202,6 +193,25 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
+    }
+
+    /**
+     * Use this for motions such as arcs. The positions of each motor are set to ticks * motorPower.
+     */
+    public void customMotion(int ticks, double frontLeftPower, double frontRightPower,
+                             double backLeftPower, double backRightPower) {
+        double[] motorPowers = {frontLeftPower, frontRightPower, backLeftPower, backRightPower};
+        for (int i = 0; i < 4; i++) {
+            DcMotor motor = motors[i];
+            double power = motorPowers[i];
+            int target = (int) (ticks * power);
+            motor.setTargetPosition(motor.getCurrentPosition() + target);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motor.setPower(power);
+        }
+        while (!nearTarget()) ;
+        brake();
     }
 
     public void brake() {
