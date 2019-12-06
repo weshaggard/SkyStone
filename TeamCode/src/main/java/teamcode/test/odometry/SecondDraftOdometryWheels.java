@@ -18,6 +18,10 @@ public class SecondDraftOdometryWheels {
     private static final double DISTANCE_TOLERANCE = 10;
     private static final double Y_POINT_TOLERANCE_INTERSECT = 0.003;
     private static final double X_POINT_TOLERANCE_INTERSECT = 0.003;
+    private static final double ODOMETRY_WHEELS_TICKS_TO_INCHES = 23;
+    //arbetrary value
+    private static final double CENTIMETERS_TO_INCHES = 1/2.54;
+
     private final DcMotor xWheelLeft;
     private final DcMotor xWheelRight;
     private final DcMotor yWheel;
@@ -37,6 +41,8 @@ public class SecondDraftOdometryWheels {
     private double globalDirection;
     //Inches
 
+    public Thread OdometryPositionUpdate;
+
     private Point perpendicularPointToRobot;
     //for generating
     //Fields to be moved into the drive System once this is fully implemented
@@ -45,7 +51,11 @@ public class SecondDraftOdometryWheels {
     double turnPower;
 
 
-
+    /**
+     * Creates the Odometry Wheels Object
+     * @param opMode
+     * @param inches
+     */
     public SecondDraftOdometryWheels(AbstractOpMode opMode, double inches){
         HardwareMap hardwareMap = opMode.hardwareMap;
         xWheelLeft = hardwareMap.get(DcMotor.class, "Odometry Left X Wheel");
@@ -55,6 +65,11 @@ public class SecondDraftOdometryWheels {
         globalDirection = 0;
         apex = opMode.getRuntime();
         INCHES_FROM_CENTER_X = inches;
+        OdometryPositionUpdate = new Thread(){
+            public void run(){
+                updateGlobalPosistion();
+            }
+        };
     }
 
     public void updateGlobalPosistion(){
