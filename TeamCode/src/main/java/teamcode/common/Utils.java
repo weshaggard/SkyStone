@@ -14,6 +14,7 @@ public class Utils {
 
     public static boolean servoNearPosition(Servo servo, double position, double errorTolerance) {
         errorTolerance = Math.abs(errorTolerance);
+        Debug.log("pos = " + servo.getPosition() + ", target = " + position);
         return Math.abs(servo.getPosition() - position) <= errorTolerance;
     }
 
@@ -21,6 +22,7 @@ public class Utils {
         int current = motor.getCurrentPosition();
         int target = motor.getTargetPosition();
         int distance = Math.abs(target - current);
+        Debug.log("Distance = " + distance);
         return distance <= errorTolerance;
     }
 

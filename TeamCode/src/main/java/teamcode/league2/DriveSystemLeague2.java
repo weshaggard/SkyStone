@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
-import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
@@ -21,7 +20,7 @@ public class DriveSystemLeague2 {
      * Maximum number of ticks a motor's current position must be away from it's target for it to
      * be considered near its target.
      */
-    private static final int TICK_ERROR_TOLERANCE = 25;
+    private static final int TICK_ERROR_TOLERANCE = 30;
     /**
      * Proportional.
      */
@@ -50,6 +49,7 @@ public class DriveSystemLeague2 {
     }
 
     private void correctDirections() {
+        //frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -89,10 +89,6 @@ public class DriveSystemLeague2 {
         frontRight.setPower(frontRightPow);
         backLeft.setPower(backLeftPow);
         backRight.setPower(backRightPow);
-        Debug.log(frontLeftPow);
-        Debug.log(frontRightPow);
-        Debug.log(backLeftPow);
-        Debug.log(backRightPow);
     }
 
     public void vertical(double inches, double speed) {
@@ -106,6 +102,7 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
@@ -122,6 +119,7 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
@@ -185,6 +183,7 @@ public class DriveSystemLeague2 {
         }
 
         while (!nearTarget()) ;
+        brake();
     }
 
     /**
@@ -202,6 +201,7 @@ public class DriveSystemLeague2 {
             motor.setPower(speed);
         }
         while (!nearTarget()) ;
+        brake();
     }
 
     public void brake() {

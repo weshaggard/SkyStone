@@ -38,7 +38,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         driveSystem = new DriveSystemLeague2(hardwareMap);
-        arm = new ArmSystemLeague2(hardwareMap);
+        arm = new ArmSystemLeague2(this);
         timer = getNewTimer();
     }
 
@@ -69,7 +69,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
         arm.resetLift();
 
-        arm.toggleFoundationGrabbers(false);
+        arm.grabFoundation(false);
         // Turn off the intake
         intakeOff();
 
