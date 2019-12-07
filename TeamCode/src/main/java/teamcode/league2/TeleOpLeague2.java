@@ -13,7 +13,7 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
 
-    private static final double MAX_LIFT_HEIGHT_INCHES = 20.25;
+    private static final double MAX_LIFT_HEIGHT_INCHES = 21;
     private static final double LIFT_SCORE_STEP_INCHES = 4.25;
     private static final double LIFT_INITIAL_SCORE_HEIGHT = 4.25;
     private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING = 12.0;
