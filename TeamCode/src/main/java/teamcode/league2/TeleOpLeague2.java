@@ -16,7 +16,8 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double MAX_LIFT_HEIGHT_INCHES = 20.25;
     private static final double LIFT_SCORE_STEP_INCHES = 4.25;
     private static final double LIFT_INITIAL_SCORE_HEIGHT = 4.25;
-    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES = 7.0;
+    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING = 12.0;
+    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME = 9.0;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
@@ -180,7 +181,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     }
                 }
                 driveSystem.continuous(velocity, turn);
-                if ((gamepad2.right_trigger > 0 || gamepad1.dpad_left) && canUseGrabbers) {
+                if ((gamepad2.x || gamepad1.dpad_left) && canUseGrabbers) {
                     arm.toggleFoundationGrabbers(!arm.foundationGrabbersAreOpen());
                     grabberCooldown();
                 }
@@ -211,20 +212,20 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 } else if (gamepad1.dpad_right) {
                     // retract manually
                     retractWrist(true);
-                } else if (gamepad1.dpad_up || gamepad2.right_bumper) {
+                } else if (gamepad1.dpad_up || gamepad2.dpad_right) {
                     // move setLiftHeight up
                     double inches = Math.min(arm.getLiftHeight() + LIFT_MANUAL_STEP_INCHES, MAX_LIFT_HEIGHT_INCHES);
                     Debug.log("Lift up to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
-                    if (gamepad2.right_bumper) {
+                    if (gamepad2.dpad_right) {
                         arm.resetLift();
                     }
-                } else if (gamepad1.dpad_down || gamepad2.left_bumper) {
+                } else if (gamepad1.dpad_down || gamepad2.dpad_left) {
                     // move lift down
                     double inches = arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES;
                     Debug.log("Lift down to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
-                    if (gamepad2.left_bumper) {
+                    if (gamepad2.dpad_left) {
                         arm.resetLift();
                     }
                 } else if (gamepad1.b) {
@@ -264,8 +265,8 @@ public class TeleOpLeague2 extends AbstractOpMode {
             }
             Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
 
-            if (newHeight < LIFT_HOME_CLEARANCE_HEIGHT_INCHES) {
-                arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+            if (newHeight < LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING) {
+                arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING, 1.0);
                 extendWrist();
                 arm.setLiftHeight(newHeight, 1.0);
             } else {
@@ -283,9 +284,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
             if (wristState == WristState.EXTENDED) {
                 Debug.log(2);
                 double height = arm.getLiftHeight();
-                if (height < LIFT_HOME_CLEARANCE_HEIGHT_INCHES) {
+                if (height < LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME) {
                     Debug.log(3);
-                    arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                    arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME, 1.0);
                 }
                 Debug.log(4);
                 retractWrist(false);
@@ -332,11 +333,10 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (gamepad2.left_trigger > 0) {
+                while (gamepad2.left_bumper) {
                     colorSensorIsActive = false;
-                } else {
-                    colorSensorIsActive = true;
                 }
+                colorSensorIsActive = true;
                 if (arm.intakeIsFull() && colorSensorIsActive) {
                     stoneBoxState = StoneBoxState.FULL;
                 } else {
