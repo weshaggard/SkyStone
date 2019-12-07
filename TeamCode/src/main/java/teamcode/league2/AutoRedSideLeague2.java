@@ -15,8 +15,8 @@ import teamcode.common.Vector3D;
 @Autonomous(name = "Red Side Auto")
 public class AutoRedSideLeague2 extends AbstractOpMode {
 
-    private static final Interval LEFT_STONE_BOUNDS = new Interval(-200, -50);
-    private static final Interval MIDDLE_STONE_BOUNDS = new Interval(50, 200);
+    private static final Interval MIDDLE_STONE_BOUNDS = new Interval(-200, -50);
+    private static final Interval RIGHT_STONE_BOUNDS = new Interval(50, 200);
 
     private DriveSystemLeague2 drive;
     private ArmSystemLeague2 arm;
@@ -64,7 +64,7 @@ public class AutoRedSideLeague2 extends AbstractOpMode {
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
-            if (LEFT_STONE_BOUNDS.contains(horizontalPos)) {
+            if (RIGHT_STONE_BOUNDS.contains(horizontalPos)) {
                 return SkyStoneConfiguration.THREE_SIX;
             } else if (MIDDLE_STONE_BOUNDS.contains(horizontalPos)) {
                 return SkyStoneConfiguration.TWO_FIVE;
