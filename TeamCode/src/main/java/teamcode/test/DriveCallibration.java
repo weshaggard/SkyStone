@@ -1,6 +1,7 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.TimerTask;
@@ -9,6 +10,7 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league2.DriveSystemLeague2;
 
+@Disabled
 @Autonomous(name = "Drive Callibration")
 public class DriveCallibration extends AbstractOpMode {
 

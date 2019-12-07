@@ -2,6 +2,7 @@ package teamcode.test.odometry;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,6 +19,7 @@ import java.io.File;
  * Odometry system calibration. Run this OpMode to generate the necessary constants to calculate the robot's global position on the field.
  * The Global Positioning Algorithm will not function and will throw an error if this program is not run first
  */
+@Disabled
 @TeleOp(name = "Odometry System Calibration", group = "Calibration")
 public class OdometryCalibration extends LinearOpMode {
     //Drive motors
@@ -55,11 +57,11 @@ public class OdometryCalibration extends LinearOpMode {
 
         //Initialize IMU parameters
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu.initialize(parameters);
         telemetry.addData("Odometry System Calibration Status", "IMU Init Complete");
@@ -72,15 +74,15 @@ public class OdometryCalibration extends LinearOpMode {
         waitForStart();
 
         //Begin calibration (if robot is unable to pivot at these speeds, please adjust the constant at the top of the code
-        while(getZAngle() < 90 && opModeIsActive()){
+        while (getZAngle() < 90 && opModeIsActive()) {
             right_front.setPower(-PIVOT_SPEED);
             right_back.setPower(-PIVOT_SPEED);
             left_front.setPower(PIVOT_SPEED);
             left_back.setPower(PIVOT_SPEED);
-            if(getZAngle() < 60) {
+            if (getZAngle() < 60) {
                 setPowerAll(-PIVOT_SPEED, -PIVOT_SPEED, PIVOT_SPEED, PIVOT_SPEED);
-            }else{
-                setPowerAll(-PIVOT_SPEED/2, -PIVOT_SPEED/2, PIVOT_SPEED/2, PIVOT_SPEED/2);
+            } else {
+                setPowerAll(-PIVOT_SPEED / 2, -PIVOT_SPEED / 2, PIVOT_SPEED / 2, PIVOT_SPEED / 2);
             }
 
             telemetry.addData("IMU Angle", getZAngle());
@@ -90,7 +92,7 @@ public class OdometryCalibration extends LinearOpMode {
         //Stop the robot
         setPowerAll(0, 0, 0, 0);
         timer.reset();
-        while(timer.milliseconds() < 1000 && opModeIsActive()){
+        while (timer.milliseconds() < 1000 && opModeIsActive()) {
             telemetry.addData("IMU Angle", getZAngle());
             telemetry.update();
         }
@@ -105,17 +107,17 @@ public class OdometryCalibration extends LinearOpMode {
        */
         double encoderDifference = Math.abs(verticalLeft.getCurrentPosition()) + (Math.abs(verticalRight.getCurrentPosition()));
 
-        double verticalEncoderTickOffsetPerDegree = encoderDifference/angle;
+        double verticalEncoderTickOffsetPerDegree = encoderDifference / angle;
 
-        double wheelBaseSeparation = (2*90*verticalEncoderTickOffsetPerDegree)/(Math.PI*COUNTS_PER_INCH);
+        double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * COUNTS_PER_INCH);
 
-        horizontalTickOffset = horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
+        horizontalTickOffset = horizontal.getCurrentPosition() / Math.toRadians(getZAngle());
 
         //Write the constants to text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
         ReadWriteFile.writeFile(horizontalTickOffsetFile, String.valueOf(horizontalTickOffset));
 
-        while(opModeIsActive()){
+        while (opModeIsActive()) {
             telemetry.addData("Odometry System Calibration Status", "Calibration Complete");
             //Display calculated constants
             telemetry.addData("Wheel Base Separation", wheelBaseSeparation);
@@ -133,7 +135,7 @@ public class OdometryCalibration extends LinearOpMode {
         }
     }
 
-    private void initHardwareMap(String rfName, String rbName, String lfName, String lbName, String vlEncoderName, String vrEncoderName, String hEncoderName){
+    private void initHardwareMap(String rfName, String rbName, String lfName, String lbName, String vlEncoderName, String vrEncoderName, String hEncoderName) {
         right_front = hardwareMap.dcMotor.get(rfName);
         right_back = hardwareMap.dcMotor.get(rbName);
         left_front = hardwareMap.dcMotor.get(lfName);
@@ -179,20 +181,22 @@ public class OdometryCalibration extends LinearOpMode {
 
     /**
      * Gets the orientation of the robot using the REV IMU
+     *
      * @return the angle of the robot
      */
-    private double getZAngle(){
+    private double getZAngle() {
         return (-imu.getAngularOrientation().firstAngle);
     }
 
     /**
      * Sets power to all four drive motors
+     *
      * @param rf power for right front motor
      * @param rb power for right back motor
      * @param lf power for left front motor
      * @param lb power for left back motor
      */
-    private void setPowerAll(double rf, double rb, double lf, double lb){
+    private void setPowerAll(double rf, double rb, double lf, double lb) {
         right_front.setPower(rf);
         right_back.setPower(rb);
         left_front.setPower(lf);

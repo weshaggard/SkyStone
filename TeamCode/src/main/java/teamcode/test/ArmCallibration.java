@@ -1,11 +1,13 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league2.ArmSystemLeague2;
 
+@Disabled
 @Autonomous(name = "Arm Callibration")
 public class ArmCallibration extends AbstractOpMode {
 

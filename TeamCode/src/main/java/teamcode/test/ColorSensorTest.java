@@ -1,10 +1,12 @@
 package teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.league2.ArmSystemLeague2;
 
+@Disabled
 @TeleOp(name = "Color Sensor Test")
 public class ColorSensorTest extends AbstractOpMode {
 

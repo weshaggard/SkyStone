@@ -8,7 +8,6 @@ public class HardwareComponentNamesLeague2 {
     public static final String BACK_RIGHT_DRIVE = "BackRightDrive";
 
     public static final String ARM_LIFT = "ArmLift";
-    public static final String ARM_LIFT_SENSOR = "ArmLiftSensor";
     public static final String ARM_WRIST = "ArmWrist";
     public static final String ARM_CLAW = "ArmClaw";
 

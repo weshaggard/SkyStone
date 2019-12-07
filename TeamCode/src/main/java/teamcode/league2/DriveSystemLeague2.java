@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
-import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
@@ -89,10 +88,6 @@ public class DriveSystemLeague2 {
         frontRight.setPower(frontRightPow);
         backLeft.setPower(backLeftPow);
         backRight.setPower(backRightPow);
-        Debug.log(frontLeftPow);
-        Debug.log(frontRightPow);
-        Debug.log(backLeftPow);
-        Debug.log(backRightPow);
     }
 
     public void vertical(double inches, double speed) {

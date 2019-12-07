@@ -13,10 +13,11 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
 
-    private static final double MAX_LIFT_HEIGHT_INCHES = 17;
-    private static final double LIFT_SCORE_STEP_INCHES = 5.0;
+    private static final double MAX_LIFT_HEIGHT_INCHES = 20.25;
+    private static final double LIFT_SCORE_STEP_INCHES = 4.25;
+    private static final double LIFT_INITIAL_SCORE_HEIGHT = 4.25;
+    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES = 7.0;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
-    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12.0;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 1000;
@@ -25,8 +26,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double TURN_SPEED_MODIFIER = 0.3;
     private static final double VERTICAL_SPEED_MODIFIER = 0.3;
     private static final double LATERAL_SPEED_MODIFIER = 0.3;
-
-    private int scoreLevel;
+    private static final double SPRINT_SPEED_MODIFIER = 0.85;
+    private static final double LEFT_INTAKE_SPEED = 0.8;
+    private static final double RIGHT_INTAKE_SPEED = 0.6;
 
     private DriveSystemLeague2 driveSystem;
     private ArmSystemLeague2 arm;
@@ -36,6 +38,10 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private WristState wristState;
     private ClawState clawState;
     private IntakeState intakeState;
+    private DriveMode driveMode;
+
+    private int scoreLevel;
+    private boolean colorSensorIsActive;
 
     @Override
     protected void onInitialize() {
@@ -62,21 +68,18 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private void setStartState() {
         // reset the current skystone score level height
         scoreLevel = 1;
-
         // Open the claw
         openClaw(false);
-
         // Retract arm
-        retractArm(false);
-
-        arm.resetLift();
-
+        retractWrist(false);
+        arm.setLiftHeight(0, 1);
         arm.toggleFoundationGrabbers(false);
         // Turn off the intake
         intakeOff();
-
         // The stone box should be empty
         stoneBoxState = StoneBoxState.EMPTY;
+        driveMode = DriveMode.MANUAL;
+        colorSensorIsActive = true;
     }
 
     private enum StoneBoxState {
@@ -100,18 +103,23 @@ public class TeleOpLeague2 extends AbstractOpMode {
         OFF
     }
 
+    private enum DriveMode {
+        MANUAL,
+        AUTONOMOUS
+    }
+
     private void intakeOff() {
         arm.intake(0.0);
         intakeState = IntakeState.OFF;
     }
 
     private void intake() {
-        arm.intake(0.5);
+        arm.intake(LEFT_INTAKE_SPEED, RIGHT_INTAKE_SPEED);
         intakeState = IntakeState.INGRESS;
     }
 
-    private void outtake(double power) {
-        arm.intake(-power);
+    private void outtake() {
+        arm.intake(-LEFT_INTAKE_SPEED);
         intakeState = IntakeState.EGRESS;
     }
 
@@ -136,7 +144,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         wristState = WristState.EXTENDED;
     }
 
-    private void retractArm(boolean wait) {
+    private void retractWrist(boolean wait) {
         arm.setWristPosition(false);
         if (wait) {
             Utils.sleep(500);
@@ -150,6 +158,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
+                if (driveMode == DriveMode.AUTONOMOUS) {
+                    continue;
+                }
                 double vertical = gamepad1.right_stick_y;
                 double lateral = gamepad1.right_stick_x;
                 double turn = gamepad1.left_stick_x;
@@ -157,14 +168,19 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     vertical *= VERTICAL_SPEED_MODIFIER;
                     lateral *= LATERAL_SPEED_MODIFIER;
                     turn *= TURN_SPEED_MODIFIER;
-                }
-                if (clawState == ClawState.CLOSED) {
-                    vertical *= -1;
-                    lateral *= -1;
+                } else {
+                    vertical *= SPRINT_SPEED_MODIFIER;
+                    lateral *= SPRINT_SPEED_MODIFIER;
+                    turn *= SPRINT_SPEED_MODIFIER;
                 }
                 Vector2D velocity = new Vector2D(lateral, vertical);
+                if (clawState == ClawState.CLOSED) {
+                    if (!gamepad1.left_stick_button) {
+                        velocity.multiply(-1);
+                    }
+                }
                 driveSystem.continuous(velocity, turn);
-                if (gamepad1.dpad_left && canUseGrabbers) {
+                if ((gamepad2.right_trigger > 0 || gamepad1.dpad_left) && canUseGrabbers) {
                     arm.toggleFoundationGrabbers(!arm.foundationGrabbersAreOpen());
                     grabberCooldown();
                 }
@@ -187,45 +203,50 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private class ScoreControl extends Thread {
         @Override
         public void run() {
-            boolean yDown = false;
+            boolean rightBumperDown = false;
             while (opModeIsActive()) {
                 if (gamepad1.dpad_left) {
                     // extend manually
                     //extendWrist();
                 } else if (gamepad1.dpad_right) {
                     // retract manually
-                    retractArm(true);
-                } else if (gamepad1.dpad_up) {
+                    retractWrist(true);
+                } else if (gamepad1.dpad_up || gamepad2.right_bumper) {
                     // move setLiftHeight up
                     double inches = Math.min(arm.getLiftHeight() + LIFT_MANUAL_STEP_INCHES, MAX_LIFT_HEIGHT_INCHES);
                     Debug.log("Lift up to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
-                } else if (gamepad1.dpad_down) {
+                    if (gamepad2.right_bumper) {
+                        arm.resetLift();
+                    }
+                } else if (gamepad1.dpad_down || gamepad2.left_bumper) {
                     // move lift down
-                    double inches = Math.max(arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES, 0);
+                    double inches = arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES;
                     Debug.log("Lift down to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
+                    if (gamepad2.left_bumper) {
+                        arm.resetLift();
+                    }
                 } else if (gamepad1.b) {
                     // first height
                     scoreLevel = 1;
                     Debug.log("Reset height");
                 }
                 if (gamepad1.right_bumper) {
-                    if (!yDown) {
+                    if (!rightBumperDown) {
                         scorePosition();
                     }
-                    yDown = true;
+                    rightBumperDown = true;
                 } else {
-                    yDown = false;
+                    rightBumperDown = false;
                 }
                 if (gamepad1.x) {
-                    if (arm.intakeIsFull()) {
-                        arm.setClawPosition(true);
-                        driveSystem.vertical(-10, 0.3);
-                        homePosition();
-                    } else {
-                        toggleClaw();
-                    }
+                    openClaw(true);
+                    driveMode = DriveMode.AUTONOMOUS;
+                    driveSystem.vertical(-4, 1);
+                    driveMode = DriveMode.MANUAL;
+                    homePosition();
+                    intake();
                 } else if (stoneBoxState == StoneBoxState.FULL && clawState == ClawState.OPEN) {
                     closeClaw(false);
                 }
@@ -237,14 +258,14 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 return;
             }
             double newHeight = scoreLevel * LIFT_SCORE_STEP_INCHES;
-            newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES); // janky solution to be removed later
+            newHeight = Math.min(newHeight, MAX_LIFT_HEIGHT_INCHES);
             if (scoreLevel == 1) {
-                newHeight = 7.2;
+                newHeight = LIFT_INITIAL_SCORE_HEIGHT;
             }
             Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
 
-            if (newHeight < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
-                arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+            if (newHeight < LIFT_HOME_CLEARANCE_HEIGHT_INCHES) {
+                arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
                 extendWrist();
                 arm.setLiftHeight(newHeight, 1.0);
             } else {
@@ -252,23 +273,31 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 extendWrist();
             }
             scoreLevel++;
-            if (scoreLevel > 3) {
-                scoreLevel = 3;
+            if (scoreLevel > 4) {
+                scoreLevel = 4;
             }
         }
 
         private void homePosition() {
+            Debug.log(1);
             if (wristState == WristState.EXTENDED) {
+                Debug.log(2);
                 double height = arm.getLiftHeight();
-                if (height < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
-                    arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                if (height < LIFT_HOME_CLEARANCE_HEIGHT_INCHES) {
+                    Debug.log(3);
+                    arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
                 }
-                retractArm(false);
+                Debug.log(4);
+                retractWrist(false);
+                Debug.log(5);
             }
 
             openClaw(false);
+            Debug.log(6);
             Utils.sleep(500);
-            arm.resetLift();
+            Debug.log(7);
+            arm.setLiftHeight(0, 1);
+            Debug.log(8);
         }
 
         private void toggleClaw() {
@@ -293,7 +322,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     intake();
                 } else if (gamepad1.left_bumper) {
                     // Turn on the outtake
-                    outtake(1);
+                    outtake();
                 }
             }
         }
@@ -303,7 +332,12 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (arm.intakeIsFull()) {
+                if (gamepad2.left_trigger > 0) {
+                    colorSensorIsActive = false;
+                } else {
+                    colorSensorIsActive = true;
+                }
+                if (arm.intakeIsFull() && colorSensorIsActive) {
                     stoneBoxState = StoneBoxState.FULL;
                 } else {
                     stoneBoxState = StoneBoxState.EMPTY;

@@ -1,6 +1,7 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.BoundingBox2D;
@@ -10,6 +11,7 @@ import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 import teamcode.league2.VisionLeague2;
 
+@Disabled
 @Autonomous(name = "Vision Calibrator")
 public class VisionCalibrator extends AbstractOpMode {
 

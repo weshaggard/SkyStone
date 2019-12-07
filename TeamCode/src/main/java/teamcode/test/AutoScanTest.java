@@ -1,6 +1,7 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -11,6 +12,7 @@ import teamcode.common.Vector3D;
 import teamcode.league2.DriveSystemLeague2;
 import teamcode.league2.VisionLeague2;
 
+@Disabled
 @Autonomous(name = "Auto Scan Test")
 public class AutoScanTest extends AbstractOpMode {
 

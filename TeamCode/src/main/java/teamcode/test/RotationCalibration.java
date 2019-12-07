@@ -2,10 +2,12 @@ package teamcode.test;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.league2.DriveSystemLeague2;
 
+@Disabled
 @Autonomous(name = "Rotation Calibration")
 public class RotationCalibration extends AbstractOpMode {
 

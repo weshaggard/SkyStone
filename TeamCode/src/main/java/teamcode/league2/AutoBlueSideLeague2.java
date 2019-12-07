@@ -40,9 +40,9 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
         intakeFirstStone(config);
         scoreFirstStoneAndGrabFoundation(config);
         pullFoundation();
+        intakeSecondStone(config);
 
         while (opModeIsActive()) ;
-//        intakeSecondStone(config);
 //        scoreSecondStone(config);
 //        pushFoundation();
     }
@@ -102,7 +102,7 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
 
     private void scoreFirstStoneAndGrabFoundation(SkyStoneConfiguration config) {
         int stone = config.getSecondStone();
-        double distance = 69 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES; // 69!
+        double distance = 65 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
         if (stone == 6) {
             // account for special case when stone is at end
             distance -= 8;
@@ -123,7 +123,7 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
         drive.vertical(10, 0.2);
         arm.toggleFoundationGrabbers(false);
         arm.setClawPosition(true);
-        sleep(750);
+        sleep(1250);
         TimerTask retractArmTask = new TimerTask() {
             @Override
             public void run() {
@@ -136,23 +136,24 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
 
     private void pullFoundation() {
         // arc
-        drive.customMotion(5600, -0.64, -0.16, -0.64, -0.16);
+        drive.customMotion(4460, -0.64, -0.16, -0.64, -0.16);
         arm.toggleFoundationGrabbers(true);
-        sleep(750);
-        drive.turn(20,0.4);
-        drive.lateral(4,0.4);
-//        arm.toggleFoundationGrabbers(false);
-//        sleep(1000);
+        sleep(500);
+        drive.lateral(8, 0.4);
+        drive.vertical(-24, 0.4);
+        drive.lateral(12, 0.4);
+        drive.lateral(-4, 0.2);
     }
 
     private void intakeSecondStone(SkyStoneConfiguration config) {
-        int skystone = config.getFirstStone();
-        drive.vertical(-(Utils.SKYSTONE_LENGTH_INCHES * (6 - skystone) + 24), 1);
-        drive.lateral(-18, 1);
+        int stone = config.getFirstStone();
+        drive.vertical(-(26 + (3 - stone) * Utils.SKYSTONE_LENGTH_INCHES), 0.6);
+        drive.lateral(16, 0.4);
         arm.intake(0.8, 0.6);
         AutoUtilsLeague2.stopIntakeWhenFull(arm);
-        drive.vertical(-10, 1);
-        drive.lateral(18, 1);
+        drive.vertical(-10, 0.2);
+        arm.setClawPosition(false);
+        drive.lateral(-17, 0.4);
     }
 
     private void scoreSecondStone(SkyStoneConfiguration config) {

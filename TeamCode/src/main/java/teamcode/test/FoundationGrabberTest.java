@@ -1,11 +1,13 @@
 package teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league2.ArmSystemLeague2;
 
+@Disabled
 @TeleOp(name = "Grabber Test")
 public class FoundationGrabberTest extends AbstractOpMode {
     ArmSystemLeague2 arm;

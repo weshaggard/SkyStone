@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 
 import static teamcode.common.Utils.servoNearPosition;
@@ -20,7 +20,7 @@ public class ArmSystemLeague2 {
     private static final double WRIST_EXTENDED_POSITION = 0.0;
     private static final double WRIST_RETRACTED_POSITION = 1.0;
     private static final double WRIST_POSITION_ERROR_TOLERANCE = 0.05;
-    private static final double WRIST_TICK_DELTA = 0.08;
+    private static final double WRIST_TICK_DELTA = 0.16;
 
     private static final double CLAW_OPEN_POSITION = 0.2;
     private static final double CLAW_CLOSED_POSITION = 1.0;
@@ -37,13 +37,11 @@ public class ArmSystemLeague2 {
     private final Servo leftGrabber, rightGrabber;
     private final DcMotor leftIntake, rightIntake;
     private final ColorSensor intakeSensor;
-    private final TouchSensor liftSensor;
 
     public ArmSystemLeague2(HardwareMap hardwareMap) {
         lift = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.ARM_LIFT);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        liftSensor = hardwareMap.get(TouchSensor.class, HardwareComponentNamesLeague2.ARM_LIFT_SENSOR);
         leftIntake = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.INTAKE_LEFT);
         rightIntake = hardwareMap.get(DcMotor.class, HardwareComponentNamesLeague2.INTAKE_RIGHT);
         wrist = hardwareMap.get(Servo.class, HardwareComponentNamesLeague2.ARM_WRIST);
@@ -54,9 +52,9 @@ public class ArmSystemLeague2 {
     }
 
     /**
-     * Returns the current setLiftHeight height in inches.
+     * Returns the current lift height in inches.
      *
-     * @return the current setLiftHeight height in inches.
+     * @return the current lift height in inches.
      */
     public double getLiftHeight() {
         int ticks = lift.getCurrentPosition();
@@ -68,17 +66,17 @@ public class ArmSystemLeague2 {
         lift.setTargetPosition(ticks);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
+        int i = 0;
         while (!Utils.motorNearTarget(lift, LIFT_POSITION_ERROR_TOLERANCE) &&
                 AbstractOpMode.currentOpMode().opModeIsActive()) ;
         lift.setPower(0.0);
     }
 
     /**
-     * No longer uses the touch sensor.
+     * Resets lift encoders, setting the new "zero" position.
      */
-    @Deprecated
     public void resetLift() {
-        setLiftHeight(0, 1);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public boolean wristIsExtended() {

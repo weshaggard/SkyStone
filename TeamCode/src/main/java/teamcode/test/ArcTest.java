@@ -1,11 +1,13 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league2.DriveSystemLeague2;
 
+@Disabled
 @Autonomous(name = "Arc Test")
 public class ArcTest extends AbstractOpMode {
 
