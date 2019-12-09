@@ -1,7 +1,6 @@
 package teamcode.league2;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,25 +29,20 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         arm = new ArmSystemLeague2(this);
         vision = new VisionLeague2(hardwareMap);
         timer = new Timer();
+        setStartState();
     }
 
     @Override
     protected void onStart() {
-        setStartState();
         toScanningPos();
         SkyStoneConfiguration config = scan();
         Debug.log(config);
         intakeFirstStone(config);
         scoreFirstStoneAndGrabFoundation(config);
-        pullfoundation();
-
-        while (opModeIsActive()) ;
+        pullFoundation();
 //        intakeSecondStone(config);
 //        scoreSecondStone(config);
-//        pushFoundation();
-
-        // pause for testing purposes
-        while (opModeIsActive()) ;
+        park();
     }
 
     private void setStartState() {
@@ -58,10 +52,9 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     }
 
     private void toScanningPos() {
-        // align with the space between the two stones to be scanned
-        drive.vertical(4, 0.6);
         // move toward the stones
-        drive.lateral(16, 0.6);
+        drive.vertical(6.5, 0.6);
+        drive.lateral(16.5, 0.4);
     }
 
     private SkyStoneConfiguration scan() {
@@ -70,10 +63,10 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
-            if (MIDDLE_STONE_BOUNDS.contains(horizontalPos)) {
-                return SkyStoneConfiguration.TWO_FIVE;
-            } else if (RIGHT_STONE_BOUNDS.contains(horizontalPos)) {
+            if (RIGHT_STONE_BOUNDS.contains(horizontalPos)) {
                 return SkyStoneConfiguration.THREE_SIX;
+            } else if (MIDDLE_STONE_BOUNDS.contains(horizontalPos)) {
+                return SkyStoneConfiguration.TWO_FIVE;
             }
         }
         return SkyStoneConfiguration.ONE_FOUR;
@@ -81,42 +74,20 @@ public class OptimalRedSideAuto extends AbstractOpMode {
 
     private void intakeFirstStone(SkyStoneConfiguration config) {
         int stone = config.getSecondStone();
-        if (stone == 6) {
-            drive.turn(180, 0.6);
-            // travel toward the tape to set up for intake
-            drive.vertical(24, 0.6);
-            drive.lateral(-6, 0.6);
-            arm.intake(0.1, 0.75);
-            AutoUtilsLeague2.stopIntakeWhenFull(arm);
-            // come in diagonally if stone is at the end
-            drive.turn(30, 0.6);
-            drive.vertical(-18, 0.4);
-            arm.setClawPosition(false);
-            sleep(500);
-            drive.vertical(21, 0.4);
-            drive.turn(-30, 0.6);
-        } else {
-            drive.turn(180, 0.6);
-            drive.vertical((stone - 6) * Utils.SKYSTONE_LENGTH_INCHES + 27, 1);
-            drive.lateral(-24, 0.6);
-            arm.intake(0.4, 0.6);
-            AutoUtilsLeague2.stopIntakeWhenFull(arm);
-            drive.vertical(-10, 1);
-            arm.setClawPosition(false);
-            sleep(500);
-            drive.lateral(18, 0.6);
-        }
+        // travel toward the tape to set up for intake
+        drive.vertical((6 - stone) * Utils.SKYSTONE_LENGTH_INCHES + 1.5, 1);
+        drive.lateral(25, 0.7);
+        arm.intake(0.8, 0.6);
+        AutoUtilsLeague2.stopIntakeWhenFull(arm);
+        drive.vertical(-10, 0.4);
+        arm.setClawPosition(false);
+        drive.lateral(-20, 0.4);
+        drive.turn(3, 0.4);
     }
 
     private void scoreFirstStoneAndGrabFoundation(SkyStoneConfiguration config) {
         int stone = config.getSecondStone();
-        double distance = 60 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
-        if (stone == 6) {
-            // account for special case when stone is at end
-            distance -= 8;
-        }
-        drive.vertical(distance, 1);
-
+        double distance = 81 + (6 - stone) * Utils.SKYSTONE_LENGTH_INCHES;
         // get ready to pull foundation
         arm.grabFoundation(true);
         TimerTask scorePositionTask = new TimerTask() {
@@ -125,11 +96,18 @@ public class OptimalRedSideAuto extends AbstractOpMode {
                 AutoUtilsLeague2.armScorePosition(arm);
             }
         };
-        timer.schedule(scorePositionTask, 0);
-        drive.turn(-90, 0.4);
-        drive.vertical(12, 0.5);
-        arm.grabFoundation(false);
-        sleep(1000);
+        timer.schedule(scorePositionTask, 1500);
+
+        drive.vertical(-distance, 0.7);
+        drive.turn(90, 0.4);
+        TimerTask grabFoundationTask = new TimerTask() {
+            @Override
+            public void run() {
+                arm.toggleFoundationGrabbers(false);
+            }
+        };
+        timer.schedule(grabFoundationTask, 500);
+        drive.vertical(12, 0.2);
         arm.setClawPosition(true);
         sleep(750);
         TimerTask retractArmTask = new TimerTask() {
@@ -142,44 +120,27 @@ public class OptimalRedSideAuto extends AbstractOpMode {
         timer.schedule(retractArmTask, 0);
     }
 
-    private void pullfoundation() {
-        // arcMotion();
-//        arm.grabFoundation(false);
-//        sleep(1000);
-    }
-
-    private void arcMotion() {
-        DcMotor[] motors = drive.getMotors();
-        DcMotor frontLeft = motors[0];
-        DcMotor frontRight = motors[1];
-        DcMotor backLeft = motors[2];
-        DcMotor backRight = motors[3];
-
-        int frontLeftTicks = frontLeft.getCurrentPosition();
-
-        double frontLeftPow = 0;
-        double frontRightPow = 0;
-        double backLeftPow = 0;
-        double backRightPow = 0;
-
-        frontLeft.setTargetPosition(frontLeftTicks);
-        frontLeft.setPower(frontLeftPow);
-        frontRight.setPower(frontRightPow);
-        backLeft.setPower(backLeftPow);
-        backRight.setPower(backRightPow);
+    private void pullFoundation() {
+        // arc
+        drive.customMotion(4500, -0.16, -0.65, -0.16, -0.65);
+        arm.toggleFoundationGrabbers(true);
+        drive.vertical(7,1);
+        drive.lateral(-9, 0.4);
     }
 
     private void intakeSecondStone(SkyStoneConfiguration config) {
-        int skystone = config.getFirstStone();
-        drive.vertical(-(Utils.SKYSTONE_LENGTH_INCHES * (6 - skystone) + 24), 1);
-        drive.lateral(-18, 1);
-        arm.intake(0.4, 0.6);
-        AutoUtilsLeague2.stopIntakeWhenFull(arm);
-        drive.vertical(-10, 1);
-        drive.lateral(18, 1);
+        int stone = config.getFirstStone();
+        drive.vertical(-4, 0.5);
+        drive.turn(20, 0.4);
+        drive.vertical(50, 0.7);
+//        arm.intake(0.8, 0.6);
+//        drive.vertical(-10, 0.2);
+//        drive.lateral(18, 0.4);
     }
 
     private void scoreSecondStone(SkyStoneConfiguration config) {
+        // extra 5 to account for error
+        drive.turn(-185, 0.6);
         int stone = config.getFirstStone();
         drive.vertical((6 - stone) * Utils.SKYSTONE_LENGTH_INCHES + 24, 1);
 
@@ -212,7 +173,7 @@ public class OptimalRedSideAuto extends AbstractOpMode {
     }
 
     private void park() {
-        drive.vertical(-72, 1);
+        drive.vertical(-36, 1);
     }
 
     @Override

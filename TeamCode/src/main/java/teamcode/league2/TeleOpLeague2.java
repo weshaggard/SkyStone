@@ -12,10 +12,13 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele Op")
 public class TeleOpLeague2 extends AbstractOpMode {
 
-    private static final double MAX_LIFT_HEIGHT_INCHES = 17;
-    private static final double LIFT_SCORE_STEP_INCHES = 5.0;
+    private static final double MAX_LIFT_HEIGHT_INCHES = 21;
+    private static final double LIFT_SCORE_STEP_INCHES = 4.25;
+    private static final double LIFT_INITIAL_SCORE_HEIGHT = 4.25;
+    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING = 12.0;
+    private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME = 9.0;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
-    private static final double ARM_HOME_CLEARANCE_HEIGHT_INCHES = 12.0;
+    private static final int MAX_SCORE_LEVEL = 5;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 1000;
@@ -34,6 +37,11 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private WristState wristState;
     private ClawState clawState;
     private IntakeState intakeState;
+    private DriveMode driveMode;
+
+    private int scoreLevel;
+    private boolean colorSensorIsActive;
+    private boolean reverseDrive;
 
     @Override
     protected void onInitialize() {
@@ -75,6 +83,9 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
         // The stone box should be empty
         stoneBoxState = StoneBoxState.EMPTY;
+        driveMode = DriveMode.MANUAL;
+        colorSensorIsActive = true;
+        reverseDrive = false;
     }
 
     private enum StoneBoxState {
@@ -145,6 +156,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private class DriveControl extends Thread {
         @Override
         public void run() {
+            boolean yDown = false;
             while (opModeIsActive()) {
                 double vertical = gamepad1.right_stick_y;
                 double lateral = gamepad1.right_stick_x;
@@ -154,12 +166,26 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     lateral *= LATERAL_SPEED_MODIFIER;
                     turn *= TURN_SPEED_MODIFIER;
                 }
+                Vector2D velocity = new Vector2D(lateral, vertical);
+                if (gamepad2.y && !yDown) {
+                    reverseDrive = !reverseDrive;
+                    yDown = true;
+                } else {
+                    yDown = false;
+                }
+                if (reverseDrive) {
+                    velocity.multiply(-1);
+                }
                 if (clawState == ClawState.CLOSED) {
                     vertical *= -1;
                     lateral *= -1;
                 }
                 Vector2D velocity = new Vector2D(lateral, vertical);
                 driveSystem.continuous(velocity, turn);
+                if ((gamepad2.x || gamepad1.dpad_left) && canUseGrabbers) {
+                    arm.toggleFoundationGrabbers(!arm.foundationGrabbersAreOpen());
+                    grabberCooldown();
+                }
             }
         }
     }
@@ -174,17 +200,23 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     extendWrist();
                 } else if (gamepad1.dpad_right) {
                     // retract manually
-                    retractArm(true);
-                } else if (gamepad1.dpad_up) {
+                    retractWrist(true);
+                } else if (gamepad1.dpad_up || gamepad2.dpad_right) {
                     // move setLiftHeight up
                     double inches = Math.min(arm.getLiftHeight() + LIFT_MANUAL_STEP_INCHES, MAX_LIFT_HEIGHT_INCHES);
                     Debug.log("Lift up to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
-                } else if (gamepad1.dpad_down) {
+                    if (gamepad2.dpad_right) {
+                        arm.resetLift();
+                    }
+                } else if (gamepad1.dpad_down || gamepad2.dpad_left) {
                     // move lift down
                     double inches = Math.max(arm.getLiftHeight() - LIFT_MANUAL_STEP_INCHES, 0);
                     Debug.log("Lift down to: " + inches);
                     arm.setLiftHeight(inches, 1.0);
+                    if (gamepad2.dpad_left) {
+                        arm.resetLift();
+                    }
                 } else if (gamepad1.b) {
                     // first height
                     scoreLevel = 1;
@@ -223,8 +255,8 @@ public class TeleOpLeague2 extends AbstractOpMode {
             }
             Debug.log("Lift to level " + scoreLevel + ": " + newHeight + " inches");
 
-            if (newHeight < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
-                arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+            if (newHeight < LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING) {
+                arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING, 1.0);
                 extendWrist();
                 arm.setLiftHeight(newHeight, 1.0);
             } else {
@@ -232,16 +264,17 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 extendWrist();
             }
             scoreLevel++;
-            if (scoreLevel > 3) {
-                scoreLevel = 3;
+            if (scoreLevel > MAX_SCORE_LEVEL) {
+                scoreLevel = MAX_SCORE_LEVEL;
             }
         }
 
         private void homePosition() {
             if (wristState == WristState.EXTENDED) {
                 double height = arm.getLiftHeight();
-                if (height < ARM_HOME_CLEARANCE_HEIGHT_INCHES) {
-                    arm.setLiftHeight(ARM_HOME_CLEARANCE_HEIGHT_INCHES, 1.0);
+                if (height < LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME) {
+                    Debug.log(3);
+                    arm.setLiftHeight(LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME, 1.0);
                 }
                 retractArm(false);
             }
@@ -272,8 +305,17 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     // Turn on the intake
                     intake();
                 } else if (gamepad1.left_bumper) {
+                    colorSensorIsActive = false;
                     // Turn on the outtake
-                    outtake(1);
+                    openClaw(false);
+                    outtake();
+                    TimerTask enableColorSensor = new TimerTask() {
+                        @Override
+                        public void run() {
+                            colorSensorIsActive = true;
+                        }
+                    };
+                    timer.schedule(enableColorSensor, 2000);
                 }
             }
         }
@@ -283,7 +325,11 @@ public class TeleOpLeague2 extends AbstractOpMode {
         @Override
         public void run() {
             while (opModeIsActive()) {
-                if (arm.intakeIsFull()) {
+                while (gamepad2.left_bumper) {
+                    colorSensorIsActive = false;
+                }
+                colorSensorIsActive = true;
+                if (arm.intakeIsFull() && colorSensorIsActive) {
                     stoneBoxState = StoneBoxState.FULL;
                 } else {
                     stoneBoxState = StoneBoxState.EMPTY;
