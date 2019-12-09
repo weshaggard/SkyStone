@@ -26,7 +26,6 @@ public class SecondDraftOdometryWheels {
     private final DcMotor xWheelRight;
     private final DcMotor yWheel;
     private final double apex;
-    private final double INCHES_FROM_CENTER_X;
     private Vector2D current;
     private final double DISTANCE_TOLERANCE_X = 5;
     private final double DISTANCE_TOLERANCE_Y = 5;
@@ -41,38 +40,39 @@ public class SecondDraftOdometryWheels {
     private double globalDirection;
     //Inches
 
-    public Thread OdometryPositionUpdate;
+    private DriveSystemOdometryTest driveSystem;
 
     private Point perpendicularPointToRobot;
     //for generating
-    //Fields to be moved into the drive System once this is fully implemented
-    double xPower;
-    double yPower;
-    double turnPower;
 
 
     /**
      * Creates the Odometry Wheels Object
      * @param opMode
-     * @param inches
+     * @param globalRobotPosition starting position of the robot at the beginning of the OpMode
+     * @param driveSystem the robots driveSystem, allowing us access to the speed fields and full implementation of the pure pursuit algorithm
      */
-    public SecondDraftOdometryWheels(AbstractOpMode opMode, double inches){
+    public SecondDraftOdometryWheels(AbstractOpMode opMode, Point globalRobotPosition, DriveSystemOdometryTest driveSystem){
+        this.driveSystem = driveSystem;
         HardwareMap hardwareMap = opMode.hardwareMap;
         xWheelLeft = hardwareMap.get(DcMotor.class, "Odometry Left X Wheel");
         xWheelRight = hardwareMap.get(DcMotor.class, "Odometry Right X Wheel");
         yWheel = hardwareMap.get(DcMotor.class, "Odometry Y Wheel");
-        globalRobotPosition = new Point(0, 0);
+        this.globalRobotPosition = globalRobotPosition;
         globalDirection = 0;
         apex = opMode.getRuntime();
-        INCHES_FROM_CENTER_X = inches;
-        OdometryPositionUpdate = new Thread(){
+        new Thread(){
+            @Override
             public void run(){
-                updateGlobalPosistion();
+                while(AbstractOpMode.currentOpMode().opModeIsActive()){
+                    updateGlobalPosistion();
+                }
             }
-        };
+        }.start();
+
     }
 
-    public void updateGlobalPosistion(){
+    private void updateGlobalPosistion(){
         int distanceTravelledX = encoderValueX - previousEncoderValueX;
         int distanceTravelledY = encoderValueY - previousEncoderValueY;
         current = new Vector2D(distanceTravelledX, distanceTravelledY);
@@ -104,6 +104,7 @@ public class SecondDraftOdometryWheels {
     //TODO using a list of path points, figure out where I am in the path using perpendicular lines. Timestamp 15:00 in the GF tutorial
 
     public int getPositionInPath(ArrayList<CurvePoint> pathPoints){
+
         for(int i = 0; i < pathPoints.size() - 1; i++){
             CurvePoint current = pathPoints.get(i);
             if(i + 1 < pathPoints.size()) {
@@ -133,11 +134,17 @@ public class SecondDraftOdometryWheels {
         return abs(currentPoint.x - globalRobotPosition.x) < DISTANCE_TOLERANCE_X && abs(currentPoint.y - globalRobotPosition.y) < DISTANCE_TOLERANCE_Y;
     }
 
+    private boolean isLastPoint(ArrayList<CurvePoint> path, CurvePoint current){
+        return path.indexOf(current) == path.size() -1;
+    }
+
     //To be implemented into the new Drive System for league 3
     public void followCurve(ArrayList<CurvePoint> allPoints, double followAngle){
-        CurvePoint followMe = getFollowPointPath(allPoints, globalRobotPosition, allPoints.get(0).followDistance);
-        goToPosition(followMe.x, followMe.y, followMe.moveSpeed, followAngle, followMe.turnSpeed );
-
+        for(int i = 0; i < allPoints.size(); i++) {
+            CurvePoint followMe = getFollowPointPath(allPoints, globalRobotPosition, allPoints.get(0).followDistance);
+            //assumes all followDistance is the same, gotta make a findPositionInPath method
+            goToPosition(followMe.x, followMe.y, followMe.moveSpeed, followAngle, followMe.turnSpeed);
+        }
     }
 
     /**
@@ -161,14 +168,16 @@ public class SecondDraftOdometryWheels {
         double powerX = relativeDistanceX / (abs(relativeDistanceX) + Math.abs(relativeDistanceY));
         double powerY = relativeDistanceY / (abs(relativeDistanceX) + Math.abs(relativeDistanceY));
         //power calculations
-        xPower = powerX * power;
-        yPower = powerY * power;
+        driveSystem.xPower = powerX * power;
+        driveSystem.yPower = powerY * power;
         //assigning power to driveTrain
         double relativeTurnAngle = relativeAngle - 180 + preferredAngle;
-        this.turnPower = Range.clip(relativeTurnAngle / 30, -1, 1) * turnPower;
+        driveSystem.turnPower = Range.clip(relativeTurnAngle / 30, -1, 1) * turnPower;
         if(distanceTravelled < DISTANCE_TOLERANCE){
-            this.turnPower = 0;
+            driveSystem.turnPower = 0;
         }
+
+
 
     }
 
@@ -209,8 +218,9 @@ public class SecondDraftOdometryWheels {
         double c = (pow(slope1,2) * pow(x1, 2)) - (2 * slope1 * y1 * x1) + pow(y1,2) - pow(radius, 2);
         ArrayList<Point> allPoints = new ArrayList();
         try{
-            double xRoot1 = (-b + sqrt(pow(b,2) - (4 * a * c))) / (2 *a);
-            double xRoot2 = (-b - sqrt(pow(b,2) - (4 * a * c))) / (2 *a);
+            double discriminant = sqrt((pow(b,2) - 4 * a * c));
+            double xRoot1 = (-b + discriminant) / (2 *a);
+            double xRoot2 = (-b - discriminant) / (2 *a);
 
             double yRoot1 = slope1 * (xRoot1 - x1) + y1;
             double yRoot2 = slope1 * (xRoot2 - x1) + y1;
@@ -230,11 +240,16 @@ public class SecondDraftOdometryWheels {
 
 
         }catch(ArithmeticException e){
-
-
         }
         return allPoints;
 
+    }
+
+    public boolean nearTargetPoint(CurvePoint point) {
+        if(point.x == globalRobotPosition.x && point.y == globalRobotPosition.y){
+            return true;
+        }
+        return false;
     }
 
 
