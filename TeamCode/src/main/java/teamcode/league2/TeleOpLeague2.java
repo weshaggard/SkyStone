@@ -19,6 +19,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
     private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_SCORING = 12.0;
     private static final double LIFT_HOME_CLEARANCE_HEIGHT_INCHES_TO_HOME = 9.0;
     private static final double LIFT_MANUAL_STEP_INCHES = 1;
+    private static final int MAX_SCORE_LEVEL = 5;
 
     private static final long CLOSE_CLAW_DELAY = 1000;
     private static final long OPEN_CLAW_DELAY = 1000;
@@ -43,6 +44,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
     private int scoreLevel;
     private boolean colorSensorIsActive;
+    private boolean reverseDrive;
 
     @Override
     protected void onInitialize() {
@@ -81,6 +83,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
         stoneBoxState = StoneBoxState.EMPTY;
         driveMode = DriveMode.MANUAL;
         colorSensorIsActive = true;
+        reverseDrive = false;
     }
 
     private enum StoneBoxState {
@@ -158,6 +161,7 @@ public class TeleOpLeague2 extends AbstractOpMode {
 
         @Override
         public void run() {
+            boolean yDown = false;
             while (opModeIsActive()) {
                 if (driveMode == DriveMode.AUTONOMOUS) {
                     continue;
@@ -175,6 +179,15 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     turn *= SPRINT_SPEED_MODIFIER;
                 }
                 Vector2D velocity = new Vector2D(lateral, vertical);
+                if (gamepad2.y && !yDown) {
+                    reverseDrive = !reverseDrive;
+                    yDown = true;
+                } else {
+                    yDown = false;
+                }
+                if (reverseDrive) {
+                    velocity.multiply(-1);
+                }
                 if (clawState == ClawState.CLOSED) {
                     if (!gamepad1.left_stick_button) {
                         velocity.multiply(-1);
@@ -274,8 +287,8 @@ public class TeleOpLeague2 extends AbstractOpMode {
                 extendWrist();
             }
             scoreLevel++;
-            if (scoreLevel > 4) {
-                scoreLevel = 4;
+            if (scoreLevel > MAX_SCORE_LEVEL) {
+                scoreLevel = MAX_SCORE_LEVEL;
             }
         }
 
@@ -322,8 +335,17 @@ public class TeleOpLeague2 extends AbstractOpMode {
                     // Turn on the intake
                     intake();
                 } else if (gamepad1.left_bumper) {
+                    colorSensorIsActive = false;
                     // Turn on the outtake
+                    openClaw(false);
                     outtake();
+                    TimerTask enableColorSensor = new TimerTask() {
+                        @Override
+                        public void run() {
+                            colorSensorIsActive = true;
+                        }
+                    };
+                    timer.schedule(enableColorSensor, 2000);
                 }
             }
         }

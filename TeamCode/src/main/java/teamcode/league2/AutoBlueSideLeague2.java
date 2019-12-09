@@ -53,12 +53,12 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
 
     private void toScanningPos() {
         // move toward the stones
-        drive.lateral(16, 0.6);
+        drive.lateral(16.5, 0.6);
     }
 
     private SkyStoneConfiguration scan() {
         // pause to process image
-        sleep(500);
+        sleep(1500);
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
@@ -92,9 +92,9 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
             drive.lateral(25, 0.6);
             arm.intake(0.8, 0.6);
             AutoUtilsLeague2.stopIntakeWhenFull(arm);
-            drive.vertical(-10, 0.4);
+            drive.vertical(-11, 0.4);
             arm.setClawPosition(false);
-            drive.lateral(-17, 0.4);
+            drive.lateral(-16, 0.4);
         }
     }
 
@@ -164,7 +164,7 @@ public class AutoBlueSideLeague2 extends AbstractOpMode {
     }
 
     private void park() {
-        drive.vertical(24, 1);
+        drive.vertical(24, 0.6);
     }
 
     @Override

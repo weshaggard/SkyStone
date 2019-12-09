@@ -54,12 +54,12 @@ public class AutoRedSideLeague2 extends AbstractOpMode {
     private void toScanningPos() {
         // move toward the stones
         drive.vertical(6.5, 0.6);
-        drive.lateral(16.5, 0.6);
+        drive.lateral(16.5, 0.4);
     }
 
     private SkyStoneConfiguration scan() {
         // pause to process image
-        sleep(750);
+        sleep(2500);
         Vector3D skystonePos = vision.getSkystonePosition();
         if (skystonePos != null) {
             double horizontalPos = -skystonePos.getY();
@@ -107,7 +107,7 @@ public class AutoRedSideLeague2 extends AbstractOpMode {
             }
         };
         timer.schedule(grabFoundationTask, 500);
-        drive.vertical(10, 0.2);
+        drive.vertical(12, 0.2);
         arm.setClawPosition(true);
         sleep(750);
         TimerTask retractArmTask = new TimerTask() {
