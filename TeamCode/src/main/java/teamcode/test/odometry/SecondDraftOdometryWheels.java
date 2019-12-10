@@ -46,6 +46,10 @@ public class SecondDraftOdometryWheels {
     //for generating
 
 
+    public String getWheelEncoderValues(){
+        return "leftX: " + xWheelLeft.getCurrentPosition() + "\n" + "rightX: " + xWheelRight.getCurrentPosition() + "\n" + "Y: " + yWheel.getCurrentPosition();
+    }
+
     /**
      * Creates the Odometry Wheels Object
      * @param opMode
@@ -159,7 +163,7 @@ public class SecondDraftOdometryWheels {
         double deltaY = y - globalRobotPosition.y;
         double distanceTravelled = pow(deltaX, 2) + pow(deltaY, 2);
         //change in robots position throughout this function
-        double absoluteAngle = toDegrees(atan2(deltaY, deltaX));
+        double absoluteAngle = atan2(deltaY, deltaX);
         double relativeAngle = angleWrapper(absoluteAngle - globalDirection);
         //change in the robots position
         double relativeDistanceX = distanceTravelled * cos(relativeAngle);
