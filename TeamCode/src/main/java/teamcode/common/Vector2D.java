@@ -21,6 +21,10 @@ public final class Vector2D implements Cloneable {
         return new Vector2D(1, 0);
     }
 
+    public static Vector2D zero() {
+        return new Vector2D(0, 0);
+    }
+
     public double getX() {
         return x;
     }

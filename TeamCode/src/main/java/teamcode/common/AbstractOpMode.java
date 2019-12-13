@@ -10,8 +10,6 @@ public abstract class AbstractOpMode extends LinearOpMode {
 
     private static AbstractOpMode opMode;
 
-    private List<Timer> timers;
-
     public static AbstractOpMode currentOpMode() {
         return opMode;
     }
@@ -19,16 +17,12 @@ public abstract class AbstractOpMode extends LinearOpMode {
     @Override
     public final void runOpMode() {
         opMode = this;
-        timers = new ArrayList<>();
         onInitialize();
         waitForStart();
         if (opModeIsActive()) {
             onStart();
         }
         onStop();
-        for (Timer timer : timers) {
-            timer.cancel();
-        }
         Debug.clear();
     }
 
@@ -37,24 +31,5 @@ public abstract class AbstractOpMode extends LinearOpMode {
     protected abstract void onStart();
 
     protected abstract void onStop();
-
-    /**
-     * Use getNewTimer() instead.
-     */
-    @Deprecated
-    public Timer getTimer() {
-        return getNewTimer();
-    }
-
-    public Timer getNewTimer() {
-        Timer timer = new Timer();
-        timers.add(timer);
-        return timer;
-    }
-
-    public void cancelTimer(Timer timer) {
-        timer.cancel();
-        timers.remove(timer);
-    }
 
 }

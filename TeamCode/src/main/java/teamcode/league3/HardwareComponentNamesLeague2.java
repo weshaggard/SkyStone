@@ -1,4 +1,4 @@
-package teamcode.league2;
+package teamcode.league3;
 
 public class HardwareComponentNamesLeague2 {
 
