@@ -19,9 +19,7 @@ public abstract class AbstractOpMode extends LinearOpMode {
         opMode = this;
         onInitialize();
         waitForStart();
-        if (opModeIsActive()) {
-            onStart();
-        }
+        onStart();
         onStop();
         Debug.clear();
     }

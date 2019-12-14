@@ -5,25 +5,29 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
+import teamcode.common.Vector2D;
 import teamcode.league3.DriveSystem;
+import teamcode.league3.GPS;
 
 @Autonomous(name = "Drive Test")
 public class DriveTest extends AbstractOpMode {
 
+    GPS gps;
     private DriveSystem driveSystem;
 
     @Override
     protected void onInitialize() {
-        driveSystem = new DriveSystem(hardwareMap);
+        gps = new GPS(hardwareMap, Vector2D.zero());
+        driveSystem = new DriveSystem(hardwareMap, gps);
     }
 
     @Override
     protected void onStart() {
-        Debug.log("going forward 12 inches at 0.1 power");
-        driveSystem.vertical(12, 0.1);
+        while (opModeIsActive()) ;
     }
 
     @Override
     protected void onStop() {
+        gps.shutdown();
     }
 }
