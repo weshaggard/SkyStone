@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.common.Debug;
-import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 public class DriveSystem {
@@ -29,7 +27,8 @@ public class DriveSystem {
     }
 
     public void vertical(double inches, double power) {
-
+        Vector2D currentPosition = gps.getCurrentPosition();
+        double rotation = gps.getRotation();
     }
 
     public void lateral(double inches, double power) {
@@ -42,8 +41,6 @@ public class DriveSystem {
 
     public void goTo(Vector2D targetPosition, double power) {
         while (AbstractOpMode.currentOpMode().opModeIsActive()) {
-            Vector2D currentPosition = gps.getCurrentPosition();
-
         }
     }
 

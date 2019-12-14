@@ -1,7 +1,6 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -23,7 +22,8 @@ public class DriveTest extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        while (opModeIsActive()) ;
+        while (opModeIsActive()) {
+        }
     }
 
     @Override

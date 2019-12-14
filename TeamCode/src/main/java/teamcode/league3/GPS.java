@@ -1,14 +1,9 @@
 package teamcode.league3;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
 
 /**
@@ -29,6 +24,7 @@ public class GPS {
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER);
+        correctDirections();
         resetEncoders();
         Thread positionUpdater = new Thread() {
             @Override
@@ -38,11 +34,17 @@ public class GPS {
                 } catch (Exception e) {
                 }
                 while (active) {
-                    updatePosition();
+                    updateLocation();
                 }
             }
         };
         positionUpdater.start();
+    }
+
+    private void correctDirections(){
+        leftVertical.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightVertical.setDirection(DcMotorSimple.Direction.REVERSE);
+        horizontal.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     private void resetEncoders() {
@@ -51,16 +53,20 @@ public class GPS {
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private void updatePosition() {
-        Telemetry telemetry = AbstractOpMode.currentOpMode().telemetry;
-        telemetry.addData("left vertical position: ", leftVertical.getCurrentPosition());
-        telemetry.addData("right vertical position: ", rightVertical.getCurrentPosition());
-        telemetry.addData("horizontal position: ", horizontal.getCurrentPosition());
-        telemetry.update();
+    private void updateLocation() {
+
     }
 
     public Vector2D getCurrentPosition() {
         return currentPosition;
+    }
+
+    /**
+     * Returns the robot's bearing.
+     * @return
+     */
+    public double getRotation(){
+        return 0;
     }
 
     public void shutdown() {
