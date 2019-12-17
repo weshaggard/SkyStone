@@ -13,6 +13,10 @@ public final class Vector2D implements Cloneable {
         this.y = y;
     }
 
+    public static Vector2D fromAngleMagnitude(double theta, double magnitude) {
+        return new Vector2D(Math.cos(theta) * magnitude, Math.sin(theta) * magnitude);
+    }
+
     public static Vector2D forward() {
         return new Vector2D(0, 1);
     }
@@ -41,11 +45,6 @@ public final class Vector2D implements Cloneable {
         this.y = y;
     }
 
-    public void multiply(double scalar) {
-        x *= scalar;
-        y *= scalar;
-    }
-
     public double magnitude() {
         return Math.sqrt(x * x + y * y);
     }
@@ -56,9 +55,21 @@ public final class Vector2D implements Cloneable {
         y /= magnitude;
     }
 
-    public void add(Vector2D vector) {
-        x += vector.x;
-        y += vector.y;
+    public Vector2D normalized() {
+        double magnitude = magnitude();
+        return new Vector2D(x / magnitude, y / magnitude);
+    }
+
+    public Vector2D add(Vector2D vector) {
+        return new Vector2D(x + vector.x, y + vector.y);
+    }
+
+    public Vector2D subtract(Vector2D vector) {
+        return new Vector2D(x - vector.x, y - vector.y);
+    }
+
+    public Vector2D multiply(double scalar) {
+        return new Vector2D(x * scalar, y * scalar);
     }
 
     public double dotProduct(Vector2D other) {
@@ -77,7 +88,7 @@ public final class Vector2D implements Cloneable {
     }
 
     /**
-     * @return the angle in radians from -pi to pi.
+     * @return the angle in radians.
      */
     public double getDirection() {
         return Math.atan2(y, x);

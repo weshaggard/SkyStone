@@ -1,15 +1,16 @@
-package teamcode.league3;
+package teamcode.test;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.Vector2D;
+import teamcode.league3.Constants;
 
 /**
  * Always call shutdown() in onStop() of AbstractOpMode.
  */
-public class GPS {
+public class GPSSimple {
 
     /**
      * Whether or not this GPS should continue to update positions.
@@ -23,10 +24,9 @@ public class GPS {
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
-    public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
+    public GPSSimple(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
         active = true;
         this.position = currentPosition;
-        this.rotation = bearingToRadians(currentBearing);
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER);
@@ -64,17 +64,14 @@ public class GPS {
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
-        double deltaRot = (deltaLeftVertical - deltaRightVertical) / Constants.VERTICAL_ODOMETER_SEPARATION_DISTANCE;
-        rotation += deltaRot;
-
         double horizontalPos = horizontal.getCurrentPosition();
-        double deltaHorizontal = horizontalPos - prevHorizontalPos - deltaRot * Constants.HORIZONTAL_ODOMETER_DEGREES_TO_TICKS;
+        double deltaHorizontal = horizontalPos - prevHorizontalPos;
 
         double p = (deltaLeftVertical + deltaRightVertical) / 2;
         double n = deltaHorizontal;
 
-        double x = position.getX() + p * Math.sin(rotation) + n * Math.cos(rotation);
-        double y = position.getY() + p * Math.cos(rotation) - n * Math.sin(rotation);
+        double x = position.getX() + n;
+        double y = position.getY() + p;
         position.setX(x);
         position.setY(y);
 
@@ -89,25 +86,18 @@ public class GPS {
     }
 
     /**
-     * Returns the rotation in radians, unit circle style.
-     */
-    public double getRotation(){
-        return rotation;
-    }
-
-    /**
      * Returns the robot's bearing in degrees.
      */
-    public double getBearing() {
+    public double getRotation() {
         return radiansToBearing(rotation);
     }
 
     private double radiansToBearing(double radians) {
-        return radians;
+        return 0;
     }
 
     private double bearingToRadians(double bearing) {
-        return bearing;
+        return 0;
     }
 
     /**

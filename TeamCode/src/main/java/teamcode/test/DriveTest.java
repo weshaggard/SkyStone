@@ -16,15 +16,14 @@ public class DriveTest extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        gps = new GPS(hardwareMap, Vector2D.zero(), 0);
+        gps = new GPS(hardwareMap, Vector2D.zero(), Math.PI);
         driveSystem = new DriveSystem(hardwareMap, gps);
     }
 
     @Override
     protected void onStart() {
-        while (opModeIsActive()) {
-            Debug.log(gps.getPosition());
-        }
+        Vector2D target = new Vector2D(15000, 50000);
+        driveSystem.goTo(target, 0.2);
     }
 
     @Override

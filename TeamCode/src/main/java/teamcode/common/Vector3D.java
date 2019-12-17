@@ -36,16 +36,16 @@ public class Vector3D {
         this.z = z;
     }
 
-    public void multiply(double scalar) {
-        x *= scalar;
-        y *= scalar;
-        z *= scalar;
+    public Vector3D multiply(double scalar) {
+        return new Vector3D(x * scalar, y * scalar, z * scalar);
     }
 
-    public void add(Vector3D vector) {
-        x += vector.x;
-        y += vector.y;
-        z += vector.z;
+    public Vector3D add(Vector3D vector) {
+        return new Vector3D(x + vector.x, y + vector.y, z + vector.z);
+    }
+
+    public Vector3D subtract(Vector3D vector) {
+        return new Vector3D(x - vector.x, y - vector.y, z - vector.z);
     }
 
     public boolean isZero() {
