@@ -5,20 +5,39 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
+import teamcode.common.Point;
+import teamcode.common.Utils;
 import teamcode.common.Vector2D;
+import teamcode.test.odometry.OdometryWheelsFinal;
 
 public class DriveSystem {
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final GPS gps;
+    /**
+     * 0: front left (rear encoder)
+     * 1: front right (left encoder
+     * 2: rear left (right encoder)
+     * 3. rear right
+     */
+    private DcMotor[] motors;
+    private DriveMotion driveMotion;
+    private OdometryWheelsFinal wheels;
 
-    public DriveSystem(HardwareMap hardwareMap, GPS gps) {
-        frontLeft = hardwareMap.dcMotor.get(Constants.FRONT_LEFT_DRIVE);
-        frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE);
-        rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE);
-        rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE);
-        correctDirections();
+    public enum DriveMotion {
+        VERTICAL, LATERAL, TURN, STOP
+    }
+
+      public driveSystem(GPS gps){
         this.gps = gps;
+        resetEncoders();
+        wheels = new OdometryWheelsFinal(AbstractOpMode.currentOpMode(),new Point(100, 100) ,this, 0);
+        driveMotion = null;
+    }
+
+    private DcMotor getMotorByName(HardwareMap hardwareMap, String motorName) {
+        return hardwareMap.get(DcMotor.class, motorName);
     }
 
     private void correctDirections() {
@@ -32,7 +51,11 @@ public class DriveSystem {
     }
 
     public void lateral(double inches, double power) {
+        driveMotion = DriveMotion.LATERAL;
+        //int ticks = (int)(inches * Constants.DRIVE_LATERAL_INCHES_TO_TICKS);
 
+        while(!nearTarget() && AbstractOpMode.currentOpMode().opModeIsActive()){
+        }
     }
 
     public void rotate(double degrees, double power) {
@@ -70,8 +93,10 @@ public class DriveSystem {
         rearRight.setPower(0);
     }
 
-    private boolean nearTarget() {
-        return false;
+    public boolean nearTarget() {
+        return Utils.motorNearTarget(motors[0], Constants.DRIVE_TICK_ERROR_TOLERANCE) &&
+                Utils.motorNearTarget(motors[1], Constants.DRIVE_TICK_ERROR_TOLERANCE) &&
+                Utils.motorNearTarget(motors[2], Constants.DRIVE_TICK_ERROR_TOLERANCE);
     }
 
 }
