@@ -12,27 +12,31 @@ import teamcode.common.Vector2D;
 public class GPS {
 
     /**
-     * Whether or noto this GPS should continue to update positions.
+     * Whether or not this GPS should continue to update positions.
      */
     private boolean active;
-    private final Vector2D currentPosition;
+    private Vector2D position;
+    /**
+     * In radians, unit circle style.
+     */
+    private double rotation;
     private final DcMotor leftVertical, rightVertical, horizontal;
+    private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
-    public GPS(HardwareMap hardwareMap, Vector2D currentPosition) {
+    public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
         active = true;
-        this.currentPosition = currentPosition;
+        this.position = currentPosition;
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER);
+        prevLeftVerticalPos = 0;
+        prevRightVerticalPos = 0;
+        prevHorizontalPos = 0;
         correctDirections();
         resetEncoders();
         Thread positionUpdater = new Thread() {
             @Override
             public void run() {
-                try {
-                    sleep(1000);
-                } catch (Exception e) {
-                }
                 while (active) {
                     updateLocation();
                 }
@@ -41,7 +45,7 @@ public class GPS {
         positionUpdater.start();
     }
 
-    private void correctDirections(){
+    private void correctDirections() {
         leftVertical.setDirection(DcMotorSimple.Direction.REVERSE);
         rightVertical.setDirection(DcMotorSimple.Direction.REVERSE);
         horizontal.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -54,21 +58,53 @@ public class GPS {
     }
 
     private void updateLocation() {
+        double leftVerticalPos = leftVertical.getCurrentPosition();
+        double rightVerticalPos = rightVertical.getCurrentPosition();
+        double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
+        double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
+        double deltaRot = (deltaLeftVertical - deltaRightVertical) / 50; //Constants.ODOMETRY_WHEEL_DISTANCE;
+        rotation += deltaRot;
+
+        double horizontalPos = horizontal.getCurrentPosition() - deltaRot * 2200; // HORIZONTAL_DEGREES_TO_TICKS;
+        double deltaHorizontal = horizontalPos - prevHorizontalPos;
+
+        double p = (deltaRightVertical + deltaLeftVertical) / 2;
+        double n = deltaHorizontal;
+
+        double x = position.getX() + p * Math.sin(rotation) + n * Math.cos(rotation);
+        double y = position.getY() + p * Math.cos(rotation) + n * Math.sin(rotation);
+        position.setX(x);
+        position.setY(y);
+
+        prevLeftVerticalPos = leftVerticalPos;
+        prevRightVerticalPos = rightVerticalPos;
+        prevHorizontalPos = horizontalPos;
     }
 
-    public Vector2D getCurrentPosition() {
-        return currentPosition;
+    public Vector2D getPosition() {
+        // clone so that position can not be externally modified
+        return position.clone();
     }
 
     /**
-     * Returns the robot's bearing.
-     * @return
+     * Returns the robot's bearing in degrees.
      */
-    public double getRotation(){
+    public double getRotation() {
+        return radiansToBearing(rotation);
+    }
+
+    private double radiansToBearing(double radians) {
         return 0;
     }
 
+    private double bearingToRadians(double bearing) {
+        return 0;
+    }
+
+    /**
+     * Invoke this in AbstractOpMode.onStop().
+     */
     public void shutdown() {
         active = false;
     }

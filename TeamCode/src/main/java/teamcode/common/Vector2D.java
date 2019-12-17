@@ -37,7 +37,7 @@ public final class Vector2D implements Cloneable {
         return y;
     }
 
-    public void setY() {
+    public void setY(double y) {
         this.y = y;
     }
 

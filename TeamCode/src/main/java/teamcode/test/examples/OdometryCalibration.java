@@ -7,11 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.ReadWriteFile;
-
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
-import java.io.File;
+import teamcode.common.Debug;
 
 /**
  * Created by Sarthak on 6/1/2019.
@@ -29,10 +27,10 @@ public class OdometryCalibration extends LinearOpMode {
     BNO055IMU imu;
 
     //Hardware Map Names for drive motors and odometry wheels. THIS WILL CHANGE ON EACH ROBOT, YOU NEED TO UPDATE THESE VALUES ACCORDINGLY
-    String rfName = "rf", rbName = "rb", lfName = "lf", lbName = "lb";
-    String verticalLeftEncoderName = rbName, verticalRightEncoderName = lfName, horizontalEncoderName = rfName;
+    String rfName = "FrontLeftDrive", rbName = "RearRightDrive", lfName = "FrontLeftDrive", lbName = "RearLeftDrive";
+    String verticalLeftEncoderName = "LeftVerticalOdometer", verticalRightEncoderName = "RightVerticalOdometer", horizontalEncoderName = "HorizontalOdometer";
 
-    final double PIVOT_SPEED = 0.5;
+    final double PIVOT_SPEED = 0.2;
 
     //The amount of encoder ticks for each inch the robot moves. THIS WILL CHANGE FOR EACH ROBOT AND NEEDS TO BE UPDATED HERE
     final double COUNTS_PER_INCH = 307.699557;
@@ -40,10 +38,6 @@ public class OdometryCalibration extends LinearOpMode {
     ElapsedTime timer = new ElapsedTime();
 
     double horizontalTickOffset = 0;
-
-    //Text files to write the values to. The files are stored in the robot controller under Internal Storage\FIRST\settings
-    File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
-    File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -111,10 +105,6 @@ public class OdometryCalibration extends LinearOpMode {
 
         horizontalTickOffset = horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
 
-        //Write the constants to text files
-        ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
-        ReadWriteFile.writeFile(horizontalTickOffsetFile, String.valueOf(horizontalTickOffset));
-
         while(opModeIsActive()){
             telemetry.addData("Odometry System Calibration Status", "Calibration Complete");
             //Display calculated constants
@@ -170,7 +160,6 @@ public class OdometryCalibration extends LinearOpMode {
         left_front.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front.setDirection(DcMotorSimple.Direction.REVERSE);
         right_back.setDirection(DcMotorSimple.Direction.REVERSE);
-
 
         telemetry.addData("Status", "Hardware Map Init Complete");
         telemetry.update();

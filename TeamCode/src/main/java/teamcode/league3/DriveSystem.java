@@ -27,7 +27,7 @@ public class DriveSystem {
     }
 
     public void vertical(double inches, double power) {
-        Vector2D currentPosition = gps.getCurrentPosition();
+        Vector2D currentPosition = gps.getPosition();
         double rotation = gps.getRotation();
     }
 
@@ -41,14 +41,17 @@ public class DriveSystem {
 
     public void goTo(Vector2D targetPosition, double power) {
         while (AbstractOpMode.currentOpMode().opModeIsActive()) {
+
         }
     }
 
     public void continuous(Vector2D velocity, double turnSpeed) {
-        double direction = velocity.getDirection();
+        // multiply the x component by -1 (not sure why this is necessary but it is)
+        Vector2D velocity0 = new Vector2D(-velocity.getX(), velocity.getY());
+        double direction = velocity0.getDirection();
 
         double maxPow = Math.sin(Math.PI / 4);
-        double power = velocity.magnitude() / maxPow;
+        double power = velocity0.magnitude() / maxPow;
 
         double angle = direction - Math.PI / 4;
         double sin = Math.sin(angle);
