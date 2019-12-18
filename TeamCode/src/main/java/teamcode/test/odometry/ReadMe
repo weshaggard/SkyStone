@@ -1,0 +1,20 @@
+This is for the Gluten Free iteration of Pure Pursuit
+To begin, take the code in the PurePursuitGlutenFree class and make a new class in their BitBucket labelled "tutorialSeries"
+Then make a new instance of the class in main (or make everything Static)
+Run the sample code below in main.loop():
+                ArrayList<CurvePoint> followPath = new ArrayList<>();
+                followPath.add(new CurvePoint(0.0,0.0,0.5,0.3,10.0,Math.toRadians(50), 1.0));
+                followPath.add(new CurvePoint(180.0,180.0,1.0,1.0,50.0,Math.toRadians(50), 1.0));
+                followPath.add(new CurvePoint(220.0,180.0,1.0,1.0,50.0,Math.toRadians(50), 1.0));
+                followPath.add(new CurvePoint(280.0,50.0,1.0,1.0,50.0,Math.toRadians(50), 1.0));
+                followPath.add(new CurvePoint(180.0,0.0,1.0,1.0,50.0,Math.toRadians(50), 1.0));
+                try {
+                    movement.followCurve(followPath, 90);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+Note: Rotational component is not working, someone may want to work on that
+also run in parallel with the DebugClient also provided with the Tutorial
+Link to the Sim:
+https://www.youtube.com/watch?v=VdoN7ePnG_w
+Also the sim runs in JavaFX, which is not supported after Java 10
