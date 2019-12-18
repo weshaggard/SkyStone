@@ -29,12 +29,29 @@ public class DriveSystem {
         VERTICAL, LATERAL, TURN, STOP
     }
 
-      public driveSystem(GPS gps){
+      public DriveSystem(HardwareMap hardwareMap, GPS gps){
         this.gps = gps;
-        resetEncoders();
+        frontLeft = hardwareMap.get(DcMotor.class, Constants.FRONT_LEFT_DRIVE);
+        frontRight = hardwareMap.get(DcMotor.class, Constants.FRONT_RIGHT_DRIVE);
+        rearLeft = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
+        rearRight = hardwareMap.get(DcMotor.class, Constants.REAR_RIGHT_DRIVE);
+        correctDirections();
         wheels = new OdometryWheelsFinal(AbstractOpMode.currentOpMode(),new Point(100, 100) ,this, 0);
         driveMotion = null;
     }
+
+    //Tele Op Constructor because Global Positioning isnt necessary
+    public DriveSystem(HardwareMap hardwareMap){
+        gps = null;
+        frontLeft = hardwareMap.get(DcMotor.class, Constants.FRONT_LEFT_DRIVE);
+        frontRight = hardwareMap.get(DcMotor.class, Constants.FRONT_RIGHT_DRIVE);
+        rearLeft = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
+        rearRight = hardwareMap.get(DcMotor.class, Constants.REAR_RIGHT_DRIVE);
+        correctDirections();
+
+    }
+
+
 
     private DcMotor getMotorByName(HardwareMap hardwareMap, String motorName) {
         return hardwareMap.get(DcMotor.class, motorName);
