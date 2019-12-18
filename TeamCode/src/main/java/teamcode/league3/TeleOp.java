@@ -45,7 +45,6 @@ public class TeleOp extends AbstractOpMode {
     }
 
     private void armUpdate() throws InterruptedException {
-
         if(gamepad1.a){
             arm.goToHome(0.6);
             presetNum = 1;
@@ -67,6 +66,8 @@ public class TeleOp extends AbstractOpMode {
             arm.adjustLiftHeight(-1, ARM_SYSTEM_POWER);
         }else if(gamepad1.dpad_left || gamepad2.dpad_right){
             arm.adjustFoundationGrabbers();
+        }else if(gamepad1.x){
+            arm.adjustClawPosition();
         }
     }
 

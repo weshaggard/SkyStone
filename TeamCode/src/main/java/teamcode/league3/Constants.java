@@ -27,13 +27,18 @@ public class Constants {
     public static final double DRIVE_LATERAL_INCHES_TO_TICKS = 551;
     public static final double DRIVE_DEGREES_TO_TICKS = 160;
 
-
+    //arm constants
     public static final double RAPIER_INCHES_TO_TICKS = 322.60869565217;
+    public static final double WINCH_TICKS_TO_INCHES = 140.9333333333; //uncalibrated
+
+
 
     //Speed constants mostly for odometry but to potentially be used for auto
     public static final double TURN_SPEED = 0.5;
     public static final double LATERAL_SPEED = 0.5;
     public static final double VERTICAL_SPEED = 0.5;
     public static final double WINCH_INCHES_TO_TICKS = 146.972519894;
+
+    public static final double CLAW_OPEN_POSITION = 0;
 
 }

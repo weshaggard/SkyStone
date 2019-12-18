@@ -24,10 +24,12 @@ public class ArmSystem {
     private final Servo leftFoundationGrabber;
     private final Servo rightFoundationGrabber;
     private GrabberState grabberState;
-
+    private ClawState clawState;
     private final int LINEAR_EXTENSION_EXTENDED_POSITION_INCHES = (int)(12 * Constants.RAPIER_INCHES_TO_TICKS);
     private static final double GRABBER_OPEN_POSITION = 0.5;
     private static final double GRABBER_CLOSED_POSITION = 1;
+    //422.8 ticks per rev
+    //3 inches per rev
 
 
     public ArmSystem(HardwareMap hardwareMap) {
@@ -41,6 +43,7 @@ public class ArmSystem {
         leftFoundationGrabber = hardwareMap.servo.get(Constants.LEFT_FOUNDATION_GRABBER);
         rightFoundationGrabber = hardwareMap.servo.get(Constants.RIGHT_FOUDNATION_GRABBER);
         grabberState = GrabberState.OPEN;
+        clawState = ClawState.OPEN;
     }
 
     public void intake(double power) {
@@ -60,7 +63,7 @@ public class ArmSystem {
     }
 
     public void moveToScoreFromIntookStone(int presetNum, final double power) throws InterruptedException {
-        claw.setPosition(CLAW_CLOSE_POS);
+        adjustClawPosition();
         Thread.currentThread().sleep(500);
         lift(presetNum, power);
         Thread linearExtension = new Thread(){
@@ -83,9 +86,7 @@ public class ArmSystem {
         winch.setPower(0);
     }
 
-    private enum GrabberState{
-        OPEN, CLOSED
-    }
+
 
     public void adjustFoundationGrabbers() {
         if(grabberState == GrabberState.OPEN){
@@ -102,6 +103,14 @@ public class ArmSystem {
 
     private enum LinearExtensionState{
         EXTENDED, RETRACTED
+    }
+
+    private enum GrabberState{
+        OPEN, CLOSED
+    }
+
+    private enum ClawState{
+        OPEN, CLOSED
     }
 
 
@@ -123,6 +132,16 @@ public class ArmSystem {
             }
             linearExtension.setPower(0);
             linearExtensionState = LinearExtensionState.RETRACTED;
+        }
+    }
+
+    public void adjustClawPosition(){
+        if(clawState == ClawState.OPEN){
+            claw.setPosition(CLAW_CLOSE_POS);
+            clawState = ClawState.CLOSED;
+        }else{
+            claw.setPosition(Constants.CLAW_OPEN_POSITION);
+            clawState = ClawState.OPEN;
         }
     }
 
