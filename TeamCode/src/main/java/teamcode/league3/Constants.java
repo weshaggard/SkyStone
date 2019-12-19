@@ -19,7 +19,6 @@ public class Constants {
     public static final String LEFT_FOUNDATION_GRABBER = "LeftFoundationGrabber";
     public static final String RIGHT_FOUDNATION_GRABBER = "RightFoundationGrabber";
 
-
     public static final double DRIVE_VERTICAL_INCHES_TO_TICKS = 1102;
     public static final int DRIVE_TICK_ERROR_TOLERANCE = 500;
 

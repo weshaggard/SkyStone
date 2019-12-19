@@ -16,9 +16,9 @@ public class OdometryWheelsFinal {
     public final DcMotor yOdoWheel;
 
     //information about the robot's global position
-    public Point globalRobotPosition;
+    private static Point globalRobotPosition;
     //currentGlobalDirection is in Radians
-    public double currentGlobalDirection;
+    private double currentGlobalDirection;
 
 
     //information about the driveSystem
@@ -65,7 +65,6 @@ public class OdometryWheelsFinal {
 
     //in addition to tracking the robot, you are also correcting for all form of manipulation
     public void update(){
-        if(motion != DriveSystem.DriveMotion.TURN) {
             deltaLeft = currentEncoderLeft - previousEncoderLeft;
             deltaRight = currentEncoderRight - previousEncoderRight;
             deltaY = currentEncoderY - previousEncoderY;
@@ -75,14 +74,6 @@ public class OdometryWheelsFinal {
             double deltaAngle = angleWrapper(absoluteAngle - currentGlobalDirection);
             globalRobotPosition = new Point(globalRobotPosition.x + deltaCentimetersX, globalRobotPosition.y + deltaCentimetersY);
             driveSystem.rotate(deltaAngle, Constants.TURN_SPEED);
-            if(motion != DriveSystem.DriveMotion.LATERAL && deltaY > 0) {
-                //driveSystem.lateral(deltaY * TICKS_TO_CENTIMETERS * INCHES_TO_CENTIMETERS, Constants.LATERAL_SPEED);
-            }
-            if(motion != DriveSystem.DriveMotion.VERTICAL && deltaCentimetersX > 0);{
-//                driveSystem.vertical(-deltaCentimetersX * INCHES_TO_CENTIMETERS, Constants.VERTICAL_SPEED, this);
-            }
-        }
-
     }
 
     //ensures the angle is between -180 and 180 degrees while keeping it in radians
@@ -105,6 +96,14 @@ public class OdometryWheelsFinal {
         return Math.abs(leftOdoXWheel.getCurrentPosition() - leftOdoXWheel.getTargetPosition()) < Constants.DRIVE_TICK_ERROR_TOLERANCE  &&
                 Math.abs(rightOdoXWheel.getCurrentPosition() - leftOdoXWheel.getTargetPosition()) < Constants.DRIVE_TICK_ERROR_TOLERANCE &&
                 Math.abs(yOdoWheel.getCurrentPosition() - yOdoWheel.getTargetPosition()) < Constants.DRIVE_TICK_ERROR_TOLERANCE;
+    }
+
+    public Point getGlobalRobotPosition(){
+        return globalRobotPosition;
+    }
+
+    public double getWorldAngleRads(){
+        return currentGlobalDirection;
     }
 
 
