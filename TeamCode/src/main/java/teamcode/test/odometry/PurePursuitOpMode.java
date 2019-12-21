@@ -22,8 +22,8 @@ public class PurePursuitOpMode extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        driveSystem = new DriveSystem(hardwareMap);
-        wheels = new OdometryWheelsFinal(this, new Point(100, 100), driveSystem, Math.toRadians(0));
+        wheels = new OdometryWheelsFinal(this, new Point(100, 100), Math.toRadians(0));
+        driveSystem = new DriveSystem(hardwareMap, wheels);
         movement = new PurePursuitMovement(wheels);
         odometryUpdate = new Thread(){
             @Override

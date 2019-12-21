@@ -9,6 +9,7 @@ import teamcode.common.Debug;
 import teamcode.common.Point;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
+import teamcode.test.odometry.MathFunctions;
 import teamcode.test.odometry.OdometryWheelsFinal;
 
 public class DriveSystem {
@@ -36,13 +37,13 @@ public class DriveSystem {
         rearLeft = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
         rearRight = hardwareMap.get(DcMotor.class, Constants.REAR_RIGHT_DRIVE);
         correctDirections();
-        wheels = new OdometryWheelsFinal(AbstractOpMode.currentOpMode(),new Point(100, 100) ,this, 0);
         driveMotion = null;
     }
 
     //Tele Op Constructor because Global Positioning isnt necessary
-    public DriveSystem(HardwareMap hardwareMap){
+    public DriveSystem(HardwareMap hardwareMap, OdometryWheelsFinal wheels){
         gps = null;
+        this.wheels = wheels;
         frontLeft = hardwareMap.get(DcMotor.class, Constants.FRONT_LEFT_DRIVE);
         frontRight = hardwareMap.get(DcMotor.class, Constants.FRONT_RIGHT_DRIVE);
         rearLeft = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
@@ -53,7 +54,7 @@ public class DriveSystem {
 
 
 
-    private DcMotor getMotorByName(HardwareMap hardwareMap, String motorName) {
+    public DcMotor getMotorByName(HardwareMap hardwareMap, String motorName) {
         return hardwareMap.get(DcMotor.class, motorName);
     }
 
@@ -62,9 +63,41 @@ public class DriveSystem {
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void vertical(double inches, double power) {
-        Vector2D currentPosition = gps.getPosition();
-        double rotation = gps.getRotation();
+    /**
+     * for omni movement with odometry in auto
+     * @param deltaXCentimter the distance travelled in the X
+     * @param deltaYCentimeter the distance travelled in the Y
+     * @param power the power assigned to the driveTrain
+     */
+    public void omniMovement(double deltaXCentimter, double deltaYCentimeter, double power){
+        Point destination = new Point(wheels.getGlobalRobotPosition().x + deltaXCentimter, wheels.getGlobalRobotPosition().y + deltaYCentimeter);
+        double directionRads = wheels.getWorldAngleRads();
+        //double angle = MathFunctions.angleWrap(directionRads + Math.atan2(deltaYCentimeter, deltaXCentimter));
+
+        //double turnSpeed
+        //Point currentGlobalPoint = wheels.getGlobalRobotPosition();
+        while(!robotIsNearPoint(destination)) {
+            double directionRelativeToGlobalPosition = Math.atan2(Math.abs(destination.y - wheels.getGlobalRobotPosition().y), Math.abs(destination.x - wheels.getGlobalRobotPosition().x));
+            double powerX = deltaXCentimter / (Math.abs(deltaXCentimter) + Math.abs(deltaYCentimeter));
+            double powerY = deltaYCentimeter / (Math.abs(deltaXCentimter) + Math.abs(deltaYCentimeter));
+
+            Debug.log(wheels.getGlobalRobotPosition());
+            Vector2D velocity = new Vector2D(powerX * power, powerY * power);
+            continuous(velocity, 0);
+        }
+        brake();
+    }
+
+    public void vertical(double centimeters, double power) {
+        //OdometryWheelsFinal implementation
+
+        //GPS implementation
+        //Vector2D currentPosition = gps.getPosition();
+        //double rotation = gps.getRotation();
+    }
+
+    private boolean robotIsNearPoint(Point current) {
+        return Math.abs(wheels.getGlobalRobotPosition().x - current.x) < Constants.TOLERANCE_X && Math.abs(wheels.getGlobalRobotPosition().y - current.y) < Constants.TOLERANCE_Y;
     }
 
     public void lateral(double inches, double power) {

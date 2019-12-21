@@ -19,7 +19,7 @@ public class TeleOp extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        driveSystem = new DriveSystem(hardwareMap);
+        //driveSystem = new DriveSystem(hardwareMap);
         arm = new ArmSystem(hardwareMap);
         presetNum = 1;
         driveSystemExcecution = new Thread(){

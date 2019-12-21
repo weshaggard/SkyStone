@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Point;
 import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
@@ -22,7 +23,6 @@ public class OdometryWheelsFinal {
 
 
     //information about the driveSystem
-    private DriveSystem driveSystem;
     private DriveSystem.DriveMotion motion;
 
     //current encoder values
@@ -41,7 +41,7 @@ public class OdometryWheelsFinal {
     private int deltaRight;
     private int deltaY;
 
-    private final double TICKS_TO_CENTIMETERS = 1102 * 2.54;
+    private final double TICKS_TO_CENTIMETERS = 1102 / 2.54;
     private final double INCHES_TO_CENTIMETERS = 1/2.54;
 
 
@@ -49,31 +49,62 @@ public class OdometryWheelsFinal {
      * Constructs an odometryWheel object
      * @param opMode the current opMode the program is running
      * @param globalRobotPosition the point the robot is on in CM as an X,Y point
-     * @param driveSystem the DriveSystem being used during the opMode
      * @param startingAngle the starting angle of the robot in DEGREES, everything is handled inside this class as Radians however
      */
-    public OdometryWheelsFinal(AbstractOpMode opMode, Point globalRobotPosition, DriveSystem driveSystem, double startingAngle){
+    public OdometryWheelsFinal(AbstractOpMode opMode, Point globalRobotPosition, double startingAngle){
         HardwareMap hardwareMap = opMode.hardwareMap;
-        leftOdoXWheel = hardwareMap.get(DcMotor.class, "LeftOdoWheelX");
-        rightOdoXWheel = hardwareMap.get(DcMotor.class, "rightOdoWheelX");
-        yOdoWheel = hardwareMap.get(DcMotor.class, "yOdoWheel");
+        leftOdoXWheel = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
+        rightOdoXWheel = hardwareMap.get(DcMotor.class, Constants.FRONT_RIGHT_DRIVE);
+        yOdoWheel = hardwareMap.get(DcMotor.class, Constants.FRONT_LEFT_DRIVE);
         this.globalRobotPosition = globalRobotPosition;
-        this.driveSystem = driveSystem;
         this.motion = DriveSystem.DriveMotion.STOP;
         currentGlobalDirection = Math.toRadians(startingAngle);
+        new Thread(){
+            @Override
+            public void run(){
+
+                while(AbstractOpMode.currentOpMode().opModeIsActive()){
+                    update();
+                }
+            }
+        }.start();
     }
 
-    //in addition to tracking the robot, you are also correcting for all form of manipulation
+    /**
+     * Updates the globalPosition and direction of the robot in Radians
+     * Port 0: yOdoWheel (FrontLeftDrive)
+     * Port 1: RightOdoWheelX (FrontRightDrive)
+     * Port 2: LeftOdoWheelX (RearLeftDrive)
+     */
     public void update(){
+            currentEncoderLeft = leftOdoXWheel.getCurrentPosition();
+            currentEncoderRight = rightOdoXWheel.getCurrentPosition();
+            currentEncoderY = yOdoWheel.getCurrentPosition();
             deltaLeft = currentEncoderLeft - previousEncoderLeft;
             deltaRight = currentEncoderRight - previousEncoderRight;
             deltaY = currentEncoderY - previousEncoderY;
-            double deltaCentimetersX = (deltaLeft + deltaRight) / 2 * TICKS_TO_CENTIMETERS;
-            double deltaCentimetersY = deltaY * TICKS_TO_CENTIMETERS;
-            double absoluteAngle = Math.atan2(deltaCentimetersY, deltaCentimetersX);
-            double deltaAngle = angleWrapper(absoluteAngle - currentGlobalDirection);
+            double deltaCentimetersX = (deltaLeft + deltaRight) / 2 * Constants.TICKS_PER_CENTIMETER;
+            double deltaCentimetersY = deltaY * Constants.TICKS_PER_CENTIMETER;
+            if(deltaLeft != deltaRight){
+                //arc based case
+                double arcLengthRatio = (double)Math.min(deltaLeft, deltaRight) / (double)Math.max(deltaLeft, deltaRight);
+                double radius = 2 * Constants.ODOMETRY_DISTANCE_TO_CENTER  * arcLengthRatio/ (1 - arcLengthRatio);
+                double theta = Math.min(deltaLeft, deltaRight) * 2 * Math.PI / 2 * Math.PI * radius;
+                currentGlobalDirection = angleWrapper(theta + currentGlobalDirection);
+
+            }
+            if(deltaCentimetersX == 0) {
+                //rotational case
+                double absoluteAngle = Math.PI * Math.pow(Constants.ODOMETRY_DISTANCE_TO_CENTER, 2);
+                //double absoluteAngle = Math.atan2(deltaCentimetersY, deltaCentimetersX);
+                double deltaAngle = angleWrapper(absoluteAngle - currentGlobalDirection);
+            }
             globalRobotPosition = new Point(globalRobotPosition.x + deltaCentimetersX, globalRobotPosition.y + deltaCentimetersY);
-            driveSystem.rotate(deltaAngle, Constants.TURN_SPEED);
+            Debug.log(globalRobotPosition);
+            //currentGlobalDirection = angleWrapper(deltaAngle + currentGlobalDirection);
+            previousEncoderLeft = currentEncoderLeft;
+            previousEncoderRight = currentEncoderRight;
+            previousEncoderY = currentEncoderY;
     }
 
     //ensures the angle is between -180 and 180 degrees while keeping it in radians

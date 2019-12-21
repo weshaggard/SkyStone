@@ -19,8 +19,9 @@ public class PurePursuitSimpleTest extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        driveSystem = new DriveSystem(AbstractOpMode.currentOpMode().hardwareMap);
-        wheels = new OdometryWheelsFinal(this, new Point(100,100),driveSystem,0);
+        wheels = new OdometryWheelsFinal(this, new Point(100,100),0);
+
+        driveSystem = new DriveSystem(AbstractOpMode.currentOpMode().hardwareMap, wheels);
         movement = new PurePursuitSimple(wheels, driveSystem);
         path = new ArrayList<>();
     }

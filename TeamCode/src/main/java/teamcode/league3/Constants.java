@@ -40,4 +40,8 @@ public class Constants {
 
     public static final double CLAW_OPEN_POSITION = 0;
 
+    public static final double TICKS_PER_CENTIMETER = 434.599097936;
+    public static final double TOLERANCE_X = 0.1 ;
+    public static final double TOLERANCE_Y = 0.1;
+    public static final double ODOMETRY_DISTANCE_TO_CENTER = 4.405;
 }

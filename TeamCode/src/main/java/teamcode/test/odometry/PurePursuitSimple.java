@@ -33,8 +33,8 @@ public class PurePursuitSimple {
         double xPower = deltaX / distanceHypotenuse * power;
         double yPower = deltaY / distanceHypotenuse * power;
         double absoluteAngleRads = Math.atan2(deltaY, deltaX);
-        double relativeAngleRads = wheels.angleWrapper(absoluteAngleRads - wheels.currentGlobalDirection);
-        driveSystem.rotate(Math.toDegrees(relativeAngleRads), Constants.TURN_SPEED);
+        //double relativeAngleRads = wheels.angleWrapper(absoluteAngleRads - wheels.currentGlobalDirection);
+        //driveSystem.rotate(Math.toDegrees(relativeAngleRads), Constants.TURN_SPEED);
         Vector2D velocity = new Vector2D(yPower, xPower);
         while(!driveSystem.nearTarget()){
             driveSystem.continuous(velocity, 0);

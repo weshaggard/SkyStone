@@ -37,7 +37,7 @@ public class PurePursuitMovement {
     //private CurvePoint currentPoint;
     private CurvePoint previousFollowMe;
 
-    public PurePursuitMovement(OdometryWheelsFinal wheels;){
+    public PurePursuitMovement(OdometryWheelsFinal wheels){
         this.wheels = wheels;
     }
 
