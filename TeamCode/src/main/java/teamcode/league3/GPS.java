@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
 
 /**
@@ -15,6 +16,9 @@ public class GPS {
      * Whether or not this GPS should continue to update positions.
      */
     private boolean active;
+    /**
+     * Position stored in ticks. When exposed to external classes, it is represented in inches.
+     */
     private Vector2D position;
     /**
      * In radians, unit circle style.
@@ -27,9 +31,9 @@ public class GPS {
         active = true;
         this.position = currentPosition;
         this.rotation = bearingToRadians(currentBearing);
-        leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER);
-        rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER);
-        horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER);
+        leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
+        rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
+        horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
         prevLeftVerticalPos = 0;
         prevRightVerticalPos = 0;
         prevHorizontalPos = 0;
@@ -47,8 +51,6 @@ public class GPS {
     }
 
     private void correctDirections() {
-        leftVertical.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightVertical.setDirection(DcMotorSimple.Direction.REVERSE);
         horizontal.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
@@ -64,8 +66,9 @@ public class GPS {
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
-        double deltaRot = (deltaLeftVertical - deltaRightVertical) / Constants.VERTICAL_ODOMETER_SEPARATION_DISTANCE;
+        double deltaRot = (deltaRightVertical - deltaLeftVertical) / Constants.VERTICAL_ODOMETER_SEPARATION_DISTANCE;
         rotation += deltaRot;
+        //rotation = Utils.wrapAngle(rotation);
 
         double horizontalPos = horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos - deltaRot * Constants.HORIZONTAL_ODOMETER_DEGREES_TO_TICKS;
@@ -73,8 +76,8 @@ public class GPS {
         double p = (deltaLeftVertical + deltaRightVertical) / 2;
         double n = deltaHorizontal;
 
-        double x = position.getX() + p * Math.sin(rotation) + n * Math.cos(rotation);
-        double y = position.getY() + p * Math.cos(rotation) - n * Math.sin(rotation);
+        double y = position.getY() + p * Math.sin(rotation) - n * Math.cos(rotation);
+        double x = position.getX() + p * Math.cos(rotation) - n * Math.sin(rotation);
         position.setX(x);
         position.setY(y);
 
@@ -83,15 +86,17 @@ public class GPS {
         prevHorizontalPos = horizontalPos;
     }
 
+    /**
+     * Returns the position of the robot as read by the odometers. In inches
+     */
     public Vector2D getPosition() {
-        // clone so that position can not be externally modified
-        return position.clone();
+        return position.multiply(Constants.ODOMETER_TICKS_TO_INCHES);
     }
 
     /**
      * Returns the rotation in radians, unit circle style.
      */
-    public double getRotation(){
+    public double getRotation() {
         return rotation;
     }
 
@@ -103,11 +108,15 @@ public class GPS {
     }
 
     private double radiansToBearing(double radians) {
+        // 0 -> 90
+        // pi/2 -> 0
+        // pi -> 270
+        // 3pi/2 -> 180
         return radians;
     }
 
     private double bearingToRadians(double bearing) {
-        return bearing;
+        return 0;
     }
 
     /**

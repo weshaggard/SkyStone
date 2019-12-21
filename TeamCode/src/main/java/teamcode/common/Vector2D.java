@@ -13,6 +13,9 @@ public final class Vector2D implements Cloneable {
         this.y = y;
     }
 
+    /**
+     * Returns a new vector with the specified angle and magnitude.
+     */
     public static Vector2D fromAngleMagnitude(double theta, double magnitude) {
         return new Vector2D(Math.cos(theta) * magnitude, Math.sin(theta) * magnitude);
     }
@@ -70,6 +73,16 @@ public final class Vector2D implements Cloneable {
 
     public Vector2D multiply(double scalar) {
         return new Vector2D(x * scalar, y * scalar);
+    }
+
+    /**
+     * Returns a new vector that is a transformation of this vector rotated counterclockwise around
+     * the origin.
+     */
+    public Vector2D rotate(double radians) {
+        double x2 = Math.cos(radians) * this.x - Math.sin(radians) * this.y;
+        double y2 = Math.sin(radians) * this.x + Math.cos(radians) * this.y;
+        return new Vector2D(x2, y2);
     }
 
     public double dotProduct(Vector2D other) {

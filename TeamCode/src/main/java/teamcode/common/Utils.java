@@ -24,6 +24,29 @@ public class Utils {
         return distance <= errorTolerance;
     }
 
+    /**
+     * Linear interpolation.
+     */
+    public static double lerp(double min, double max, double interpolant) {
+        if (interpolant < 0 || interpolant > 1) {
+            throw new IllegalArgumentException("Interpolant must be between 0 and 1");
+        }
+        return min + (max - min) * interpolant;
+    }
+
+    /**
+     * Returns an angle in [-pi, pi) that is equal to the specified angle.
+     */
+    public static double wrapAngle(double radians) {
+        while (radians < -Math.PI) {
+            radians += 2 * Math.PI;
+        }
+        while (radians >= Math.PI) {
+            radians -= 2 * Math.PI;
+        }
+        return radians;
+    }
+
     public static void sleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
