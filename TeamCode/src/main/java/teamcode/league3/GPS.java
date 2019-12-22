@@ -66,12 +66,14 @@ public class GPS {
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
-        double deltaRot = (deltaRightVertical - deltaLeftVertical) / Constants.VERTICAL_ODOMETER_SEPARATION_DISTANCE;
+        double deltaRot = (deltaRightVertical - deltaLeftVertical) /
+                Constants.VERTICAL_ODOMETER_SEPARATION_DISTANCE;
         rotation += deltaRot;
         //rotation = Utils.wrapAngle(rotation);
 
         double horizontalPos = horizontal.getCurrentPosition();
-        double deltaHorizontal = horizontalPos - prevHorizontalPos - deltaRot * Constants.HORIZONTAL_ODOMETER_DEGREES_TO_TICKS;
+        double deltaHorizontal = horizontalPos - prevHorizontalPos - deltaRot *
+                Constants.HORIZONTAL_ODOMETER_DEGREES_TO_TICKS;
 
         double p = (deltaLeftVertical + deltaRightVertical) / 2;
         double n = deltaHorizontal;

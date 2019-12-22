@@ -73,7 +73,8 @@ public class DriveSystem {
             double distanceToTarget = translation.magnitude();
             double powerMultiplier = speed * getModulatedPower(speed, distanceToTarget);
 
-            Vector2D velocity = translation.normalized().multiply(powerMultiplier);
+            // Account for the orientation of the robot.
+            Vector2D velocity = translation.rotate(-currentRotation).normalized().multiply(powerMultiplier);
             double turnSpeed = (currentRotation - targetRotation) * Constants.TURN_CORRECTION_INTENSITY;
             continuous(velocity, turnSpeed);
         }
