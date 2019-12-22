@@ -40,7 +40,7 @@ public class DriveSystem {
         driveMotion = null;
     }
 
-    //Tele Op Constructor because Global Positioning isnt necessary
+
     public DriveSystem(HardwareMap hardwareMap, OdometryWheelsFinal wheels){
         gps = null;
         this.wheels = wheels;

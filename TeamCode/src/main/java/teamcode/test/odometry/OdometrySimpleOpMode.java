@@ -1,6 +1,7 @@
 package teamcode.test.odometry;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -9,12 +10,12 @@ import teamcode.common.Vector2D;
 import teamcode.league3.DriveSystem;
 
 
-@Autonomous(name= "Odometry test simple")
+@TeleOp(name= "Odometry test simple")
 public class OdometrySimpleOpMode extends AbstractOpMode {
 
     DriveSystem driveSystem;
     OdometryWheelsFinal wheels;
-    Thread odometerUpdate;
+
     @Override
     protected void onInitialize() {
         wheels = new OdometryWheelsFinal(this, new Point(0, 0), 0);
@@ -25,8 +26,8 @@ public class OdometrySimpleOpMode extends AbstractOpMode {
     protected void onStart() {
         while(opModeIsActive()) {
             Debug.clear();
-            Debug.log("Position: " + wheels.getGlobalRobotPosition());
-            Debug.log("Direction: " + Math.toDegrees(wheels.getWorldAngleRads()));
+            //Debug.log("Position: " + wheels.getGlobalRobotPosition());
+            //Debug.log("Direction: " + Math.toDegrees(wheels.getWorldAngleRads()));
             Vector2D velocity = new Vector2D(0.4 * gamepad1.left_stick_x,0.4 *  gamepad1.left_stick_y);
             double turnSpeed = gamepad1.right_stick_x * 0.4;
             driveSystem.continuous(velocity, turnSpeed);
@@ -36,11 +37,6 @@ public class OdometrySimpleOpMode extends AbstractOpMode {
 
     @Override
     protected void onStop() {
-        try {
-            Thread.sleep(500);
-            odometerUpdate.sleep(500);
-        }catch( InterruptedException e){
-            e.printStackTrace();
-        }
+        wheels.active = false;
     }
 }
