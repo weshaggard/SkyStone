@@ -7,6 +7,7 @@ public class Line {
     Point p1;
     Point p2;
     double slope;
+    double length;
 
 
     /**
@@ -23,6 +24,12 @@ public class Line {
         if(!leftToRight){
             slope *= -1;
         }
+
+    }
+
+    public Line(Point start, double slope){
+        this.p1 = start;
+        this.slope = slope;
     }
 
     /**

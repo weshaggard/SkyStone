@@ -49,9 +49,9 @@ public class OdometryWheelsFinal {
      * Constructs an odometryWheel object
      * @param opMode the current opMode the program is running
      * @param globalRobotPosition the point the robot is on in CM as an X,Y point
-     * @param startingAngle the starting angle of the robot in DEGREES, everything is handled inside this class as Radians however
+     * @param startingAngle the starting angle of the robot in DEGREES, everything is handled inside this class as Radians however, Note that this is also a direction
      */
-    public OdometryWheelsFinal(AbstractOpMode opMode, Point globalRobotPosition, double startingAngle){
+    public OdometryWheelsFinal(final AbstractOpMode opMode, Point globalRobotPosition, double startingAngle){
         HardwareMap hardwareMap = opMode.hardwareMap;
         leftOdoXWheel = hardwareMap.get(DcMotor.class, Constants.REAR_LEFT_DRIVE);
         rightOdoXWheel = hardwareMap.get(DcMotor.class, Constants.FRONT_RIGHT_DRIVE);
@@ -62,8 +62,7 @@ public class OdometryWheelsFinal {
         new Thread(){
             @Override
             public void run(){
-
-                while(AbstractOpMode.currentOpMode().opModeIsActive()){
+                while(opMode.opModeIsActive()){
                     update();
                 }
             }
@@ -91,16 +90,40 @@ public class OdometryWheelsFinal {
                 double radius = 2 * Constants.ODOMETRY_DISTANCE_TO_CENTER  * arcLengthRatio/ (1 - arcLengthRatio);
                 double theta = Math.min(deltaLeft, deltaRight) * 2 * Math.PI / 2 * Math.PI * radius;
                 currentGlobalDirection = angleWrapper(theta + currentGlobalDirection);
-
+                deltaCentimetersX = radius - radius * Math.cos(currentGlobalDirection);
+                deltaCentimetersY = Math.sqrt(2 * radius * deltaCentimetersX - Math.pow(deltaCentimetersX, 2));
             }
             if(deltaCentimetersX == 0) {
-                //rotational case
-                double absoluteAngle = Math.PI * Math.pow(Constants.ODOMETRY_DISTANCE_TO_CENTER, 2);
+                //rotational case, note that this is pivoted around the center so the change in position is ZERO
+                if(deltaRight > 0){
+                    //rotating positve theta
+                    double theta = deltaRight * TICKS_TO_CENTIMETERS / Constants.ODOMETRY_DISTANCE_TO_CENTER;
+                    currentGlobalDirection = angleWrapper(currentGlobalDirection + theta);
+                }else{
+                    //rotating negative theta
+                    double theta = deltaLeft * TICKS_TO_CENTIMETERS / Constants.ODOMETRY_DISTANCE_TO_CENTER;
+                    currentGlobalDirection = angleWrapper(currentGlobalDirection - theta);
+                }
+
                 //double absoluteAngle = Math.atan2(deltaCentimetersY, deltaCentimetersX);
-                double deltaAngle = angleWrapper(absoluteAngle - currentGlobalDirection);
+                //double deltaAngle = angleWrapper(absoluteAngle - currentGlobalDirection);
+                //global position remains unchanged
             }
-            globalRobotPosition = new Point(globalRobotPosition.x + deltaCentimetersX, globalRobotPosition.y + deltaCentimetersY);
-            Debug.log(globalRobotPosition);
+
+            if(currentGlobalDirection > Math.toRadians(90) && currentGlobalDirection < Math.toRadians(180)){
+                //case for misoriented chassis in quadrant 2
+                globalRobotPosition = new Point(globalRobotPosition.x - deltaCentimetersY, globalRobotPosition.y + deltaCentimetersX);
+            }else if(currentGlobalDirection > Math.toRadians(-180) && currentGlobalDirection < Math.toRadians(-90)){
+                //case for quadrant 3
+                globalRobotPosition = new Point(globalRobotPosition.x - deltaCentimetersX, globalRobotPosition.y - deltaCentimetersY);
+            }else if(currentGlobalDirection < 0 && currentGlobalDirection > Math.toRadians(-90)){
+                //case for quadrant 4
+                globalRobotPosition = new Point(globalRobotPosition.x + deltaCentimetersY, globalRobotPosition.y - deltaCentimetersX);
+            }else {
+                //ideal case, robots direction of motion is in Quadrant 1
+                globalRobotPosition = new Point(globalRobotPosition.x + deltaCentimetersX, globalRobotPosition.y + deltaCentimetersY);
+            }
+
             //currentGlobalDirection = angleWrapper(deltaAngle + currentGlobalDirection);
             previousEncoderLeft = currentEncoderLeft;
             previousEncoderRight = currentEncoderRight;

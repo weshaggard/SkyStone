@@ -17,6 +17,9 @@ public class Point {
      * @return the slope as a double
      */
     public double slope(Point p2){
+        if(x - p2.x == 0){
+            return Double.NaN;
+        }
         return (y - p2.y) / (x - p2.x);
     }
 
