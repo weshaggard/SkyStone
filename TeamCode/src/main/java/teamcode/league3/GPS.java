@@ -27,9 +27,13 @@ public class GPS {
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
+    /**
+     * @param currentPosition in inches
+     * @param currentBearing  in degrees
+     */
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
         active = true;
-        this.position = currentPosition;
+        this.position = currentPosition.multiply(Constants.ODOMETER_INCHES_TO_TICKS);
         this.rotation = bearingToRadians(currentBearing);
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
@@ -72,10 +76,10 @@ public class GPS {
 
         double horizontalPos = horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
-                Constants.HORIZONTAL_ODOMETER_ROTATION_TO_HORIZONTAL_TICK_OFFSET;
+                Constants.HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
 
-        double y = position.getY() + averageDeltaVertical * Math.sin(rotation) +
+        double y = position.getY() - averageDeltaVertical * Math.sin(rotation) -
                 deltaHorizontal * Math.cos(rotation);
         double x = position.getX() + averageDeltaVertical * Math.cos(rotation) +
                 deltaHorizontal * Math.sin(rotation);
@@ -92,7 +96,7 @@ public class GPS {
      * Returns the position of the robot as read by the odometers. In inches
      */
     public Vector2D getPosition() {
-        return position.multiply(Constants.ODOMETER_TICKS_TO_INCHES);
+        return position.multiply(1 / Constants.ODOMETER_INCHES_TO_TICKS);
     }
 
     /**

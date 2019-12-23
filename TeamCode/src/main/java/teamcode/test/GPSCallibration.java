@@ -17,25 +17,22 @@ public class GPSCallibration extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         Vector2D startPosition = Vector2D.zero();
-        double startBearing = 90;
+        double startBearing = Math.PI / 2;
         gps = new GPS(hardwareMap, startPosition, startBearing);
         driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startBearing);
     }
 
     @Override
     protected void onStart() {
-        while (opModeIsActive()) {
-                Debug.clear();
-            Debug.log("GPS location: " + gps.getPosition());
-            Debug.log("GPS rotation: " + Math.toDegrees(gps.getRotation()));
-            double x = gamepad1.right_stick_x;
-            double y = -gamepad1.right_stick_y;
-            Vector2D velocity = new Vector2D(x, y);
-            double turn = gamepad1.left_stick_x;
-            velocity = velocity.multiply(0.4);
-            turn *= 0.4;
-            driveSystem.continuous(velocity, turn);
-        }
+        double speed = 0.25;
+        Vector2D target1 = new Vector2D(24, 0);
+        Vector2D target2 = new Vector2D(24, 24);
+        Vector2D target3 = new Vector2D(0, 24);
+        Vector2D target4 = new Vector2D(0, 0);
+        driveSystem.goTo(target1, speed);
+        driveSystem.goTo(target2, speed);
+        driveSystem.goTo(target3, speed);
+        driveSystem.goTo(target4, speed);
     }
 
     @Override

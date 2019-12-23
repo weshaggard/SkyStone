@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
@@ -58,18 +60,21 @@ public class DriveSystem {
 
     public void goTo(Vector2D targetPosition, double speed) {
         this.targetPosition = targetPosition;
-        while (!near(targetPosition, targetRotation)) {
+        while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Vector2D currentPosition = gps.getPosition();
             double currentRotation = gps.getRotation();
             Vector2D translation = targetPosition.subtract(currentPosition);
 
             // Reduce power when approaching target position.
             double distanceToTarget = translation.magnitude();
-            double powerMultiplier = speed * getModulatedPower(speed, distanceToTarget);
+            double power = getModulatedPower(speed, distanceToTarget);
 
             // Account for the orientation of the robot.
-            Vector2D velocity = translation.rotate(-currentRotation).normalize().multiply(powerMultiplier);
-            double turnSpeed = (currentRotation - targetRotation) * Constants.TURN_CORRECTION_INTENSITY;
+            Vector2D velocity = translation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
+
+            double turnSpeed = Math.min((currentRotation - targetRotation) *
+                    Constants.TURN_CORRECTION_SPEED_MULTIPLIER * speed, Constants.MAX_TURN_CORRECTION_SPEED * speed);
+
             continuous(velocity, turnSpeed);
         }
     }
@@ -109,11 +114,13 @@ public class DriveSystem {
     private boolean near(Vector2D position, double rotation) {
         Vector2D currentPosition = gps.getPosition();
         Vector2D positionOffset = position.subtract(currentPosition);
+        Debug.clear();
+        Debug.log("offset: " + positionOffset);
         double currentRotation = gps.getRotation();
         double rotationOffset = rotation - currentRotation;
         return Math.abs(positionOffset.getX()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(positionOffset.getY()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_DEGREES;
+                Math.abs(positionOffset.getY()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES;// &&
+        //Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_DEGREES;
     }
 
 }
