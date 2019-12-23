@@ -38,58 +38,6 @@ public class DriveSystem {
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void vertical(double inches, double power) {
-        Vector2D translation = Vector2D.fromAngleMagnitude(targetRotation, inches);
-        targetPosition = targetPosition.add(translation);
-        while (!near(targetPosition, targetRotation)) {
-            // add in correction
-            double targetX = 0;
-            double targetY = 0;
-            Vector2D velocity = new Vector2D(0, 0);
-            continuous(velocity, 0);
-        }
-        brake();
-    }
-
-    public void lateral(double inches, double power) {
-
-    }
-
-    public void rotate(double degrees, double power) {
-        targetRotation = targetRotation + degrees;
-        double radians = Math.toRadians(degrees);
-        double currentRotation = gps.getRotation();
-        double turnAngle = radians - currentRotation;
-    }
-
-    public void goTo(Vector2D targetPosition, double speed) {
-        this.targetPosition = targetPosition;
-        while (!near(targetPosition, targetRotation)) {
-            Vector2D currentPosition = gps.getPosition();
-            double currentRotation = gps.getRotation();
-            Vector2D translation = targetPosition.subtract(currentPosition);
-
-            // Reduce power when approaching target position.
-            double distanceToTarget = translation.magnitude();
-            double powerMultiplier = speed * getModulatedPower(speed, distanceToTarget);
-
-            // Account for the orientation of the robot.
-            Vector2D velocity = translation.rotate(-currentRotation).normalized().multiply(powerMultiplier);
-            double turnSpeed = (currentRotation - targetRotation) * Constants.TURN_CORRECTION_INTENSITY;
-            continuous(velocity, turnSpeed);
-        }
-    }
-
-    private double getModulatedPower(double maxSpeed, double distanceToTarget) {
-        if (distanceToTarget < Constants.DRIVE_SPEED_REDUCTION_DISTANCE_INCHES) {
-            return Math.min(maxSpeed, Utils.lerp(Constants.DRIVE_MIN_REDUCED_SPEED,
-                    1, distanceToTarget /
-                            Constants.DRIVE_SPEED_REDUCTION_DISTANCE_INCHES));
-        } else {
-            return maxSpeed;
-        }
-    }
-
     public void continuous(Vector2D velocity, double turnSpeed) {
         // Not sure why this is necessary, but it works. If it ain't broke, don't fix it.
         Vector2D velocity0 = new Vector2D(-velocity.getX(), velocity.getY());
@@ -106,6 +54,46 @@ public class DriveSystem {
         frontRight.setPower(power * cos - turnSpeed);
         rearLeft.setPower(power * cos + turnSpeed);
         rearRight.setPower(power * sin - turnSpeed);
+    }
+
+    public void goTo(Vector2D targetPosition, double speed) {
+        this.targetPosition = targetPosition;
+        while (!near(targetPosition, targetRotation)) {
+            Vector2D currentPosition = gps.getPosition();
+            double currentRotation = gps.getRotation();
+            Vector2D translation = targetPosition.subtract(currentPosition);
+
+            // Reduce power when approaching target position.
+            double distanceToTarget = translation.magnitude();
+            double powerMultiplier = speed * getModulatedPower(speed, distanceToTarget);
+
+            // Account for the orientation of the robot.
+            Vector2D velocity = translation.rotate(-currentRotation).normalize().multiply(powerMultiplier);
+            double turnSpeed = (currentRotation - targetRotation) * Constants.TURN_CORRECTION_INTENSITY;
+            continuous(velocity, turnSpeed);
+        }
+    }
+
+    private double getModulatedPower(double maxSpeed, double distanceToTarget) {
+        if (distanceToTarget < Constants.DRIVE_SPEED_REDUCTION_DISTANCE_INCHES) {
+            return Math.min(maxSpeed, Utils.lerp(Constants.DRIVE_MIN_REDUCED_SPEED,
+                    1, distanceToTarget /
+                            Constants.DRIVE_SPEED_REDUCTION_DISTANCE_INCHES));
+        } else {
+            return maxSpeed;
+        }
+    }
+
+    public void vertical(double inches, double speed) {
+
+    }
+
+    public void lateral(double inches, double speed) {
+
+    }
+
+    public void turn(double degrees, double speed) {
+
     }
 
     public void brake() {

@@ -52,13 +52,7 @@ public final class Vector2D implements Cloneable {
         return Math.sqrt(x * x + y * y);
     }
 
-    public void normalize() {
-        double magnitude = magnitude();
-        x /= magnitude;
-        y /= magnitude;
-    }
-
-    public Vector2D normalized() {
+    public Vector2D normalize() {
         double magnitude = magnitude();
         return new Vector2D(x / magnitude, y / magnitude);
     }

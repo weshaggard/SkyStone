@@ -25,9 +25,9 @@ public class GPSCallibration extends AbstractOpMode {
     @Override
     protected void onStart() {
         while (opModeIsActive()) {
-            Debug.clear();
+                Debug.clear();
             Debug.log("GPS location: " + gps.getPosition());
-            Debug.log("GPS rotation: " + gps.getRotation());
+            Debug.log("GPS rotation: " + Math.toDegrees(gps.getRotation()));
             double x = gamepad1.right_stick_x;
             double y = -gamepad1.right_stick_y;
             Vector2D velocity = new Vector2D(x, y);
