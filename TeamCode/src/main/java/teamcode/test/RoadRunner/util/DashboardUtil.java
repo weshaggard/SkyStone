@@ -1,9 +1,10 @@
 package teamcode.test.RoadRunner.util;
 
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.path.Path;
+
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.canvas.Canvas;
 
 /**
  * Set of helper functions for drawing Road Runner paths and trajectories on dashboard canvases.

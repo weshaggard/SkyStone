@@ -12,6 +12,8 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.ArrayList;
@@ -26,6 +28,9 @@ import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
 import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREVOptimized;
 import teamcode.test.examples.GlobalCoordinatePositionUpdateSample;
 
+
+@Disabled
+@Autonomous(name="RoadRunner")
 public class RoadRunnerTest extends AbstractOpMode {
     SampleMecanumDriveREVOptimized drive;
 

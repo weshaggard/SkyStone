@@ -1,8 +1,6 @@
 package teamcode.test.RoadRunner.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -10,9 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
+
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.FtcDashboard;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import teamcode.test.RoadRunner.mecanum.DriveConstants;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveBase;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREVOptimized;
 
 /*
  * This routine determines the effective track width. The procedure works by executing a point turn
@@ -23,7 +25,7 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
  * this procedure a few times and averages the values for additional accuracy. Note: a relatively
  * accurate track width estimate is important or else the angular constraints will be thrown off.
  */
-@Config
+
 @Autonomous(group = "drive")
 public class TrackWidthTuner extends LinearOpMode {
     public static double ANGLE = 180; // deg
@@ -34,7 +36,7 @@ public class TrackWidthTuner extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
+        SampleMecanumDriveBase drive = new SampleMecanumDriveREVOptimized(hardwareMap);
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         // drive encoders for computing the heading
 

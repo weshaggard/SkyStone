@@ -68,6 +68,13 @@ import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dash
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 import static java.lang.Compiler.enable;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.GET_CONFIG;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.GET_ROBOT_STATUS;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.INIT_OP_MODE;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.RECEIVE_GAMEPAD_STATE;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.SAVE_CONFIG;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.START_OP_MODE;
+import static teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType.STOP_OP_MODE;
 
 /**
  * Main class for interacting with the instance.
@@ -231,7 +238,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                 for (TelemetryPacket packet : telemetryToSend.subList(0, telemetryToSend.size() - 1)) {
                     packet.fieldOverlay().clear();
                 }
-                sendAll(new ReceiveTelemetry(telemetryToSend));
+                //sendAll(new ReceiveTelemetry(telemetryToSend));
 
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 long sleepTime = telemetryTransmissionInterval - elapsedTime;
@@ -278,7 +285,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     opModeList.add(opModeMeta.name);
                 }
                 Collections.sort(opModeList);
-                sendAll(new ReceiveOpModeList(opModeList));
+                //sendAll(new ReceiveOpModeList(opModeList));
             }
         }
     }
@@ -313,7 +320,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     source.getFrameBitmap(Continuation.createTrivial(new Consumer<Bitmap>() {
                         @Override
                         public void accept(Bitmap value) {
-                            sendAll(new ReceiveImage(bitmapToJpegString(value, imageQuality)));
+                            //sendAll(new ReceiveImage(bitmapToJpegString(value, imageQuality)));
                             latch.countDown();
                         }
                     }));
@@ -682,7 +689,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
      * Sends updated configuration data to all instance clients.
      */
     public void updateConfig() {
-        sendAll(new ReceiveConfig(configRoot));
+        //sendAll(new ReceiveConfig(configRoot));
     }
 
     /**
@@ -753,7 +760,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         stopCameraStream();
 
-        sendAll(new ReceiveImage(bitmapToJpegString(bitmap, imageQuality)));
+        //sendAll(new ReceiveImage(bitmapToJpegString(bitmap, imageQuality)));
     }
 
     /**
@@ -824,28 +831,29 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private void sendAll(Message message) {
-        synchronized (sockets) {
-            for (DashboardWebSocket ws : sockets) {
-                ws.send(message);
-            }
-        }
-    }
+//    private void sendAll(Message message) {
+//        synchronized (sockets) {
+//            for (DashboardWebSocket ws : sockets) {
+//                ws.send(message);
+//            }
+//        }
+//    }
 
     void addSocket(DashboardWebSocket socket) {
         synchronized (sockets) {
             sockets.add(socket);
         }
-
-        socket.send(new ReceiveConfig(configRoot));
-        synchronized (opModeList) {
-            if (opModeList.size() > 0) {
-                socket.send(new ReceiveOpModeList(opModeList));
-            }
-        }
-
-        updateStatusView();
     }
+
+//        socket.send(new ReceiveConfig(configRoot));
+//        synchronized (opModeList) {
+//            if (opModeList.size() > 0) {
+//                socket.send(new ReceiveOpModeList(opModeList));
+//            }
+//        }
+//
+//        updateStatusView();
+//    }
 
     void removeSocket(DashboardWebSocket socket) {
         synchronized (sockets) {
@@ -858,11 +866,11 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     void onMessage(DashboardWebSocket socket, Message msg) {
         switch (msg.getType()) {
             case GET_ROBOT_STATUS: {
-                socket.send(new ReceiveRobotStatus(getRobotStatus()));
+                //socket.send(new ReceiveRobotStatus(getRobotStatus()));
                 break;
             }
             case GET_CONFIG: {
-                socket.send(new ReceiveConfig(configRoot));
+                //socket.send(new ReceiveConfig(configRoot));
                 break;
             }
             case INIT_OP_MODE: {
@@ -896,15 +904,14 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
     }
 
     private void close() {
-        if (opModeManager != null) {
-            opModeManager.unregisterListener(this);
+            if (opModeManager != null) {
+                opModeManager.unregisterListener(this);
+            }
+            //disable();
+
+            removeStatusView();
         }
-        //disable();
-
-        removeStatusView();
-    }
-
-    @Override
+        @Override
     public void onOpModePreInit(OpMode opMode) {
         synchronized (opModeLock) {
             activeOpModeStatus = RobotStatus.OpModeStatus.INIT;

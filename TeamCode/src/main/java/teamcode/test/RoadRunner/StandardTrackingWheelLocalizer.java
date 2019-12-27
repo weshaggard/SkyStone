@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.Arrays;
 import java.util.List;
 
+import teamcode.league3.Constants;
+
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:
  *
@@ -26,11 +28,11 @@ import java.util.List;
 
 public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 2; // in
+    public static double WHEEL_RADIUS = 2.3622; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 10; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = 4; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 8.81; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = 4.405; // in; offset of the lateral wheel
 
     private DcMotor leftEncoder, rightEncoder, frontEncoder;
 
@@ -41,9 +43,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        leftEncoder = hardwareMap.dcMotor.get("leftEncoder");
-        rightEncoder = hardwareMap.dcMotor.get("rightEncoder");
-        frontEncoder = hardwareMap.dcMotor.get("frontEncoder");
+        leftEncoder = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
+        rightEncoder = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
+        frontEncoder = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
     }
 
     public static double encoderTicksToInches(int ticks) {

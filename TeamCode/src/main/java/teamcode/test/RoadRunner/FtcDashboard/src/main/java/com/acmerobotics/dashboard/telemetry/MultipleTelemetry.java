@@ -1,6 +1,6 @@
 package teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry;
 
-import android.support.annotation.Nullable;
+
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -252,7 +252,7 @@ public class MultipleTelemetry implements Telemetry {
         }
 
         @Override
-        public Item setRetained(@Nullable Boolean aBoolean) {
+        public Item setRetained(Boolean aBoolean) {
             for (Item item : items) {
                 item.setRetained(aBoolean);
             }

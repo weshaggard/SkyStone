@@ -24,7 +24,7 @@ package teamcode.test.RoadRunner.revextensions2;
 import com.qualcomm.hardware.lynx.LynxController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
-import org.openftc.revextensions2.ExpansionHubEx.CurrentDrawUnits;
+
 
 /**
  * Extends a DcMotorImplEx to provide access to new features.
@@ -49,7 +49,7 @@ public class ExpansionHubMotor extends DcMotorImplEx
      *
      * @return the current draw in milliamps
      */
-    public double getCurrentDraw(CurrentDrawUnits units)
+    public double getCurrentDraw(ExpansionHubEx.CurrentDrawUnits units)
     {
         return expansionHubEx.getMotorCurrentDraw(units, getPortNumber());
     }
