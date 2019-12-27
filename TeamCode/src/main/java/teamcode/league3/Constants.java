@@ -25,4 +25,7 @@ public class Constants {
     public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
     public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.34563283;
 
+    public static final int DRIVE_TOLERANCE_TICKS = 500;
+    public static final double ODOMETER_DEGREES_TO_TICKS = 2000;
+    public static final double TICKS_TO_INCHES = 1 / 1102.0;
 }

@@ -13,6 +13,8 @@ public class DriveSystem {
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final GPS gps;
+
+    private DcMotor[] motors;
     /**
      * The position in inches that the robot should try to reach. The target must be stored separate from the
      * GPS's current location due to errors in positioning that may accumulate.
@@ -24,6 +26,8 @@ public class DriveSystem {
      */
     private double targetRotation;
 
+    private DriveMotion motion;
+
     public DriveSystem(HardwareMap hardwareMap, GPS gps, Vector2D currentPosition, double currentRotation) {
         frontLeft = hardwareMap.dcMotor.get(Constants.FRONT_LEFT_DRIVE_NAME);
         frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
@@ -33,6 +37,8 @@ public class DriveSystem {
         this.gps = gps;
         targetPosition = currentPosition;
         targetRotation = currentRotation;
+        motion = DriveMotion.STOP;
+        motors = new DcMotor[]{frontLeft, frontRight, rearLeft, rearRight};
     }
 
     private void correctDirections() {
@@ -89,16 +95,58 @@ public class DriveSystem {
         }
     }
 
-    public void vertical(double inches, double speed) {
+    public void vertical(double inches, double speed) throws InterruptedException {
+        int ticks = (int)(Constants.ODOMETER_INCHES_TO_TICKS * inches);
+        gps.getLeftVertical().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        gps.getRightVertical().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        gps.getLeftVertical().setTargetPosition(ticks);
+        gps.getRightVertical().setTargetPosition(ticks);
+        gps.getHorizontal().setTargetPosition(0);
+        gps.getLeftVertical().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        gps.getRightVertical().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        gps.getRightVertical().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setPower(speed);
+        frontRight.setPower(speed);
+        rearLeft.setPower(speed);
+        rearRight.setPower(speed);
+        while(!nearTarget()){
+            Debug.log("Current Tick Left: " + gps.getLeftVertical().getCurrentPosition());
+            Debug.log("Target Tick Left" + gps.getLeftVertical().getTargetPosition());
+            Debug.log("Current Tick Right: " + gps.getRightVertical().getCurrentPosition());
+            Debug.log("Target Tick Right" + gps.getRightVertical().getTargetPosition());
+            Thread.sleep(200);
 
+        }
+        brake();
     }
-
     public void lateral(double inches, double speed) {
-
+        int ticks = (int)(Constants.ODOMETER_INCHES_TO_TICKS * inches);
+        gps.getHorizontal().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        gps.getHorizontal().setTargetPosition(-ticks);
+        gps.getHorizontal().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setPower(speed);
+        frontRight.setPower(-speed);
+        rearLeft.setPower(-speed);
+        rearRight.setPower(speed);
+        while(!nearTarget());
+        brake();
     }
 
     public void turn(double degrees, double speed) {
+        int ticks = (int)(Constants.ODOMETER_DEGREES_TO_TICKS * degrees);
+        gps.getHorizontal().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        gps.getHorizontal().setTargetPosition(ticks);
+        gps.getHorizontal().setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setPower(speed);
+        frontRight.setPower(-speed);
+        rearLeft.setPower(speed);
+        rearRight.setPower(-speed);
+        while(!nearTarget());
+        brake();
+    }
 
+    public enum DriveMotion{
+        VERTICAL, LATERAL, TURN, STOP
     }
 
     public void brake() {
@@ -121,6 +169,18 @@ public class DriveSystem {
         return Math.abs(positionOffset.getX()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
                 Math.abs(positionOffset.getY()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES;// &&
         //Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_DEGREES;
+    }
+
+    //to only be used for hardpaths, once goTo is fully implemented we should not use this
+    private boolean nearTarget(){
+        return (Math.abs(gps.getLeftVertical().getTargetPosition() - gps.getLeftVertical().getCurrentPosition()) < Constants.DRIVE_TOLERANCE_TICKS ||
+                Math.abs(gps.getRightVertical().getTargetPosition() - gps.getRightVertical().getCurrentPosition()) < Constants.DRIVE_TOLERANCE_TICKS) &&
+                Math.abs(gps.getHorizontal().getTargetPosition() - gps.getHorizontal().getCurrentPosition()) < Constants.DRIVE_TOLERANCE_TICKS;
+
+    }
+
+    public DcMotor[] getMotors(){
+        return motors;
     }
 
 }

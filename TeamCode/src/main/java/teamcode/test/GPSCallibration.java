@@ -8,7 +8,7 @@ import teamcode.common.Vector2D;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.GPS;
 
-@TeleOp(name = "GPS Callibration")
+@TeleOp(name = "GPS Calibration")
 public class GPSCallibration extends AbstractOpMode {
 
     private GPS gps;
@@ -25,14 +25,15 @@ public class GPSCallibration extends AbstractOpMode {
     @Override
     protected void onStart() {
         double speed = 0.25;
-        Vector2D target1 = new Vector2D(24, 0);
-        Vector2D target2 = new Vector2D(24, 24);
-        Vector2D target3 = new Vector2D(0, 24);
-        Vector2D target4 = new Vector2D(0, 0);
-        driveSystem.goTo(target1, speed);
-        driveSystem.goTo(target2, speed);
-        driveSystem.goTo(target3, speed);
-        driveSystem.goTo(target4, speed);
+        driveSystem.goTo(new Vector2D(96,0), speed);
+//        Vector2D target1 = new Vector2D(24, 0);
+//        Vector2D target2 = new Vector2D(24, 24);
+//        Vector2D target3 = new Vector2D(0, 24);
+//        Vector2D target4 = new Vector2D(0, 0);
+//        driveSystem.goTo(target1, speed);
+//        driveSystem.goTo(target2, speed);
+//        driveSystem.goTo(target3, speed);
+//        driveSystem.goTo(target4, speed);
     }
 
     @Override
