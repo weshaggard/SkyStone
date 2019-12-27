@@ -1,11 +1,6 @@
 package teamcode.test.RoadRunner.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.config.ValueProvider;
-import com.acmerobotics.dashboard.config.variable.BasicVariable;
-import com.acmerobotics.dashboard.config.variable.CustomVariable;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
@@ -17,14 +12,22 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 import java.util.List;
 
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.FtcDashboard;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.ValueProvider;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.BasicVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.CustomVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import teamcode.test.RoadRunner.mecanum.DriveConstants;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveBase;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
+
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
+import static teamcode.test.RoadRunner.mecanum.DriveConstants.RUN_USING_ENCODER;
+import static teamcode.test.RoadRunner.mecanum.DriveConstants.kV;
 
 /*
  * This routine is designed to tune the PID coefficients used by the REV Expansion Hubs for closed-
@@ -37,7 +40,7 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
  * PID coefficients. Once you've found a satisfactory set of gains, add them to your drive class
  * ctor.
  */
-@Config
+
 @Autonomous(group = "drive")
 public class DriveVelocityPIDTuner extends LinearOpMode {
     public static double DISTANCE = 72;
