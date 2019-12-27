@@ -1,8 +1,5 @@
 package teamcode.test.RoadRunner.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.tuning.AccelRegression;
 import com.acmerobotics.roadrunner.tuning.RampRegression;
@@ -12,13 +9,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
-import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.getMaxRpm;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.rpmToVelocity;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.FtcDashboard;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveBase;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
+import teamcode.test.RoadRunner.util.LoggingUtil;
+
+import static teamcode.test.RoadRunner.mecanum.DriveConstants.RUN_USING_ENCODER;
+import static teamcode.test.RoadRunner.mecanum.DriveConstants.getMaxRpm;
+import static teamcode.test.RoadRunner.mecanum.DriveConstants.rpmToVelocity;
 
 /*
  * Op mode for computing kV, kStatic, and kA from various drive routines. For the curious, here's an
@@ -30,7 +30,7 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.rpmToVelocity;
  *   4. Adjust the encoder data based on the velocity tuning data and find kA with another linear
  *      regression.
  */
-@Config
+
 @Autonomous(group = "drive")
 public class DriveFeedforwardTuner extends LinearOpMode {
     public static final double MAX_POWER = 0.7;

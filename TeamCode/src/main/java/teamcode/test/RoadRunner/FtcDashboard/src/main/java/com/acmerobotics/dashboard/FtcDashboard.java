@@ -14,23 +14,6 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.acmerobotics.dashboard.config.ValueProvider;
-import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
-import com.acmerobotics.dashboard.config.variable.BasicVariable;
-import com.acmerobotics.dashboard.config.variable.ConfigVariableDeserializer;
-import com.acmerobotics.dashboard.config.variable.ConfigVariableSerializer;
-import com.acmerobotics.dashboard.config.variable.CustomVariable;
-import com.acmerobotics.dashboard.message.Message;
-import com.acmerobotics.dashboard.message.MessageDeserializer;
-import com.acmerobotics.dashboard.message.redux.InitOpMode;
-import com.acmerobotics.dashboard.message.redux.ReceiveConfig;
-import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
-import com.acmerobotics.dashboard.message.redux.ReceiveImage;
-import com.acmerobotics.dashboard.message.redux.ReceiveOpModeList;
-import com.acmerobotics.dashboard.message.redux.ReceiveRobotStatus;
-import com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
-import com.acmerobotics.dashboard.message.redux.SaveConfig;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -52,7 +35,7 @@ import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.robotcore.internal.webserver.WebHandler;
-import org.firstinspires.ftc.robotserver.internal.webserver.MimeTypesUtil;
+import org.firstinspires.ftc.teamcode.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -83,6 +66,8 @@ import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dash
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.redux.ReceiveTelemetry;
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.redux.SaveConfig;
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+
+import static java.lang.Compiler.enable;
 
 /**
  * Main class for interacting with the instance.
@@ -368,10 +353,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         Activity activity = AppUtil.getInstance().getActivity();
         prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if (getAutoEnable()) {
-            enable();
+          //  enable();
         }
 
-        injectStatusView();
+        //injectStatusView();
     }
 
     private boolean getAutoEnable() {
@@ -384,84 +369,84 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
              .apply();
     }
 
-    private void enable() {
-        if (enabled) return;
+//    private void enable() {
+//        if (enabled) return;
+//
+//        server = new DashboardWebSocketServer(this);
+//        try {
+//            server.start();
+//        } catch (IOException e) {
+//            Log.w(TAG, e);
+//        }
+//
+//        telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
+//        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
+//
+//        gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
+//        gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
+//
+//        enabled = true;
+//
+//        updateStatusView();
+//    }
+//
+//    private void disable() {
+//        if (!enabled) return;
+//
+//        telemetryExecutorService.shutdownNow();
+//        gamepadWatchdogExecutor.shutdownNow();
+//        server.stop();
+//
+//        synchronized (sockets) {
+//            sockets.clear();
+//        }
+//
+//        enabled = false;
+//
+//        updateStatusView();
+//    }
 
-        server = new DashboardWebSocketServer(this);
-        try {
-            server.start();
-        } catch (IOException e) {
-            Log.w(TAG, e);
-        }
-
-        telemetryExecutorService = ThreadPool.newSingleThreadExecutor("dash telemetry");
-        telemetryExecutorService.submit(new TelemetryUpdateRunnable());
-
-        gamepadWatchdogExecutor = ThreadPool.newSingleThreadExecutor("gamepad watchdog");
-        gamepadWatchdogExecutor.submit(new GamepadWatchdogRunnable());
-
-        enabled = true;
-
-        updateStatusView();
-    }
-
-    private void disable() {
-        if (!enabled) return;
-
-        telemetryExecutorService.shutdownNow();
-        gamepadWatchdogExecutor.shutdownNow();
-        server.stop();
-
-        synchronized (sockets) {
-            sockets.clear();
-        }
-
-        enabled = false;
-
-        updateStatusView();
-    }
-
-    private void injectStatusView() {
-        Activity activity = AppUtil.getInstance().getActivity();
-
-        if (activity == null) return;
-
-        connectionStatusTextView = new TextView(activity);
-        connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
-        int color = activity.getResources().getColor(R.color.dashboardColor);
-        connectionStatusTextView.setTextColor(color);
-        int horizontalMarginId = activity.getResources().getIdentifier(
-                "activity_horizontal_margin", "dimen", activity.getPackageName());
-        int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
-        connectionStatusTextView.setLayoutParams(params);
-
-        int parentLayoutId = activity.getResources().getIdentifier(
-                "entire_screen", "id", activity.getPackageName());
-        parentLayout = activity.findViewById(parentLayoutId);
-        int childCount = parentLayout.getChildCount();
-        int relativeLayoutId = activity.getResources().getIdentifier(
-                "RelativeLayout", "id", activity.getPackageName());
-        int i;
-        for (i = 0; i < childCount; i++) {
-            if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
-                break;
-            }
-        }
-        final int relativeLayoutIndex = i;
-        AppUtil.getInstance().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
-            }
-        });
-
-        updateStatusView();
-    }
+//    private void injectStatusView() {
+//        Activity activity = AppUtil.getInstance().getActivity();
+//
+//        if (activity == null) return;
+//
+//        connectionStatusTextView = new TextView(activity);
+//        connectionStatusTextView.setTypeface(Typeface.DEFAULT_BOLD);
+//        int color = activity.getResources().getColor(R.color.dashboardColor);
+//        connectionStatusTextView.setTextColor(color);
+//        int horizontalMarginId = activity.getResources().getIdentifier(
+//                "activity_horizontal_margin", "dimen", activity.getPackageName());
+//        int horizontalMargin = (int) activity.getResources().getDimension(horizontalMarginId);
+//        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT
+//        );
+//        params.setMargins(horizontalMargin, 0, horizontalMargin, 0);
+//        connectionStatusTextView.setLayoutParams(params);
+//
+//        int parentLayoutId = activity.getResources().getIdentifier(
+//                "entire_screen", "id", activity.getPackageName());
+//        parentLayout = activity.findViewById(parentLayoutId);
+//        int childCount = parentLayout.getChildCount();
+//        int relativeLayoutId = activity.getResources().getIdentifier(
+//                "RelativeLayout", "id", activity.getPackageName());
+//        int i;
+//        for (i = 0; i < childCount; i++) {
+//            if (parentLayout.getChildAt(i).getId() == relativeLayoutId) {
+//                break;
+//            }
+//        }
+//        final int relativeLayoutIndex = i;
+//        AppUtil.getInstance().runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                parentLayout.addView(connectionStatusTextView, relativeLayoutIndex);
+//            }
+//        });
+//
+//        updateStatusView();
+//    }
 
     private void removeStatusView() {
         if (parentLayout != null && connectionStatusTextView != null) {
@@ -505,22 +490,22 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         }
     }
 
-    private WebHandler newStaticAssetHandler(final AssetManager assetManager, final String file) {
-        return new WebHandler() {
-            @Override
-            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session)
-                    throws IOException {
-                if (session.getMethod() == NanoHTTPD.Method.GET) {
-                    String mimeType = MimeTypesUtil.determineMimeType(file);
-                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
-                            mimeType, assetManager.open(file));
-                } else {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            NanoHTTPD.MIME_PLAINTEXT, "");
-                }
-            }
-        };
-    }
+//    private WebHandler newStaticAssetHandler(final AssetManager assetManager, final String file) {
+//        return new WebHandler() {
+//            @Override
+//            public NanoHTTPD.Response getResponse(NanoHTTPD.IHTTPSession session)
+//                    throws IOException {
+//                if (session.getMethod() == NanoHTTPD.Method.GET) {
+//                    String mimeType = MimeTypesUtil.determineMimeType(file);
+//                    return NanoHTTPD.newChunkedResponse(NanoHTTPD.Response.Status.OK,
+//                            mimeType, assetManager.open(file));
+//                } else {
+//                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+//                            NanoHTTPD.MIME_PLAINTEXT, "");
+//                }
+//            }
+//        };
+//    }
 
     private void addAssetWebHandlers(WebHandlerManager webHandlerManager,
                                      AssetManager assetManager, String path) {
@@ -534,8 +519,8 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
                     addAssetWebHandlers(webHandlerManager, assetManager, path + "/" + file);
                 }
             } else {
-                webHandlerManager.register("/" + path,
-                        newStaticAssetHandler(assetManager, path));
+                //webHandlerManager.register("/" + path,
+                  //      newStaticAssetHandler(assetManager, path));
             }
         } catch (IOException e) {
             Log.w(TAG, e);
@@ -551,10 +536,10 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
 
         WebHandlerManager webHandlerManager = webServer.getWebHandlerManager();
         AssetManager assetManager = activity.getAssets();
-        webHandlerManager.register("/dash",
-                newStaticAssetHandler(assetManager, "dash/index.html"));
-        webHandlerManager.register("/dash/",
-                newStaticAssetHandler(assetManager, "dash/index.html"));
+       // webHandlerManager.register("/dash",
+                //newStaticAssetHandler(assetManager, "dash/index.html"));
+       // webHandlerManager.register("/dash/",
+                //newStaticAssetHandler(assetManager, "dash/index.html"));
         addAssetWebHandlers(webHandlerManager, assetManager, "dash");
 
         webServerAttached = true;
@@ -624,7 +609,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         disable.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                disable();
+                //disable();
 
                 setAutoEnable(false);
 
@@ -914,7 +899,7 @@ public class FtcDashboard implements OpModeManagerImpl.Notifications {
         if (opModeManager != null) {
             opModeManager.unregisterListener(this);
         }
-        disable();
+        //disable();
 
         removeStatusView();
     }

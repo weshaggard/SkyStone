@@ -1,6 +1,6 @@
 package teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.redux;
 
-import com.acmerobotics.dashboard.config.variable.CustomVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.CustomVariable;
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.Message;
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.message.MessageType;
 

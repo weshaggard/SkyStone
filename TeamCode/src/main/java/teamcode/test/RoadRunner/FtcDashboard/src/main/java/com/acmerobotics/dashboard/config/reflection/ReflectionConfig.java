@@ -3,10 +3,11 @@ package teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.das
 import android.util.Log;
 
 import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.config.variable.BasicVariable;
-import com.acmerobotics.dashboard.config.variable.ConfigVariable;
-import com.acmerobotics.dashboard.config.variable.CustomVariable;
-import com.acmerobotics.dashboard.config.variable.VariableType;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.BasicVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.ConfigVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.CustomVariable;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.config.variable.VariableType;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import java.lang.reflect.Field;

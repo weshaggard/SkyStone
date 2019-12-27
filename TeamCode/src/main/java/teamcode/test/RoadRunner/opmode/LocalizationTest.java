@@ -1,14 +1,15 @@
 package teamcode.test.RoadRunner.opmode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
+
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.FtcDashboard;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveBase;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
+import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREVOptimized;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -17,7 +18,7 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@Config
+
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
     public static double VX_WEIGHT = 1;
@@ -28,7 +29,7 @@ public class LocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
+        SampleMecanumDriveBase drive = new SampleMecanumDriveREVOptimized(hardwareMap);
 
         waitForStart();
 

@@ -24,8 +24,6 @@ import teamcode.test.RoadRunner.mecanum.DriveConstants;
 import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveBase;
 import teamcode.test.RoadRunner.mecanum.SampleMecanumDriveREV;
 
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
 import static teamcode.test.RoadRunner.mecanum.DriveConstants.RUN_USING_ENCODER;
 import static teamcode.test.RoadRunner.mecanum.DriveConstants.kV;
 
