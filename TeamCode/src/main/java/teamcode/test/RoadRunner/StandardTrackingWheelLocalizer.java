@@ -12,7 +12,7 @@ import java.util.List;
 import teamcode.league3.Constants;
 
 /*
- * Sample tracking wheel localizer implementation assuming the standard configuration:
+ * Sample tracking mwheel localizer implementation assuming the standard configuration:
  *
  *    /--------------\
  *    |     ____     |

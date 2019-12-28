@@ -21,6 +21,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import java.util.ArrayList;
 import java.util.List;
 
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.FtcDashboard;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.canvas.Canvas;
+import teamcode.test.RoadRunner.FtcDashboard.src.main.java.com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import teamcode.test.RoadRunner.util.DashboardUtil;
+
 import static teamcode.test.RoadRunner.mecanum.DriveConstants.TRACK_WIDTH;
 
 /*
@@ -39,7 +44,7 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
         FOLLOW_TRAJECTORY
     }
 
-    //private FtcDashboard dashboard;
+    private FtcDashboard dashboard;
     private NanoClock clock;
 
     private Mode mode;
@@ -57,8 +62,8 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
     public SampleMecanumDriveBase() {
         super(DriveConstants.kV, DriveConstants.kA, DriveConstants.kStatic, TRACK_WIDTH);
 
-//        dashboard = FtcDashboard.getInstance();
-//        dashboard.setTelemetryTransmissionInterval(25);
+        dashboard = FtcDashboard.getInstance();
+        dashboard.setTelemetryTransmissionInterval(25);
 
         clock = NanoClock.system();
 
@@ -121,18 +126,18 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
         Pose2d currentPose = getPoseEstimate();
         Pose2d lastError = getLastError();
 
-//        TelemetryPacket packet = new TelemetryPacket();
-//        Canvas fieldOverlay = packet.fieldOverlay();
-//
-//        packet.put("mode", mode);
-//
-//        packet.put("x", currentPose.getX());
-//        packet.put("y", currentPose.getY());
-//        packet.put("heading", currentPose.getHeading());
-//
-//        packet.put("xError", lastError.getX());
-//        packet.put("yError", lastError.getY());
-//        packet.put("headingError", lastError.getHeading());
+        TelemetryPacket packet = new TelemetryPacket();
+        Canvas fieldOverlay = packet.fieldOverlay();
+
+        packet.put("mode", mode);
+
+        packet.put("x", currentPose.getX());
+        packet.put("y", currentPose.getY());
+        packet.put("heading", currentPose.getHeading());
+
+        packet.put("xError", lastError.getX());
+        packet.put("yError", lastError.getY());
+        packet.put("headingError", lastError.getHeading());
 
         switch (mode) {
             case IDLE:
@@ -167,16 +172,16 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
 
                 Trajectory trajectory = follower.getTrajectory();
 
-//                fieldOverlay.setStrokeWidth(1);
-//                fieldOverlay.setStroke("4CAF50");
-//                DashboardUtil.drawSampledPath(fieldOverlay, trajectory.getPath());
-//
-//                fieldOverlay.setStroke("#F44336");
+                fieldOverlay.setStrokeWidth(1);
+                fieldOverlay.setStroke("4CAF50");
+                DashboardUtil.drawSampledPath(fieldOverlay, trajectory.getPath());
+
+                fieldOverlay.setStroke("#F44336");
                 double t = follower.elapsedTime();
-//                DashboardUtil.drawRobot(fieldOverlay, trajectory.get(t));
-//
-//                fieldOverlay.setStroke("#3F51B5");
-//                fieldOverlay.fillCircle(currentPose.getX(), currentPose.getY(), 3);
+                DashboardUtil.drawRobot(fieldOverlay, trajectory.get(t));
+
+                fieldOverlay.setStroke("#3F51B5");
+                fieldOverlay.fillCircle(currentPose.getX(), currentPose.getY(), 3);
 
                 if (!follower.isFollowing()) {
                     mode = Mode.IDLE;
@@ -187,7 +192,7 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
             }
         }
 
-        //dashboard.sendTelemetryPacket(packet);
+        dashboard.sendTelemetryPacket(packet);
     }
 
     public void waitForIdle() {
