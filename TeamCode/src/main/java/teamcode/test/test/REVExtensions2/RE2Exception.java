@@ -1,4 +1,4 @@
-package teamcode.test.RoadRunner.REVExtensions2;/*
+package teamcode.test.test.REVExtensions2;/*
  * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,11 +19,11 @@ package teamcode.test.RoadRunner.REVExtensions2;/*
  * SOFTWARE.
  */
 
-class RevBulkDataException extends RE2Exception
+class RE2Exception extends RuntimeException
 {
-    RevBulkDataException(){}
+    RE2Exception(){}
 
-    RevBulkDataException(String msg)
+    RE2Exception(String msg)
     {
         super(msg);
     }
