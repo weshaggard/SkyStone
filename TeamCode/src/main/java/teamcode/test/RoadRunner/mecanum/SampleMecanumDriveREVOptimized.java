@@ -21,7 +21,6 @@ import teamcode.league3.Constants;
 import teamcode.test.RoadRunner.revextensions2.ExpansionHubEx;
 import teamcode.test.RoadRunner.revextensions2.ExpansionHubMotor;
 import teamcode.test.RoadRunner.revextensions2.RevBulkData;
-import teamcode.test.RoadRunner.util.LynxModuleUtil;
 
 /*
  * Optimized mecanum drive implementation for REV ExHs. The time savings may significantly improve

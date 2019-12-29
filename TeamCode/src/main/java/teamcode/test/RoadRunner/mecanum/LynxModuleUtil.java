@@ -1,4 +1,4 @@
-package teamcode.test.RoadRunner.util;
+package teamcode.test.RoadRunner.mecanum;
 
 
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -42,7 +42,7 @@ public class LynxModuleUtil {
         }
 
         @Override
-        public int compareTo(Object another) {
+        public int compareTo( Object another) {
             if (another instanceof LynxFirmwareVersion) {
                 LynxFirmwareVersion anotherVersion = (LynxFirmwareVersion) another;
                 int majorComp = Integer.compare(major, anotherVersion.major);
