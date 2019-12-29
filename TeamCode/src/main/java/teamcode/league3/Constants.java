@@ -36,6 +36,4 @@ public class Constants {
     public static final double MAX_TURN_CORRECTION_SPEED = 0.1;
     public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
     public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
-
-
 }
