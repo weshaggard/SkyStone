@@ -33,6 +33,19 @@ public class DriveSystem {
         targetRotation = currentRotation;
     }
 
+    /**
+     * constructor for TeleOp due to the fact that GPS is not necessary
+     * @param hardwareMap list of hardware devices
+     */
+    public DriveSystem(HardwareMap hardwareMap) {
+        frontLeft = hardwareMap.dcMotor.get(Constants.FRONT_LEFT_DRIVE_NAME);
+        frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
+        rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
+        rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
+        correctDirections();
+        gps = null;
+    }
+
     private void correctDirections() {
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
