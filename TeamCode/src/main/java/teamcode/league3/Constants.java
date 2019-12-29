@@ -10,6 +10,15 @@ public class Constants {
     public static final String LEFT_VERTICAL_ODOMETER_NAME = "LeftVerticalOdometer";
     public static final String RIGHT_VERTICAL_ODOMETER_NAME = "RightVerticalOdometer";
     public static final String HORIZONTAL_ODOMETER_NAME = "HorizontalOdometer";
+    public static final String LEFT_INTAKE_WHEEL = "LeftIntakeWheel";
+    public static final String RIGHT_INTAKE_WHEEL = "RightIntakeWheel";
+    public static final String LEFT_WINCH = "LeftWinch";
+    public static final String RIGHT_WINCH = "RightWinch";
+    public static final String BOX_TRANSFER = "Box Transfer";
+    public static final String LEFT_FOUNDATION_GRABBER = "LeftFoundationGrabber";
+    public static final String RIGHT_FOUNDATION_GRABBER = "RightFoundationGrabber";
+    public static final String INNTAKE_COLOR_SENSOR = "IntakeColorSensor";
+
 
     // drive system
     public static final double DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
@@ -24,4 +33,6 @@ public class Constants {
     public static final double MAX_TURN_CORRECTION_SPEED = 0.1;
     public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
     public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
+
+
 }
