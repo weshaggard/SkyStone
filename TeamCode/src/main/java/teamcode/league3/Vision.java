@@ -23,37 +23,24 @@ public class Vision {
     }
 
     private final HardwareMap hardwareMap;
-    private VisionSource visionSource;
     private VuforiaTrackables trackables;
 
     public Vision(HardwareMap hardwareMap, VisionSource source) {
         this.hardwareMap = hardwareMap;
-        this.visionSource = source;
-        createVuforia();
+        createVuforia(source);
     }
 
-    public VisionSource getVisionSource() {
-        return visionSource;
-    }
-
-    public void setVisionSource(VisionSource source) {
-        this.visionSource = source;
-        createVuforia();
-    }
-
-    private void createVuforia() {
-        if (trackables != null) {
-            trackables.deactivate();
-            return;
-        }
+    private void createVuforia(VisionSource source) {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().
                 getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
+
         // the default camera name points to the phone
-        if (visionSource == VisionSource.WEBCAM) {
+        if (source == VisionSource.WEBCAM) {
             parameters.cameraName = hardwareMap.get(CameraName.class, "webcam");
         }
+
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
         trackables = vuforia.loadTrackablesFromAsset(ASSET_NAME);
         trackables.activate();
