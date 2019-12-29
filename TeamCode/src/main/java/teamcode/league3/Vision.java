@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import teamcode.common.Vector2D;
 import teamcode.common.Vector3D;
 
 public class Vision {
@@ -46,7 +47,10 @@ public class Vision {
         trackables.activate();
     }
 
-    public Vector3D getSkystonePosition() {
+    /**
+     * Returns the "top-down" position of a detected SkyStone.
+     */
+    public Vector2D getSkystonePosition() {
         VuforiaTrackable skystone = trackables.get(0);
         OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) skystone.getListener()).getPose();
         if (pose == null) {
@@ -55,8 +59,7 @@ public class Vision {
         VectorF position = pose.getTranslation();
         double x = position.get(0);
         double y = position.get(1);
-        double z = position.get(2);
-        return new Vector3D(x, y, z);
+        return new Vector2D(x, y);
     }
 
 }
