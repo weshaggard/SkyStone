@@ -21,6 +21,7 @@ public class Constants {
     public static final String LEFT_FOUNDATION_GRABBER = "LeftFoundationGrabber";
     public static final String RIGHT_FOUNDATION_GRABBER = "RightFoundationGrabber";
     public static final String INTAKE_COLOR_SENSOR = "IntakeColorSensor";
+    public static final String WEBCAM = "Webcam";
 
 
     // drive system

@@ -3,7 +3,7 @@ package teamcode.league3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -12,7 +12,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import teamcode.common.Vector2D;
-import teamcode.common.Vector3D;
 
 public class Vision {
 
@@ -23,55 +22,72 @@ public class Vision {
         PHONE, WEBCAM
     }
 
-    private final HardwareMap hardwareMap;
-    private VisionSource visionSource;
-    private VuforiaTrackables trackables;
-
-    public Vision(HardwareMap hardwareMap, VisionSource source) {
-        this.hardwareMap = hardwareMap;
-        this.visionSource = source;
-        createVuforia();
+    /**
+     * Rotations are clockwise from the perspective of behind the camera.
+     */
+    public enum CameraOrientation {
+        ZERO, NINETY, ONE_HUNDRED_EIGHTY, TWO_HUNDRED_SEVENTY
     }
 
-    public VisionSource getVisionSource() {
-        return visionSource;
+    private final CameraOrientation cameraOrientation;
+    private final VuforiaTrackables trackables;
+
+    public Vision(HardwareMap hardwareMap, VisionSource source, CameraOrientation cameraOrientation) {
+        this.cameraOrientation = cameraOrientation;
+        trackables = createTrackables(hardwareMap, source);
+        trackables.activate();
     }
 
-    public void setVisionSource(VisionSource source) {
-        this.visionSource = source;
-        createVuforia();
-    }
-
-    private void createVuforia() {
-        if (trackables != null) {
-            trackables.deactivate();
-            return;
-        }
+    private VuforiaTrackables createTrackables(HardwareMap hardwareMap, VisionSource source) {
+        // monitoring displays camera input to the phone screen
         int cameraMonitorViewId = hardwareMap.appContext.getResources().
                 getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         // the default camera name points to the phone
-        if (visionSource == VisionSource.WEBCAM) {
-            parameters.cameraName = hardwareMap.get(CameraName.class, "webcam");
+        if (source == VisionSource.WEBCAM) {
+            WebcamName webcamName = hardwareMap.get(WebcamName.class, Constants.WEBCAM);
+            parameters.cameraName = webcamName;
         }
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        trackables = vuforia.loadTrackablesFromAsset(ASSET_NAME);
-        trackables.activate();
+        return vuforia.loadTrackablesFromAsset(ASSET_NAME);
     }
 
     /**
-     * Returns the "top-down" position of a detected SkyStone.
+     * Returns the "top-down" position of a detected SkyStone relative to the position of the robot
+     * this Vision was created..
      */
     public Vector2D getSkystonePosition() {
-        VuforiaTrackable skystone = trackables.get(0);
-        OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) skystone.getListener()).getPose();
-        if (pose == null) {
+        VuforiaTrackable skyStone = trackables.get(0);
+        OpenGLMatrix loc = ((VuforiaTrackableDefaultListener) skyStone.getListener()).getUpdatedRobotLocation();
+        if (loc == null) {
             return null;
         }
-        VectorF position = pose.getTranslation();
-        double x = position.get(0);
-        double y = position.get(1);
+        VectorF position = loc.getTranslation();
+        double x;
+        double y;
+        switch (cameraOrientation) {
+            case ZERO:
+                x = -position.get(0);
+                y = -position.get(1);
+                break;
+            case NINETY:
+                x = -position.get(1);
+                y = position.get(0);
+                break;
+            case ONE_HUNDRED_EIGHTY:
+                x = position.get(0);
+                y = position.get(1);
+                break;
+            case TWO_HUNDRED_SEVENTY:
+                x = position.get(1);
+                y = -position.get(0);
+                break;
+            default:
+                x = 0;
+                y = 0;
+                break;
+        }
         return new Vector2D(x, y);
     }
 
