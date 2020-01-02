@@ -3,6 +3,7 @@ package teamcode.test.test;
 
 import com.acmerobotics.roadrunner.drive.Drive;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
@@ -10,6 +11,7 @@ import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.GPS;
 
+@Disabled
 @Autonomous(name= "Straight")
 public class StraightTest extends AbstractOpMode {
     DriveSystem drive;

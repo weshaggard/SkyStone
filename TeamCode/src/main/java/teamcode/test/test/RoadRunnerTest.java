@@ -6,12 +6,14 @@ import com.acmerobotics.roadrunner.path.PathBuilder;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryGenerator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import teamcode.league3.DriveConstants;
 import teamcode.league3.mecanum.SampleMecanumDriveBase;
 import teamcode.league3.mecanum.SampleMecanumDriveREVOptimized;
 
+@Disabled
 @Autonomous(name= "sinple")
 public class RoadRunnerTest extends LinearOpMode {
     SampleMecanumDriveBase drive;

@@ -56,6 +56,8 @@ public class DriveSystem {
         motors = new DcMotor[]{frontLeft, frontRight, rearLeft, rearRight};
         for(DcMotor motor: motors){
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //ensure the PID controller is at least attempted to be used
         }
     }
     //TODO we need to calibrate both the ticks to inches and the ticks to radians
@@ -89,16 +91,30 @@ public class DriveSystem {
     }
 
     public void turn(double degrees, double power){
-        setOdometerMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        for(DcMotor odometer: odometers){
-            odometer.setTargetPosition((int)(Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS * Math.toRadians(degrees)));
+        //micro optimization
+        if(degrees > 180 || degrees < -180) {
+            degrees = angleWrapper(degrees);
         }
+        setOdometerMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftVerticalOdometer.setTargetPosition((int)(Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS * Math.toRadians(degrees)));
+        rightVerticalOdometer.setTargetPosition((int)(Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS * Math.toRadians(degrees)));
+        horizontalOdometer.setTargetPosition((int)(Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS * Math.toRadians(degrees)));
+
         while(!nearTarget()) {
             setPower(power, -power, -power, power);
         }
         brake();
     }
 
+    private double angleWrapper(double angle){
+        while(angle > 180){
+            angle -= 360;
+        }
+        while(angle < -180){
+            angle += 360;
+        }
+        return angle;
+    }
 
     private boolean nearTarget(){
         return Math.abs(leftVerticalOdometer.getCurrentPosition() - leftVerticalOdometer.getTargetPosition()) < ODOMETER_TICK_TOLERANCE &&
@@ -107,8 +123,11 @@ public class DriveSystem {
     }
 
     private void correctDirections() {
+        //driveTrain
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        //odometers
+        rightVerticalOdometer.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     /**

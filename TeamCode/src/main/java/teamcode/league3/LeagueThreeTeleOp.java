@@ -1,6 +1,7 @@
 package teamcode.league3;
 
 import com.acmerobotics.roadrunner.drive.Drive;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
