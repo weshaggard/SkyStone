@@ -11,7 +11,8 @@ import teamcode.common.Vector2D;
 public class DriveSystem {
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
-    private final GPS gps;
+    private final DcMotor leftVerticalOdometer, rightVerticalOdometer, horizontalOdometer;
+    //private final GPS gps;
     /**
      * The position in inches that the robot should try to reach. The target must be stored separate from the
      * GPS's current location due to errors in positioning that may accumulate.
@@ -28,7 +29,7 @@ public class DriveSystem {
         rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
         rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
         correctDirections();
-        this.gps = gps;
+        //this.gps = gps;
         targetPosition = currentPosition;
         targetRotation = currentRotation;
     }
@@ -43,7 +44,7 @@ public class DriveSystem {
         rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
         rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
         correctDirections();
-        gps = null;
+        horizontalOdometer = hardwareMap
     }
 
     private void correctDirections() {
