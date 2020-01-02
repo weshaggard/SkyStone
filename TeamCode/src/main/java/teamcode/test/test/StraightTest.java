@@ -27,9 +27,9 @@ public class StraightTest extends AbstractOpMode {
     protected void onStart() {
         leftEncoder.setTargetPosition(1102 * 24);
         rightEncoder.setTargetPosition(1102 * 24);
-        drive.setPower(0.3);
+        drive.setPower(0.3, 0.3, 0.3,0.3);
         while(!(Math.abs(leftEncoder.getCurrentPosition() - leftEncoder.getTargetPosition()) < 500 && Math.abs(rightEncoder.getCurrentPosition() - rightEncoder.getTargetPosition()) < 500));
-        drive.setPower(0);
+        drive.brake();
 
     }
 

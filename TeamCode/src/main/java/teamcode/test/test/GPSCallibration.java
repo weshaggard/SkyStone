@@ -19,7 +19,7 @@ public class GPSCallibration extends AbstractOpMode {
         Vector2D startPosition = Vector2D.zero();
         double startBearing = 0;
         gps = new GPS(hardwareMap, startPosition, startBearing);
-        driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startBearing);
+        //driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startBearing);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class GPSCallibration extends AbstractOpMode {
         Vector2D target1 = new Vector2D(24 * 4, 0);
         Vector2D[] targets = {target1};
         for (Vector2D target : targets) {
-            driveSystem.goTo(target, speed);
+            //driveSystem.goTo(target, speed);
         }
     }
 

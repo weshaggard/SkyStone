@@ -4,14 +4,19 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.Arrays;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
+    private static final int ODOMETER_TICK_TOLERANCE = 100;
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final DcMotor leftVerticalOdometer, rightVerticalOdometer, horizontalOdometer;
+    DcMotor[] odometers;
+    DcMotor[] motors;
     //private final GPS gps;
     /**
      * The position in inches that the robot should try to reach. The target must be stored separate from the
@@ -23,16 +28,16 @@ public class DriveSystem {
      */
     private double targetRotation;
 
-    public DriveSystem(HardwareMap hardwareMap, GPS gps, Vector2D currentPosition, double currentRotation) {
-        frontLeft = hardwareMap.dcMotor.get(Constants.FRONT_LEFT_DRIVE_NAME);
-        frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
-        rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
-        rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
-        correctDirections();
-        //this.gps = gps;
-        targetPosition = currentPosition;
-        targetRotation = currentRotation;
-    }
+//    public DriveSystem(HardwareMap hardwareMap, GPS gps, Vector2D currentPosition, double currentRotation) {
+//        frontLeft = hardwareMap.dcMotor.get(Constants.FRONT_LEFT_DRIVE_NAME);
+//        frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
+//        rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
+//        rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
+//        correctDirections();
+//        //this.gps = gps;
+//        targetPosition = currentPosition;
+//        targetRotation = currentRotation;
+//    }
 
     /**
      * constructor for TeleOp due to the fact that GPS is not necessary
@@ -44,7 +49,61 @@ public class DriveSystem {
         rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
         rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
         correctDirections();
-        horizontalOdometer = hardwareMap
+        rightVerticalOdometer = hardwareMap.get(DcMotor.class, Constants.RIGHT_VERTICAL_ODOMETER_NAME);
+        leftVerticalOdometer = hardwareMap.get(DcMotor.class, Constants.LEFT_VERTICAL_ODOMETER_NAME);
+        horizontalOdometer = hardwareMap.get(DcMotor.class, Constants.HORIZONTAL_ODOMETER_NAME);
+        odometers = new DcMotor[]{leftVerticalOdometer, rightVerticalOdometer, horizontalOdometer};
+        motors = new DcMotor[]{frontLeft, frontRight, rearLeft, rearRight};
+        for(DcMotor motor: motors){
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+    }
+    //TODO we need to calibrate both the ticks to inches and the ticks to radians
+    public void vertical(double inches, double power){
+        setOdometerMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftVerticalOdometer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightVerticalOdometer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftVerticalOdometer.setTargetPosition((int)(inches * Constants.ODOMETER_INCHES_TO_TICKS));
+        rightVerticalOdometer.setTargetPosition((int)(inches * Constants.ODOMETER_INCHES_TO_TICKS));
+        while(!nearTarget()){
+            setPower(power, power, power, power);
+        }
+        brake();
+    }
+
+    private void setOdometerMode(DcMotor.RunMode mode){
+        for(DcMotor odometer: odometers){
+            odometer.setMode(mode);
+        }
+
+    }
+
+
+    public void lateral(double inches, double power){
+        setOdometerMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        horizontalOdometer.setTargetPosition((int)(inches * Constants.ODOMETER_INCHES_TO_TICKS));
+        while(!nearTarget()) {
+            setPower(power, -power, power, -power);
+        }
+        brake();
+    }
+
+    public void turn(double degrees, double power){
+        setOdometerMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        for(DcMotor odometer: odometers){
+            odometer.setTargetPosition((int)(Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS * Math.toRadians(degrees)));
+        }
+        while(!nearTarget()) {
+            setPower(power, -power, -power, power);
+        }
+        brake();
+    }
+
+
+    private boolean nearTarget(){
+        return Math.abs(leftVerticalOdometer.getCurrentPosition() - leftVerticalOdometer.getTargetPosition()) < ODOMETER_TICK_TOLERANCE &&
+                Math.abs(rightVerticalOdometer.getCurrentPosition() - rightVerticalOdometer.getTargetPosition()) < ODOMETER_TICK_TOLERANCE &&
+                Math.abs(horizontalOdometer.getCurrentPosition() - horizontalOdometer.getTargetPosition()) < ODOMETER_TICK_TOLERANCE;
     }
 
     private void correctDirections() {
@@ -74,28 +133,28 @@ public class DriveSystem {
         rearRight.setPower(power * sin + turnSpeed);
     }
 
-    public void goTo(Vector2D targetPosition, double speed) {
-        this.targetPosition = targetPosition;
-        Vector2D startPosition = gps.getPosition();
-        while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
-            Vector2D currentPosition = gps.getPosition();
-            double currentRotation = gps.getRotation();
-            Vector2D targetTranslation = targetPosition.subtract(currentPosition);
-
-            // Reduce power when leaving start and approaching target position.
-            double distanceFromStart = currentPosition.subtract(startPosition).magnitude();
-            double distanceToTarget = targetTranslation.magnitude();
-            double power = getModulatedLinearDrivePower(speed, distanceFromStart, distanceToTarget);
-
-            // Account for the orientation of the robot.
-            Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
-
-            double turnSpeed = Math.min((currentRotation - targetRotation) *
-                    Constants.TURN_CORRECTION_SPEED_MULTIPLIER * speed, Constants.MAX_TURN_CORRECTION_SPEED * speed);
-
-            continuous(velocity, turnSpeed);
-        }
-    }
+//    public void goTo(Vector2D targetPosition, double speed) {
+//        this.targetPosition = targetPosition;
+//        Vector2D startPosition = gps.getPosition();
+//        while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
+//            Vector2D currentPosition = gps.getPosition();
+//            double currentRotation = gps.getRotation();
+//            Vector2D targetTranslation = targetPosition.subtract(currentPosition);
+//
+//            // Reduce power when leaving start and approaching target position.
+//            double distanceFromStart = currentPosition.subtract(startPosition).magnitude();
+//            double distanceToTarget = targetTranslation.magnitude();
+//            double power = getModulatedLinearDrivePower(speed, distanceFromStart, distanceToTarget);
+//
+//            // Account for the orientation of the robot.
+//            Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
+//
+//            double turnSpeed = Math.min((currentRotation - targetRotation) *
+//                    Constants.TURN_CORRECTION_SPEED_MULTIPLIER * speed, Constants.MAX_TURN_CORRECTION_SPEED * speed);
+//
+//            continuous(velocity, turnSpeed);
+//        }
+//    }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
         double accelerationPower;
@@ -117,38 +176,38 @@ public class DriveSystem {
         return Math.min(accelerationPower, decelerationPower);
     }
 
-    public void vertical(double inches, double speed) {
-        Vector2D currentPosition = gps.getPosition();
-        Vector2D translation = Vector2D.forward().multiply(inches).rotate(targetRotation);
-        Vector2D targetPosition = currentPosition.add(translation);
-        goTo(targetPosition, speed);
-    }
+//    public void vertical(double inches, double speed) {
+//        Vector2D currentPosition = gps.getPosition();
+//        Vector2D translation = Vector2D.forward().multiply(inches).rotate(targetRotation);
+//        Vector2D targetPosition = currentPosition.add(translation);
+//        goTo(targetPosition, speed);
+//    }
 
-    public void lateral(double inches, double speed) {
-        Vector2D translation = Vector2D.forward().multiply(inches).rotate(targetRotation - Math.PI / 2);
-        targetPosition = targetPosition.add(translation);
-        goTo(targetPosition, speed);
-    }
+//    public void lateral(double inches, double speed) {
+//        Vector2D translation = Vector2D.forward().multiply(inches).rotate(targetRotation - Math.PI / 2);
+//        targetPosition = targetPosition.add(translation);
+//        goTo(targetPosition, speed);
+//    }
 
     /**
      * Turns counterclockwise.
      */
-    public void turn(double degrees, double speed) {
-        speed = Math.abs(speed);
-        double radians = Math.toRadians(degrees);
-        // Use the GPS location because turn does not correct linear movement. Using the target
-        // position could result in an endless loop.
-        double startRotation = gps.getRotation();
-        targetRotation = startRotation + radians;
-        while (!near(gps.getPosition(), targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
-            double currentRotation = gps.getRotation();
-            double radiansFromStart = currentRotation - startRotation;
-            double radiansToTarget = targetRotation - currentRotation;
-            double signedSpeed = Math.signum(radiansToTarget) * speed;
-            double power = getModulatedTurnPower(signedSpeed, radiansFromStart, radiansToTarget);
-            continuous(Vector2D.zero(), power);
-        }
-    }
+//    public void turn(double degrees, double speed) {
+//        speed = Math.abs(speed);
+//        double radians = Math.toRadians(degrees);
+//         Use the GPS location because turn does not correct linear movement. Using the target
+//         position could result in an endless loop.
+//        double startRotation = gps.getRotation();
+//        targetRotation = startRotation + radians;
+//        while (!near(gps.getPosition(), targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
+//            double currentRotation = gps.getRotation();
+//            double radiansFromStart = currentRotation - startRotation;
+//            double radiansToTarget = targetRotation - currentRotation;
+//            double signedSpeed = Math.signum(radiansToTarget) * speed;
+//            double power = getModulatedTurnPower(signedSpeed, radiansFromStart, radiansToTarget);
+//            continuous(Vector2D.zero(), power);
+//        }
+//    }
 
     private double getModulatedTurnPower(double maxSpeed, double radiansFromStart, double radiansToTarget) {
         double accelerationPower;
@@ -180,23 +239,29 @@ public class DriveSystem {
     /**
      * Returns true if the robot is near the specified position and rotation, false otherwise.
      *
-     * @param rotation in radians
+     //* @param rotation in radians
      */
-    private boolean near(Vector2D position, double rotation) {
-        Vector2D currentPosition = gps.getPosition();
-        Vector2D positionOffset = position.subtract(currentPosition);
-        double currentRotation = gps.getRotation();
-        double rotationOffset = rotation - currentRotation;
-        return Math.abs(positionOffset.getX()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(positionOffset.getY()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_RADIANS;
-    }
+//    private boolean near(Vector2D position, double rotation) {
+//        //Vector2D currentPosition = gps.getPosition();
+//        //Vector2D positionOffset = position.subtract(currentPosition);
+//        //double currentRotation = gps.getRotation();
+//        double rotationOffset = rotation - currentRotation;
+//        return Math.abs(positionOffset.getX()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
+//                Math.abs(positionOffset.getY()) < Constants.DRIVE_OFFSET_TOLERANCE_INCHES &&
+//                Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_RADIANS;
+//    }
 
 
-    public void setPower(double power) {
-        frontRight.setPower(power);
-        frontLeft.setPower(power);
-        rearRight.setPower(power);
-        rearLeft.setPower(power);
+    public void setPower(double flPower,double frPower,double rrPower,double rlPower) {
+        frontRight.setPower(frPower);
+        frontLeft.setPower(flPower);
+        rearRight.setPower(rrPower);
+        rearLeft.setPower(rlPower);
     }
+
+    //0         1
+    //3         2
+
+
+
 }
