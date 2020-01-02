@@ -23,21 +23,6 @@ public class Constants {
     public static final String INTAKE_COLOR_SENSOR = "IntakeColorSensor";
     public static final String WEBCAM = "Webcam";
 
-
-    // drive system
-    public static final double DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
-    public static final double DRIVE_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = 0.0523599;
-    public static final double DRIVE_MIN_REDUCED_SPEED = 0.1;
-    public static final double DRIVE_OFFSET_TOLERANCE_INCHES = 1;
-    public static final double DRIVE_OFFSET_TOLERANCE_RADIANS = 0.0872665;
-
-    // odometry
-    public static final double ODOMETER_INCHES_TO_TICKS = 1102;
-    public static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
-    public static final double MAX_TURN_CORRECTION_SPEED = 0.1;
-    public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
-    public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
-
     //game constants
     public static final double STONE_LENGTH_INCHES = 8.0;
 }

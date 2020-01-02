@@ -17,19 +17,14 @@ public class GPSCallibration extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         Vector2D startPosition = Vector2D.zero();
-        double startBearing = 0;
-        gps = new GPS(hardwareMap, startPosition, startBearing);
-        //driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startBearing);
+        double startRotation = 0;
+        gps = new GPS(hardwareMap, startPosition, startRotation);
+        driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
     }
 
     @Override
     protected void onStart() {
-        double speed = 0.25;
-        Vector2D target1 = new Vector2D(24 * 4, 0);
-        Vector2D[] targets = {target1};
-        for (Vector2D target : targets) {
-            //driveSystem.goTo(target, speed);
-        }
+        driveSystem.vertical(48, 0.5);
     }
 
     @Override

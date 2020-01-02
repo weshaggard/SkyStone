@@ -12,6 +12,10 @@ import teamcode.common.Vector2D;
  */
 public class GPS {
 
+    public static final double ODOMETER_INCHES_TO_TICKS = 1102;
+    public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
+    public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
+
     /**
      * Whether or not this GPS should continue to update positions.
      */
@@ -29,12 +33,11 @@ public class GPS {
 
     /**
      * @param currentPosition in inches
-     * @param currentBearing  in degrees
+     * @param rotation        in radians
      */
-    public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
+    public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
         active = true;
-        this.position = currentPosition.multiply(Constants.ODOMETER_INCHES_TO_TICKS);
-        this.rotation = bearingToRadians(currentBearing);
+        this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
@@ -71,12 +74,12 @@ public class GPS {
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
         double deltaRotTicks = (deltaRightVertical - deltaLeftVertical);
-        rotation += deltaRotTicks / Constants.VERTICAL_ODOMETER_TICKS_TO_RADIANS;
+        rotation += deltaRotTicks / VERTICAL_ODOMETER_TICKS_TO_RADIANS;
         rotation = Utils.wrapAngle(rotation);
 
         double horizontalPos = horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
-                Constants.HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
+                HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
 
         double y = position.getY() - averageDeltaVertical * Math.sin(rotation) -
@@ -96,33 +99,14 @@ public class GPS {
      * Returns the position of the robot as read by the odometers. In inches
      */
     public Vector2D getPosition() {
-        return position.multiply(1 / Constants.ODOMETER_INCHES_TO_TICKS);
+        return position.multiply(1 / ODOMETER_INCHES_TO_TICKS);
     }
 
     /**
-     * Returns the rotation in radians, unit circle style.
+     * Returns the rotation in radians.
      */
     public double getRotation() {
         return rotation;
-    }
-
-    /**
-     * Returns the robot's bearing in degrees.
-     */
-    public double getBearing() {
-        return radiansToBearing(rotation);
-    }
-
-    private double radiansToBearing(double radians) {
-        // 0 -> 90
-        // pi/2 -> 0
-        // pi -> 270
-        // 3pi/2 -> 180
-        return radians;
-    }
-
-    private double bearingToRadians(double bearing) {
-        return 0;
     }
 
     /**
