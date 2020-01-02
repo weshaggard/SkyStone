@@ -1,4 +1,4 @@
-package teamcode.test.test.mecanum;
+package teamcode.league3.mecanum;
 
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -21,7 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static teamcode.test.test.DriveConstants.*;
+import static teamcode.league3.DriveConstants.*;
 
 
 

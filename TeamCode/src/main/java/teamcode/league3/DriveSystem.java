@@ -191,4 +191,11 @@ public class DriveSystem {
                 Math.abs(Math.toDegrees(rotationOffset)) < Constants.DRIVE_OFFSET_TOLERANCE_RADIANS;
     }
 
+
+    public void setPower(double power) {
+        frontRight.setPower(power);
+        frontLeft.setPower(power);
+        rearRight.setPower(power);
+        rearLeft.setPower(power);
+    }
 }

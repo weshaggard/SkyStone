@@ -1,4 +1,4 @@
-package teamcode.test.test.mecanum;
+package teamcode.league3.mecanum;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
@@ -26,11 +26,11 @@ import java.util.List;
 
 public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 2; // in
+    public static double WHEEL_RADIUS = 2.3622; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 8.81; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = 4.405; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 13.5; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = 7.5; // in; offset of the lateral wheel
 
     private DcMotor leftEncoder, rightEncoder, frontEncoder;
 

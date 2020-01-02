@@ -1,4 +1,4 @@
-package teamcode.test.test;
+package teamcode.league3;
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
@@ -43,9 +43,9 @@ public class DriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
-    public static double WHEEL_RADIUS = 2.3622;
+    public static double WHEEL_RADIUS = 2.95276;
     public static double GEAR_RATIO = 86.0 / 70.0; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = (18 + 81.0/83.0) * 1.06  ;
+    public static double TRACK_WIDTH = 14 + (5.0 / 16.0) ;
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using

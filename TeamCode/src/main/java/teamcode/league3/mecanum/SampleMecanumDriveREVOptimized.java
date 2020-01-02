@@ -1,4 +1,4 @@
-package teamcode.test.test.mecanum;
+package teamcode.league3.mecanum;
 
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -9,17 +9,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 
-import teamcode.test.test.REVExtensions2.ExpansionHubEx;
-import teamcode.test.test.REVExtensions2.ExpansionHubMotor;
-import teamcode.test.test.REVExtensions2.RevBulkData;
-import teamcode.test.test.Util.LynxModuleUtil;
+import teamcode.league3.REVExtensions2.ExpansionHubEx;
+import teamcode.league3.REVExtensions2.ExpansionHubMotor;
+import teamcode.league3.REVExtensions2.RevBulkData;
+import teamcode.league3.Util.LynxModuleUtil;
 
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static teamcode.test.test.DriveConstants.*;
+import static teamcode.league3.DriveConstants.*;
 
 /* Optimized mecanum drive implementation for REV ExHs. The time savings may significantly improve
  * trajectory following performance with moderate additional complexity.

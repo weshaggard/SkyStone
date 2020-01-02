@@ -95,9 +95,7 @@ public class MoonshotArmSystem {
 
     private void lift(int inches, double power) {
         int ticks = (int)(inches * WINCH_INCHES_TO_TICKS);
-        frontWinch.setTargetPosition(ticks);
         backWinch.setTargetPosition(ticks);
-        frontWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontWinch.setPower(power);
         backWinch.setPower(power);

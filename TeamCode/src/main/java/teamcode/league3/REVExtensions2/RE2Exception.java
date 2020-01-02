@@ -1,5 +1,5 @@
-package teamcode.test.test.REVExtensions2;/*
- * Copyright (c) 2019 OpenFTC Team
+package teamcode.league3.REVExtensions2;/*
+ * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,12 @@ package teamcode.test.test.REVExtensions2;/*
  * SOFTWARE.
  */
 
-import com.qualcomm.robotcore.hardware.ControlSystem;
-import com.qualcomm.robotcore.hardware.configuration.ServoFlavor;
-import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
-import com.qualcomm.robotcore.hardware.configuration.annotations.ServoType;
-
-/**
- * Support for the VEX Motor Controller 29
- *
- * To use an MC29, connect it to a servo port, then on the Robot Controller or
- * Driver Station, configure the port you connected it to as a VEX Motor Controller 29
- *
- */
-@ServoType(flavor = ServoFlavor.CONTINUOUS, usPulseLower = 1000, usPulseUpper = 2000)
-@DeviceProperties(xmlTag = "teamcode.test.RoadRunner.REVExtensions2.VexMC29", name = "VEX Motor Controller 29", description = "VEX Motor Controller 29", compatibleControlSystems = ControlSystem.REV_HUB)
-public interface VexMC29
+class RE2Exception extends RuntimeException
 {
+    RE2Exception(){}
+
+    RE2Exception(String msg)
+    {
+        super(msg);
+    }
 }
