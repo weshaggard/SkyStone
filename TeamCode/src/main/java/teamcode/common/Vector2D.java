@@ -20,7 +20,7 @@ public final class Vector2D implements Cloneable {
         return new Vector2D(Math.cos(theta) * magnitude, Math.sin(theta) * magnitude);
     }
 
-    public static Vector2D forward() {
+    public static Vector2D up() {
         return new Vector2D(0, 1);
     }
 

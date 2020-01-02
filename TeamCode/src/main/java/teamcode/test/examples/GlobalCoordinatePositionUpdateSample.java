@@ -38,7 +38,7 @@ public class GlobalCoordinatePositionUpdateSample extends LinearOpMode {
 
         /*
         Reverse the direction of the odometry wheels. THIS WILL CHANGE FOR EACH ROBOT. Adjust the direction (as needed) of each encoder wheel
-        such that when the verticalLeft and verticalRight encoders spin forward, they return positive values, and when the
+        such that when the verticalLeft and verticalRight encoders spin up, they return positive values, and when the
         horizontal encoder travels to the right, it returns positive value
         */
         verticalLeft.setDirection(DcMotorSimple.Direction.REVERSE);

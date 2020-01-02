@@ -218,7 +218,7 @@ public class FTCVisionSample extends LinearOpMode {
          */
 
         // Set the position of the Stone Target.  Since it's not fixed in position, assume it's at the field origin.
-        // Rotated it to to face forward, and raised it to sit on the ground correctly.
+        // Rotated it to to face up, and raised it to sit on the ground correctly.
         // This can be used for generic target-centric approach algorithms
         stoneTarget.setLocation(OpenGLMatrix
                 .translation(0, 0, stoneZ)
@@ -281,14 +281,14 @@ public class FTCVisionSample extends LinearOpMode {
         // Lock it into Portrait for these numbers to work.
         //
         // Info:  The coordinate frame for the robot looks the same as the field.
-        // The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
+        // The robot's "up" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
         // Z is UP on the robot.  This equates to a bearing angle of Zero degrees.
         //
         // The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
         // pointing to the LEFT side of the Robot.
-        // The two examples below assume that the camera is facing forward out the front of the robot.
+        // The two examples below assume that the camera is facing up out the front of the robot.
 
-        // We need to rotate the camera around it's long axis to bring the correct camera forward.
+        // We need to rotate the camera around it's long axis to bring the correct camera up.
         if (CAMERA_CHOICE == BACK) {
             phoneYRotate = -90;
         } else {
@@ -301,7 +301,7 @@ public class FTCVisionSample extends LinearOpMode {
         }
 
         // Next, translate the camera lens to where it is on the robot.
-        // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
+        // In this example, it is centered (left to right), but up of the middle of the robot, and above ground level.
         final float CAMERA_FORWARD_DISPLACEMENT = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
         final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
         final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line

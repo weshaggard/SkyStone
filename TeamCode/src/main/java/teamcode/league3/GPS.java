@@ -1,7 +1,5 @@
 package teamcode.league3;
 
-import android.opengl.Matrix;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,9 +11,6 @@ import teamcode.common.Vector2D;
  * Always call shutdown() in onStop() of AbstractOpMode.
  */
 public class GPS {
-
-
-
 
     /**
      * Whether or not this GPS should continue to update positions.
@@ -39,14 +34,14 @@ public class GPS {
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double currentBearing) {
         active = true;
         this.position = currentPosition.multiply(Constants.ODOMETER_INCHES_TO_TICKS);
-        //this.rotation = bearingToRadians(currentBearing);
+        this.rotation = bearingToRadians(currentBearing);
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
         prevLeftVerticalPos = 0;
         prevRightVerticalPos = 0;
         prevHorizontalPos = 0;
-        correctDirections();
+        correctEncoderDirections();
         resetEncoders();
         Thread positionUpdater = new Thread() {
             @Override
@@ -59,7 +54,7 @@ public class GPS {
         positionUpdater.start();
     }
 
-    private void correctDirections() {
+    private void correctEncoderDirections() {
         horizontal.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
@@ -67,31 +62,6 @@ public class GPS {
         leftVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         horizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-
-    public DcMotor getLeftVertical(){
-        return leftVertical;
-    }
-
-    public DcMotor getRightVertical(){
-        return rightVertical;
-    }
-
-    public DcMotor getHorizontal(){
-        return horizontal;
-    }
-
-
-    private void updateArcBased(){
-        //current values
-        double currentEncoderLeft = leftVertical.getCurrentPosition();
-        double currentEncoderRight = rightVertical.getCurrentPosition();
-        double currentEncoderHorizontal = horizontal.getCurrentPosition();
-        //change
-        double deltaLeft = currentEncoderLeft - prevLeftVerticalPos;
-        double deltaRight = currentEncoderRight - prevRightVerticalPos;
-
     }
 
     private void updateLocation() {
@@ -120,13 +90,6 @@ public class GPS {
         prevLeftVerticalPos = leftVerticalPos;
         prevRightVerticalPos = rightVerticalPos;
         prevHorizontalPos = horizontalPos;
-    }
-
-
-    public void selfCorrection(){
-         double currentPositionLeft = leftVertical.getCurrentPosition();
-        double currentPositionRight = rightVertical.getCurrentPosition();
-        double currentPositionHorizontal = horizontal.getCurrentPosition();
     }
 
     /**
