@@ -15,8 +15,8 @@ public class DriveSystem {
     private static final double DRIVE_MIN_REDUCED_SPEED = 0.1;
     private static final double DRIVE_OFFSET_TOLERANCE_INCHES = 1;
     private static final double DRIVE_OFFSET_TOLERANCE_RADIANS = 0.0872665;
-    public static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
-    public static final double MAX_TURN_CORRECTION_SPEED = 0.1;
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
+    private static final double MAX_TURN_CORRECTION_SPEED = 0.1;
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final GPS gps;
@@ -31,7 +31,6 @@ public class DriveSystem {
     private double targetRotation;
 
     /**
-     *
      * @param hardwareMap
      * @param gps
      * @param currentPosition in inches
@@ -42,15 +41,21 @@ public class DriveSystem {
         frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
         rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
         rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
-        correctDirections();
+
+        initMotors();
         this.gps = gps;
         targetPosition = currentPosition;
         targetRotation = currentRotation;
     }
 
-    private void correctDirections() {
+    private void initMotors() {
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /**
@@ -76,9 +81,8 @@ public class DriveSystem {
     }
 
     /**
-     *
      * @param targetPosition in inches
-     * @param speed [0, 1]
+     * @param speed          [0, 1]
      */
     public void goTo(Vector2D targetPosition, double speed) {
         this.targetPosition = targetPosition;
@@ -137,9 +141,8 @@ public class DriveSystem {
     }
 
     /**
-     *
      * @param radians turns counterclockwise if positive
-     * @param speed [0, 1]
+     * @param speed   [0, 1]
      */
     public void turn(double radians, double speed) {
         speed = Math.abs(speed);

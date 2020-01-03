@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
+import teamcode.test.REVExtensions2.ExpansionHubEx;
+import teamcode.test.REVExtensions2.RevBulkData;
 
 /**
  * Always call shutdown() in onStop() of AbstractOpMode.
@@ -28,6 +30,8 @@ public class GPS {
      * In radians, unit circle style.
      */
     private volatile double rotation;
+    private final ExpansionHubEx hub;
+    private RevBulkData data;
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
@@ -38,6 +42,8 @@ public class GPS {
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
         active = true;
         this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
+        hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+        data = hub.getBulkInputData();
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
@@ -68,8 +74,8 @@ public class GPS {
     }
 
     private void updateLocation() {
-        double leftVerticalPos = leftVertical.getCurrentPosition();
-        double rightVerticalPos = rightVertical.getCurrentPosition();
+        double leftVerticalPos = data.getMotorCurrentPosition(leftVertical);
+        double rightVerticalPos = data.getMotorCurrentPosition(rightVertical);
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
@@ -77,7 +83,7 @@ public class GPS {
         rotation += deltaRotTicks / VERTICAL_ODOMETER_TICKS_TO_RADIANS;
         rotation = Utils.wrapAngle(rotation);
 
-        double horizontalPos = horizontal.getCurrentPosition();
+        double horizontalPos = data.getMotorCurrentPosition(horizontal);
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
                 HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
