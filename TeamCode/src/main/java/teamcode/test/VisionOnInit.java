@@ -37,11 +37,11 @@ public class VisionOnInit{
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
 
-    public enum skystonePos {
+    public enum SkystonePos {
         LEFT, CENTER, RIGHT;
     }
 
-    public skystonePos vuforiascan(boolean saveBitmaps, boolean red) {
+    public SkystonePos vuforiascan(boolean saveBitmaps, boolean red) {
             Image rgbImage = null;
             int rgbTries = 0;
         /*
@@ -239,7 +239,7 @@ public class VisionOnInit{
         double blackYellowRatioR = blackCountR / yellowCountR;
 
 
-        skystonePos pos;
+        SkystonePos pos;
         /*
         DbgLog.msg("color L: " + Double.toString(colorcountL));
         DbgLog.msg("color C: " + Double.toString(colorcountC));
@@ -253,11 +253,11 @@ public class VisionOnInit{
         }
 */
         if (blackYellowRatioL > blackYellowRatioC && blackYellowRatioL > blackYellowRatioR) {
-            pos = skystonePos.LEFT;
+            pos = SkystonePos.LEFT;
         } else if (blackYellowRatioC > blackYellowRatioL && blackYellowRatioC > blackYellowRatioR) {
-            pos = skystonePos.CENTER;
+            pos = SkystonePos.CENTER;
         } else {
-            pos = skystonePos.RIGHT;
+            pos = SkystonePos.RIGHT;
         }
 
         Debug.log("black/yellow L: " + blackCountL + "/" + yellowCountL);

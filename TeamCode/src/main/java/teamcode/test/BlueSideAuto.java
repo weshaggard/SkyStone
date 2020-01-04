@@ -9,7 +9,7 @@ import teamcode.common.AbstractOpMode;
 import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.MoonshotArmSystem;
-import teamcode.test.VisionOnInit.skystonePos;
+import teamcode.test.VisionOnInit.SkystonePos;
 
 @Autonomous(name = "Blue Side Auto")
 public class BlueSideAuto extends AbstractOpMode {
@@ -26,7 +26,7 @@ public class BlueSideAuto extends AbstractOpMode {
     private double VERTICAL_SPEED = 0.6;
     private double LATERAL_SPEED = 0.6;
     private double TURN_SPEED = 0.4;
-    private skystonePos pos;
+    private SkystonePos pos;
 
 
     @Override
@@ -39,11 +39,11 @@ public class BlueSideAuto extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        if (pos == skystonePos.LEFT) {
+        if (pos == SkystonePos.LEFT) {
             moveToStone(6);
             moveToFoundation(6);
             pseudoArc();
-        } else if (pos == skystonePos.CENTER) {
+        } else if (pos == SkystonePos.CENTER) {
             moveToStone(5);
             moveToFoundation(5);
             pseudoArc();
