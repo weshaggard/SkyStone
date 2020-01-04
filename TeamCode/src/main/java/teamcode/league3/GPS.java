@@ -1,7 +1,6 @@
 package teamcode.league3;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.Utils;
@@ -14,9 +13,12 @@ import teamcode.test.REVExtensions2.RevBulkData;
  */
 public class GPS {
 
-    public static final double ODOMETER_INCHES_TO_TICKS = 1102;
-    public static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
-    public static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
+    private static final double ODOMETER_INCHES_TO_TICKS = 1102;
+    private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
+    private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
+    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
+    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = 1;
+    private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
 
     /**
      * Whether or not this GPS should continue to update positions.
@@ -30,8 +32,6 @@ public class GPS {
      * In radians, unit circle style.
      */
     private volatile double rotation;
-    private final ExpansionHubEx hub;
-    private RevBulkData data;
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
@@ -42,15 +42,12 @@ public class GPS {
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
         active = true;
         this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
-        hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
-        data = hub.getBulkInputData();
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
         prevLeftVerticalPos = 0;
         prevRightVerticalPos = 0;
         prevHorizontalPos = 0;
-        correctEncoderDirections();
         resetEncoders();
         Thread positionUpdater = new Thread() {
             @Override
@@ -63,10 +60,6 @@ public class GPS {
         positionUpdater.start();
     }
 
-    private void correctEncoderDirections() {
-        horizontal.setDirection(DcMotorSimple.Direction.REVERSE);
-    }
-
     private void resetEncoders() {
         leftVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightVertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -74,8 +67,8 @@ public class GPS {
     }
 
     private void updateLocation() {
-        double leftVerticalPos = data.getMotorCurrentPosition(leftVertical);
-        double rightVerticalPos = data.getMotorCurrentPosition(rightVertical);
+        double leftVerticalPos = LEFT_VERTICAL_ODOMETER_MULTIPLIER * leftVertical.getCurrentPosition();
+        double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_MULTIPLIER * rightVertical.getCurrentPosition();
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
@@ -83,7 +76,7 @@ public class GPS {
         rotation += deltaRotTicks / VERTICAL_ODOMETER_TICKS_TO_RADIANS;
         rotation = Utils.wrapAngle(rotation);
 
-        double horizontalPos = data.getMotorCurrentPosition(horizontal);
+        double horizontalPos = HORIZONTAL_ODOMETER_MULTIPLIER * horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
                 HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
