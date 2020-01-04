@@ -36,8 +36,8 @@ public class MoonshotArmSystem {
     //Run Pulley's at 40%!!!
 
     public MoonshotArmSystem(HardwareMap hardwareMap) {
-        intakeLeft = hardwareMap.get(DcMotor.class, Constants.LEFT_INTAKE_WHEEL);
-        intakeRight = hardwareMap.get(DcMotor.class, Constants.RIGHT_INTAKE_WHEEL);
+        intakeLeft = hardwareMap.get(DcMotor.class, Constants.LEFT_INTAKE);
+        intakeRight = hardwareMap.get(DcMotor.class, Constants.RIGHT_INTAKE);
         frontWinch = hardwareMap.get(DcMotor.class, Constants.LEFT_WINCH);
         backWinch = hardwareMap.get(DcMotor.class, Constants.RIGHT_WINCH);
         boxTransfer = hardwareMap.get(Servo.class, Constants.BOX_TRANSFER);

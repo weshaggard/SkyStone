@@ -59,7 +59,7 @@ public class Vision {
      */
     public Vector2D getSkystonePosition() {
         VuforiaTrackable skyStone = trackables.get(0);
-        OpenGLMatrix loc = ((VuforiaTrackableDefaultListener) skyStone.getListener()).getUpdatedRobotLocation();
+        OpenGLMatrix loc = ((VuforiaTrackableDefaultListener) skyStone.getListener()).getFtcCameraFromTarget();
         if (loc == null) {
             return null;
         }

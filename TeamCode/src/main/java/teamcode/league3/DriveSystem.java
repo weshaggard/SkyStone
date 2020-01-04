@@ -10,13 +10,13 @@ import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
-    private static final double DRIVE_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = 0.0523599;
-    private static final double DRIVE_MIN_REDUCED_SPEED = 0.1;
-    private static final double DRIVE_OFFSET_TOLERANCE_INCHES = 1;
-    private static final double DRIVE_OFFSET_TOLERANCE_RADIANS = 0.0872665;
-    public static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
-    public static final double MAX_TURN_CORRECTION_SPEED = 0.1;
+    private static final double SPEED_REDUCTION_THRESHOLD_INCHES = 48;
+    private static final double TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = 0.0523599;
+    private static final double MIN_REDUCED_SPEED = 0.4;
+    private static final double INCHES_OFFSET_TOLERANCE = 1;
+    private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(3);
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
+    private static final double MAX_TURN_CORRECTION_SPEED = 0.1;
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final GPS gps;
@@ -31,7 +31,6 @@ public class DriveSystem {
     private double targetRotation;
 
     /**
-     *
      * @param hardwareMap
      * @param gps
      * @param currentPosition in inches
@@ -42,19 +41,21 @@ public class DriveSystem {
         frontRight = hardwareMap.dcMotor.get(Constants.FRONT_RIGHT_DRIVE_NAME);
         rearLeft = hardwareMap.dcMotor.get(Constants.REAR_LEFT_DRIVE_NAME);
         rearRight = hardwareMap.dcMotor.get(Constants.REAR_RIGHT_DRIVE_NAME);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        correctDirections();
+
+        initMotors();
         this.gps = gps;
         targetPosition = currentPosition;
         targetRotation = currentRotation;
     }
 
-    private void correctDirections() {
+    private void initMotors() {
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rearLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rearRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /**
@@ -80,13 +81,13 @@ public class DriveSystem {
     }
 
     /**
-     *
      * @param targetPosition in inches
-     * @param speed [0, 1]
+     * @param speed          [0, 1]
      */
     public void goTo(Vector2D targetPosition, double speed) {
         this.targetPosition = targetPosition;
         Vector2D startPosition = gps.getPosition();
+        double maxTurnSpeed = MAX_TURN_CORRECTION_SPEED * speed;
         while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Vector2D currentPosition = gps.getPosition();
             double currentRotation = gps.getRotation();
@@ -100,8 +101,11 @@ public class DriveSystem {
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
 
-            double turnSpeed = Math.min((currentRotation - targetRotation) *
-                    TURN_CORRECTION_SPEED_MULTIPLIER * speed, MAX_TURN_CORRECTION_SPEED * speed);
+            double turnSpeed = (targetRotation - currentRotation) *
+                    TURN_CORRECTION_SPEED_MULTIPLIER * speed;
+            if (Math.abs(turnSpeed) > maxTurnSpeed) {
+                turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
+            }
 
             continuous(velocity, turnSpeed);
         }
@@ -110,17 +114,17 @@ public class DriveSystem {
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
         double accelerationPower;
         double decelerationPower;
-        if (distanceFromStart < DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES) {
-            accelerationPower = Math.min(maxSpeed, Utils.lerp(DRIVE_MIN_REDUCED_SPEED,
+        if (distanceFromStart < SPEED_REDUCTION_THRESHOLD_INCHES) {
+            accelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceFromStart /
-                            DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES));
+                            SPEED_REDUCTION_THRESHOLD_INCHES));
         } else {
             accelerationPower = maxSpeed;
         }
-        if (distanceToTarget < DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES) {
-            decelerationPower = Math.min(maxSpeed, Utils.lerp(DRIVE_MIN_REDUCED_SPEED,
+        if (distanceToTarget < SPEED_REDUCTION_THRESHOLD_INCHES) {
+            decelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceToTarget /
-                            DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES));
+                            SPEED_REDUCTION_THRESHOLD_INCHES));
         } else {
             decelerationPower = maxSpeed;
         }
@@ -128,22 +132,20 @@ public class DriveSystem {
     }
 
     public void vertical(double inches, double speed) {
-        Vector2D currentPosition = gps.getPosition();
-        Vector2D translation = Vector2D.right().multiply(inches).rotate(targetRotation - Math.PI / 2);
-        Vector2D targetPosition = currentPosition.add(translation);
-        goTo(targetPosition, speed);
-    }
-
-    public void lateral(double inches, double speed) {
         Vector2D translation = Vector2D.up().multiply(inches).rotate(targetRotation - Math.PI / 2);
         targetPosition = targetPosition.add(translation);
         goTo(targetPosition, speed);
     }
 
+    public void lateral(double inches, double speed) {
+        Vector2D translation = Vector2D.right().multiply(inches).rotate(targetRotation + Math.PI / 2);
+        targetPosition = targetPosition.add(translation);
+        goTo(targetPosition, speed);
+    }
+
     /**
-     *
      * @param radians turns counterclockwise if positive
-     * @param speed [0, 1]
+     * @param speed   [0, 1]
      */
     public void turn(double radians, double speed) {
         speed = Math.abs(speed);
@@ -164,17 +166,17 @@ public class DriveSystem {
     private double getModulatedTurnPower(double maxSpeed, double radiansFromStart, double radiansToTarget) {
         double accelerationPower;
         double decelerationPower;
-        if (radiansFromStart < DRIVE_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS) {
-            accelerationPower = Math.min(maxSpeed, Utils.lerp(DRIVE_MIN_REDUCED_SPEED,
+        if (radiansFromStart < TURN_SPEED_REDUCTION_THRESHOLD_RADIANS) {
+            accelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, radiansFromStart /
-                            DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES));
+                            SPEED_REDUCTION_THRESHOLD_INCHES));
         } else {
             accelerationPower = maxSpeed;
         }
-        if (radiansToTarget < DRIVE_SPEED_REDUCTION_THRESHOLD_INCHES) {
-            decelerationPower = Math.min(maxSpeed, Utils.lerp(DRIVE_MIN_REDUCED_SPEED,
+        if (radiansToTarget < SPEED_REDUCTION_THRESHOLD_INCHES) {
+            decelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, radiansToTarget /
-                            DRIVE_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS));
+                            TURN_SPEED_REDUCTION_THRESHOLD_RADIANS));
         } else {
             decelerationPower = maxSpeed;
         }
@@ -199,9 +201,8 @@ public class DriveSystem {
         Vector2D positionOffset = position.subtract(currentPosition);
         double currentRotation = gps.getRotation();
         double rotationOffset = rotation - currentRotation;
-        return Math.abs(positionOffset.getX()) < DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(positionOffset.getY()) < DRIVE_OFFSET_TOLERANCE_INCHES &&
-                Math.abs(Math.toDegrees(rotationOffset)) < DRIVE_OFFSET_TOLERANCE_RADIANS;
+        return positionOffset.magnitude() < INCHES_OFFSET_TOLERANCE &&
+                Math.abs(rotationOffset) < RADIANS_OFFSET_TOLERANCE;
     }
 
 }
