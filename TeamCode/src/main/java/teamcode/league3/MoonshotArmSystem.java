@@ -109,7 +109,7 @@ public class MoonshotArmSystem {
                 Math.abs(backWinch.getTargetPosition() - backWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS;
     }
 
-    private void suck(double powerLeft, double powerRight) {
+    public void suck(double powerLeft, double powerRight) {
         intakeLeft.setPower(powerLeft);
         intakeRight.setPower(powerRight);
 

@@ -29,7 +29,7 @@ public class Utils {
      */
     public static double lerp(double min, double max, double interpolant) {
         if (interpolant < 0 || interpolant > 1) {
-            throw new IllegalArgumentException("Interpolant must be between 0 and 1");
+            throw new IllegalArgumentException("Interpolant must be between 0 and 1 (was " + interpolant + ")");
         }
         return min + (max - min) * interpolant;
     }
@@ -51,7 +51,7 @@ public class Utils {
         return centimeters / 2.54;
     }
 
-    public double inchesToCentimeters(double inches){
+    public double inchesToCentimeters(double inches) {
         return inches * 2.54;
     }
 

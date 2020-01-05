@@ -5,17 +5,21 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double SPEED_REDUCTION_THRESHOLD_INCHES = 48;
-    private static final double TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = 0.0523599;
-    private static final double MIN_REDUCED_SPEED = 0.4;
-    private static final double INCHES_OFFSET_TOLERANCE = 1;
+    private static final double MIN_REDUCED_SPEED = 0.25;
+    private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
+    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 96;
+    private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(90);
+    private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(135);
+    private static final double MAX_ALLOWED_ROTATION_OFFSET_TOLERANCE = Math.toRadians(6);
+    private static final double INCHES_OFFSET_TOLERANCE = 2;
     private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(3);
-    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1;
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 2;
     private static final double MAX_TURN_CORRECTION_SPEED = 0.1;
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
@@ -101,30 +105,40 @@ public class DriveSystem {
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
 
-            double turnSpeed = (targetRotation - currentRotation) *
-                    TURN_CORRECTION_SPEED_MULTIPLIER * speed;
+            double rotationOffset = targetRotation - currentRotation;
+            if (Math.abs(rotationOffset) > MAX_ALLOWED_ROTATION_OFFSET_TOLERANCE) {
+                Debug.log("Collision detected!");
+                Debug.log("Emergency stop!");
+                AbstractOpMode.currentOpMode().requestOpModeStop();
+            }
+            double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
+            Debug.clear();
+            Debug.log("ts1: " + turnSpeed);
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
                 turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
 
+            Debug.log("ts2: " + turnSpeed);
+
             continuous(velocity, turnSpeed);
         }
+        brake();
     }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
         double accelerationPower;
         double decelerationPower;
-        if (distanceFromStart < SPEED_REDUCTION_THRESHOLD_INCHES) {
+        if (distanceFromStart < ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES) {
             accelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceFromStart /
-                            SPEED_REDUCTION_THRESHOLD_INCHES));
+                            ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES));
         } else {
             accelerationPower = maxSpeed;
         }
-        if (distanceToTarget < SPEED_REDUCTION_THRESHOLD_INCHES) {
+        if (distanceToTarget < DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES) {
             decelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceToTarget /
-                            SPEED_REDUCTION_THRESHOLD_INCHES));
+                            DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES));
         } else {
             decelerationPower = maxSpeed;
         }
@@ -138,13 +152,13 @@ public class DriveSystem {
     }
 
     public void lateral(double inches, double speed) {
-        Vector2D translation = Vector2D.right().multiply(inches).rotate(targetRotation + Math.PI / 2);
+        Vector2D translation = Vector2D.right().multiply(inches).rotate(targetRotation - Math.PI / 2);
         targetPosition = targetPosition.add(translation);
         goTo(targetPosition, speed);
     }
 
     /**
-     * @param radians turns counterclockwise if positive
+     * @param radians turns counterclockwise if positive (-2pi, 2pi)
      * @param speed   [0, 1]
      */
     public void turn(double radians, double speed) {
@@ -153,34 +167,35 @@ public class DriveSystem {
         // position could result in an endless loop.
         double startRotation = gps.getRotation();
         targetRotation = startRotation + radians;
+        targetRotation = Utils.wrapAngle(targetRotation);
         while (!near(gps.getPosition(), targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             double currentRotation = gps.getRotation();
             double radiansFromStart = currentRotation - startRotation;
             double radiansToTarget = targetRotation - currentRotation;
-            double signedSpeed = Math.signum(radiansToTarget) * speed;
-            double power = getModulatedTurnPower(signedSpeed, radiansFromStart, radiansToTarget);
+            double power = getModulatedTurnPower(speed, radiansFromStart, radiansToTarget);
             continuous(Vector2D.zero(), power);
         }
     }
 
     private double getModulatedTurnPower(double maxSpeed, double radiansFromStart, double radiansToTarget) {
-        double accelerationPower;
-        double decelerationPower;
-        if (radiansFromStart < TURN_SPEED_REDUCTION_THRESHOLD_RADIANS) {
-            accelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
-                    1, radiansFromStart /
-                            SPEED_REDUCTION_THRESHOLD_INCHES));
+        double direction = Math.signum(radiansToTarget);
+        radiansFromStart = Math.abs(radiansFromStart);
+        radiansToTarget = Math.abs(radiansToTarget);
+        double accelerationSpeed;
+        double decelerationSpeed;
+        if (radiansFromStart < ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS) {
+            accelerationSpeed = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
+                    1, radiansFromStart / ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS));
         } else {
-            accelerationPower = maxSpeed;
+            accelerationSpeed = maxSpeed;
         }
-        if (radiansToTarget < SPEED_REDUCTION_THRESHOLD_INCHES) {
-            decelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
-                    1, radiansToTarget /
-                            TURN_SPEED_REDUCTION_THRESHOLD_RADIANS));
+        if (radiansToTarget < DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS) {
+            decelerationSpeed = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
+                    1, radiansToTarget / DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS));
         } else {
-            decelerationPower = maxSpeed;
+            decelerationSpeed = maxSpeed;
         }
-        return Math.min(accelerationPower, decelerationPower);
+        return direction * Math.min(accelerationSpeed, decelerationSpeed);
     }
 
     public void brake() {
