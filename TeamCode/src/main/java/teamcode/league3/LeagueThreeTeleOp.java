@@ -14,7 +14,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     private static final double WINCH_MOTOR_POWER = 0.5;
     private static final double RIGHT_INTAKE_MOTOR_POWER = 0.3;
     private static final double LEFT_INTAKE_MOTOR_POWER = 0.7;
-    //private MoonshotArmSystem arm;
+    private MoonshotArmSystem arm;
     private Thread armUpdate;
     private DriveSystem driveSystem;
     private Thread driveUpdate;
@@ -29,7 +29,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         //arm = new MoonshotArmSystem(this.hardwareMap);
-        driveSystem = null;
+        driveSystem = new DriveSystem(hardwareMap, new GPS(hardwareMap, new Vector2D(36, 72), Math.toRadians(90)));
         presetNum = 1;
 //        armUpdate = new Thread(){
 //            public void run(){
@@ -82,9 +82,33 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             }
             driveSystem.continuous(velocity, gamepad1.left_stick_x * TURN_SPEED_MODIFIER);
         }
+
     }
 
     @Override
     protected void onStop() {
     }
+
+
+
+    //Patrick's Driver 2 Control scheme
+    /*
+    lstick translational rstick rotational
+    movement speed todo, not 100%
+    translational sprint and rotational sprint indepent, press down on each of the sticks
+    rt modular intake
+    lt modular outtake
+
+    lb (jams)/rb(hotkeys)
+    a lb rb back arm come down and eject block
+    b
+    y
+    x lb tranfer case goes down, move front arm up, move slide out and in, eject intake
+
+    dpad (activate with rb/lb)
+    left lb same as right rb adjust arm
+    right: lb linear slide rb adjust arm
+    up: lb transfer case adjustment rb adjust arm
+    down: lb transfer case adjustment rb adjust arm
+     */
 }

@@ -81,6 +81,11 @@ public class MoonshotArmSystem {
             suck(powerLeft, powerRight);
         }
         boxTransfer.setPosition(BOX_FLAT_POSITION);
+        try {
+            Thread.currentThread().sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
 
@@ -109,7 +114,7 @@ public class MoonshotArmSystem {
                 Math.abs(backWinch.getTargetPosition() - backWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS;
     }
 
-    private void suck(double powerLeft, double powerRight) {
+    public void suck(double powerLeft, double powerRight) {
         intakeLeft.setPower(powerLeft);
         intakeRight.setPower(powerRight);
 
@@ -119,7 +124,7 @@ public class MoonshotArmSystem {
         int red = intakeSensor.red();
         int green = intakeSensor.green();
         int blue = intakeSensor.blue();
-        return red > 400;
+        return red > 100 && green > 100;
     }
 
     public void goToHome(double power) {
