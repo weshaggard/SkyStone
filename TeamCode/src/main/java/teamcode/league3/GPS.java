@@ -27,11 +27,11 @@ public class GPS {
     /**
      * Position stored in ticks. When exposed to external classes, it is represented in inches.
      */
-    private volatile Vector2D position;
+    private Vector2D position;
     /**
      * In radians, unit circle style.
      */
-    private volatile double rotation;
+    private double rotation;
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
@@ -40,8 +40,8 @@ public class GPS {
      * @param rotation        in radians
      */
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
-        active = true;
         this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
+        this.rotation = rotation;
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
         horizontal = hardwareMap.dcMotor.get(Constants.HORIZONTAL_ODOMETER_NAME);
@@ -49,6 +49,7 @@ public class GPS {
         prevRightVerticalPos = 0;
         prevHorizontalPos = 0;
         resetEncoders();
+        active = true;
         Thread positionUpdater = new Thread() {
             @Override
             public void run() {
@@ -81,7 +82,7 @@ public class GPS {
                 HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
 
-        double y = position.getY() - averageDeltaVertical * Math.sin(rotation) -
+        double y = position.getY() + averageDeltaVertical * Math.sin(rotation) +
                 deltaHorizontal * Math.cos(rotation);
         double x = position.getX() + averageDeltaVertical * Math.cos(rotation) +
                 deltaHorizontal * Math.sin(rotation);
