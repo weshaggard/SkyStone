@@ -14,7 +14,9 @@ public class WebcamOnInitTest extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         webcam = new VisionOnInit(hardwareMap);
-        Debug.log(webcam.vuforiascan(true, false));
+        while(!opModeIsActive()) {
+            Debug.log(webcam.vuforiascan(false, true));
+        }
     }
 
     @Override

@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import teamcode.common.Debug;
+
 public class MoonshotArmSystem {
 
 
@@ -17,12 +19,13 @@ public class MoonshotArmSystem {
     private Servo backGrabber, frontGrabber;
     private ColorSensor intakeSensor;
 
-    private static final double BOX_FLAT_POSITION = 0.6;
-    private static final double BOX_RAMPED_POSITION = 0;
-    private static final double BACK_GRABBER_OPEN_POSITION = 0.5;
-    private static final double BACK_GRABBER_CLOSED_POSITION = 1.0;
-    private static final double FRONT_GRABBER_OPEN_POSITION = 0.5;
-    private static final double FRONT_GRABBER_CLOSED_POSITION = 1.0;
+    private static final double BOX_FLAT_POSITION = 0.5;
+    private static final double BOX_RAMPED_POSITION = 0.37;
+    private static final double BACK_GRABBER_OPEN_POSITION = 0.9;
+    private static final double BACK_GRABBER_CLOSED_POSITION = 0.5;
+    private static final double FRONT_GRABBER_OPEN_POSITION = 0.68;
+    private static final double FRONT_GRABBER_INTAKE_POSITION = 0.84;
+    private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
     private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 0;
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
     private static final double PULLEY_RETRACTED_POSITION = 0;
@@ -56,12 +59,10 @@ public class MoonshotArmSystem {
     private void resetServos() {
         foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_OPEN_POSITION);
         foundationGrabberRight.setPosition(FOUNDATION_GRABBER_RIGHT_OPEN_POSITION);
-        pulley.setPosition(PULLEY_RETRACTED_POSITION);
-        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        boxTransfer.setPosition(BOX_FLAT_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
-        boxTransfer.setPosition(BOX_RAMPED_POSITION);
-
-
+        frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
+        pulley.setPosition(PULLEY_RETRACTED_POSITION);
 
     }
 
@@ -76,26 +77,52 @@ public class MoonshotArmSystem {
      * @Param powerLeft, the power of the left intake motor
      * @Param powerRight, the power of the right intake motor
      */
-    public void intake(double powerLeft, double powerRight){
+    public void intake(double power){
+
+        boxTransfer.setPosition(BOX_RAMPED_POSITION);
+        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         while(!intakeFull()){
-            suck(powerLeft, powerRight);
+            suck(1);
+            //Debug.log("sucking");
         }
+        suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
+        Debug.log("transfer case down");
+        backGrabber.setPosition(0.5); //Back CLOSED POS
         try {
-            Thread.currentThread().sleep(100);
+            Thread.sleep(1500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
-        frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
-
+        pulley.setPosition(0.077 * 4);
+        frontGrabber.setPosition(1); //front CLOSED POS
 
     }
 
-    public void score(int presetHeight, double power){
-        pulley.setPosition(PULLEY_EXTENDED_POSITION);
-        lift(presetHeight * 4, power);
-        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+    public void score(int presetHeight, double power)  {
+        pulley.setPosition(1);
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        frontGrabber.setPosition(0.64);
+        pulley.setPosition(1 - (0.077 * 2));
+        backGrabber.setPosition(0.9);
+        try {
+            Thread.sleep(250);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        pulley.setPosition(0);
+        Debug.log(pulley.getPosition());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void lift(int inches, double power) {
@@ -114,9 +141,9 @@ public class MoonshotArmSystem {
                 Math.abs(backWinch.getTargetPosition() - backWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS;
     }
 
-    public void suck(double powerLeft, double powerRight) {
-        intakeLeft.setPower(powerLeft);
-        intakeRight.setPower(powerRight);
+    public void suck(double power) {
+        intakeLeft.setPower(-power);
+        intakeRight.setPower(-power);
 
     }
 
@@ -124,7 +151,8 @@ public class MoonshotArmSystem {
         int red = intakeSensor.red();
         int green = intakeSensor.green();
         int blue = intakeSensor.blue();
-        return red > 100 && green > 100;
+        Debug.log(green);
+        return green > 700;
     }
 
     public void goToHome(double power) {

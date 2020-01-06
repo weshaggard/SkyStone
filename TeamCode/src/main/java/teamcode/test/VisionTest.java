@@ -11,9 +11,11 @@ import teamcode.league3.Vision;
 @Autonomous(name = "Vision Test")
 public class VisionTest extends AbstractOpMode {
 
+
+    Vision vision;
     @Override
     public void onInitialize() {
-        Debug.log(new SSS(hardwareMap).getSkyStonePosition());
+        vision = new Vision(hardwareMap, Vision.VisionSource.WEBCAM, Vision.CameraOrientation.ZERO);
     }
 
     @Override

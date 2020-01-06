@@ -112,8 +112,6 @@ public class DriveSystem {
                 AbstractOpMode.currentOpMode().requestOpModeStop();
             }
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
-            Debug.clear();
-            Debug.log("ts1: " + turnSpeed);
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
                 turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
