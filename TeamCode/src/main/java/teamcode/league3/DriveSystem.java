@@ -16,11 +16,15 @@ public class DriveSystem {
     private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 96;
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(90);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(135);
-    private static final double MAX_ALLOWED_ROTATION_OFFSET_TOLERANCE = Math.toRadians(6);
-    private static final double INCHES_OFFSET_TOLERANCE = 2;
-    private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(3);
-    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 2;
-    private static final double MAX_TURN_CORRECTION_SPEED = 0.1;
+    private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(10);
+    private static final double INCHES_OFFSET_TOLERANCE = 1;
+    private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(2);
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
+    // To account for the robot's weight distribution
+    private static final double FRONT_LEFT_POWER_MULTIPLIER = 1;
+    private static final double FRONT_RIGHT_POWER_MULTIPLIER = 1;
+    private static final double REAR_LEFT_POWER_MULTIPLIER = 1;
+    private static final double REAR_RIGHT_POWER_MULTIPLIER = 1;
 
     private final DcMotor frontLeft, frontRight, rearLeft, rearRight;
     private final GPS gps;
@@ -52,6 +56,15 @@ public class DriveSystem {
         targetRotation = currentRotation;
     }
 
+    /**
+     * Use this for tele op. Cannot use any odometer-based functionality.
+     *
+     * @param hardwareMap
+     */
+    public DriveSystem(HardwareMap hardwareMap) {
+        this(hardwareMap, null, null, 0);
+    }
+
     private void initMotors() {
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         rearRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -78,10 +91,26 @@ public class DriveSystem {
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
-        frontLeft.setPower(power * sin - turnSpeed);
-        frontRight.setPower(power * cos + turnSpeed);
-        rearLeft.setPower(power * cos - turnSpeed);
-        rearRight.setPower(power * sin + turnSpeed);
+        setFrontLeftPower(power * sin - turnSpeed);
+        setFrontRightPower(power * cos + turnSpeed);
+        setRearLeftPower(power * cos - turnSpeed);
+        setRearRightPower(power * sin + turnSpeed);
+    }
+
+    private void setFrontLeftPower(double power) {
+        frontLeft.setPower(power * FRONT_LEFT_POWER_MULTIPLIER);
+    }
+
+    private void setFrontRightPower(double power) {
+        frontRight.setPower(power * FRONT_RIGHT_POWER_MULTIPLIER);
+    }
+
+    private void setRearLeftPower(double power) {
+        rearLeft.setPower(power * REAR_LEFT_POWER_MULTIPLIER);
+    }
+
+    private void setRearRightPower(double power) {
+        rearRight.setPower(power * REAR_RIGHT_POWER_MULTIPLIER);
     }
 
     /**
@@ -90,8 +119,8 @@ public class DriveSystem {
      */
     public void goTo(Vector2D targetPosition, double speed) {
         this.targetPosition = targetPosition;
+        speed = Math.abs(speed);
         Vector2D startPosition = gps.getPosition();
-        double maxTurnSpeed = MAX_TURN_CORRECTION_SPEED * speed;
         while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Vector2D currentPosition = gps.getPosition();
             double currentRotation = gps.getRotation();
@@ -106,20 +135,12 @@ public class DriveSystem {
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
 
             double rotationOffset = targetRotation - currentRotation;
-            if (Math.abs(rotationOffset) > MAX_ALLOWED_ROTATION_OFFSET_TOLERANCE) {
+            if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {
                 Debug.log("Collision detected!");
                 Debug.log("Emergency stop!");
                 AbstractOpMode.currentOpMode().requestOpModeStop();
             }
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
-            Debug.clear();
-            Debug.log("ts1: " + turnSpeed);
-            if (Math.abs(turnSpeed) > maxTurnSpeed) {
-                turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
-            }
-
-            Debug.log("ts2: " + turnSpeed);
-
             continuous(velocity, turnSpeed);
         }
         brake();

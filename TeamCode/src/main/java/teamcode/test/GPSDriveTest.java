@@ -2,6 +2,8 @@ package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.internal.ftdi.eeprom.FT_EEPROM_232H;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Vector2D;
@@ -16,7 +18,7 @@ public class GPSDriveTest extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = Vector2D.zero();
+        Vector2D startPosition = new Vector2D(24, 24);
         double startRotation = 0;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
@@ -24,10 +26,10 @@ public class GPSDriveTest extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        driveSystem.goTo(new Vector2D(24, 0), 0.6);
-        driveSystem.goTo(new Vector2D(24, 24), 0.6);
-        driveSystem.goTo(new Vector2D(0, 24), 0.6);
-        driveSystem.goTo(Vector2D.zero(), 0.6);
+        driveSystem.goTo(new Vector2D(24, 4 * 24), 0.5);
+        driveSystem.goTo(new Vector2D(4.5 * 24, 4 * 24), 0.5);
+        driveSystem.goTo(new Vector2D(4.5 * 24, 24), 0.5);
+        driveSystem.goTo(new Vector2D(24, 24), 0.5);
     }
 
     @Override

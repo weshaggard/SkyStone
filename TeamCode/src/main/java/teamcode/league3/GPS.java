@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
-import teamcode.test.REVExtensions2.ExpansionHubEx;
-import teamcode.test.REVExtensions2.RevBulkData;
 
 /**
  * Always call shutdown() in onStop() of AbstractOpMode.
@@ -15,7 +13,7 @@ public class GPS {
 
     private static final double ODOMETER_INCHES_TO_TICKS = 1102;
     private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
-    private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 9212.3456328;
+    private static final double VERTICAL_ODOMETER_RADIANS_TO_TICKS = 0.00006703224;
     private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
     private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = 1;
     private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
@@ -34,6 +32,7 @@ public class GPS {
     private double rotation;
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
+    private boolean isUpdating;
 
     /**
      * @param currentPosition in inches
@@ -74,8 +73,8 @@ public class GPS {
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
         double deltaRotTicks = (deltaRightVertical - deltaLeftVertical);
-        rotation += deltaRotTicks / VERTICAL_ODOMETER_TICKS_TO_RADIANS;
-        rotation = Utils.wrapAngle(rotation);
+        double newRotation = rotation + deltaRotTicks * VERTICAL_ODOMETER_RADIANS_TO_TICKS;
+        rotation = Utils.wrapAngle(newRotation);
 
         double horizontalPos = HORIZONTAL_ODOMETER_MULTIPLIER * horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
@@ -84,11 +83,11 @@ public class GPS {
 
         double y = position.getY() + averageDeltaVertical * Math.sin(rotation) +
                 deltaHorizontal * Math.cos(rotation);
-        double x = position.getX() + averageDeltaVertical * Math.cos(rotation) +
+        double x = position.getX() + averageDeltaVertical * Math.cos(rotation) -
                 deltaHorizontal * Math.sin(rotation);
 
-        position.setX(x);
-        position.setY(y);
+        Vector2D newPosition = new Vector2D(x, y);
+        position = newPosition;
 
         prevLeftVerticalPos = leftVerticalPos;
         prevRightVerticalPos = rightVerticalPos;
