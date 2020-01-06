@@ -29,7 +29,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         //arm = new MoonshotArmSystem(this.hardwareMap);
-        driveSystem = new DriveSystem(hardwareMap, new GPS(hardwareMap, new Vector2D(36, 72), Math.toRadians(90)));
+        driveSystem = new DriveSystem(hardwareMap);
         presetNum = 1;
 //        armUpdate = new Thread(){
 //            public void run(){

@@ -13,7 +13,7 @@ public class GPS {
 
     private static final double ODOMETER_INCHES_TO_TICKS = 1102;
     private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
-    private static final double VERTICAL_ODOMETER_RADIANS_TO_TICKS = 0.00006703224;
+    private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 0.00006714153;
     private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
     private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = 1;
     private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
@@ -32,7 +32,6 @@ public class GPS {
     private double rotation;
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
-    private boolean isUpdating;
 
     /**
      * @param currentPosition in inches
@@ -73,8 +72,8 @@ public class GPS {
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
         double deltaRotTicks = (deltaRightVertical - deltaLeftVertical);
-        double newRotation = rotation + deltaRotTicks * VERTICAL_ODOMETER_RADIANS_TO_TICKS;
-        rotation = Utils.wrapAngle(newRotation);
+        double newRotation = rotation + deltaRotTicks * VERTICAL_ODOMETER_TICKS_TO_RADIANS;
+        rotation = newRotation;
 
         double horizontalPos = HORIZONTAL_ODOMETER_MULTIPLIER * horizontal.getCurrentPosition();
         double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *

@@ -11,15 +11,17 @@ import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double MIN_REDUCED_SPEED = 0.25;
+    private static final double MIN_REDUCED_SPEED = 0.2;
     private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
     private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 96;
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(90);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(135);
     private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(10);
-    private static final double INCHES_OFFSET_TOLERANCE = 1;
+    private static final double INCHES_OFFSET_TOLERANCE = 1.5;
     private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(2);
-    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 3;
+    private static final double GO_TO_LATERAL_SPEED_MULTIPLIER = 3.5;
+    private static final long GO_TO_POST_DELAY = 100;
     // To account for the robot's weight distribution
     private static final double FRONT_LEFT_POWER_MULTIPLIER = 1;
     private static final double FRONT_RIGHT_POWER_MULTIPLIER = 1;
@@ -133,6 +135,8 @@ public class DriveSystem {
 
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
+            // Increase lateral speed
+            velocity = new Vector2D(velocity.getX() * GO_TO_LATERAL_SPEED_MULTIPLIER, velocity.getY());
 
             double rotationOffset = targetRotation - currentRotation;
             if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {
@@ -144,6 +148,7 @@ public class DriveSystem {
             continuous(velocity, turnSpeed);
         }
         brake();
+        Utils.sleep(GO_TO_POST_DELAY);
     }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
@@ -179,16 +184,14 @@ public class DriveSystem {
     }
 
     /**
-     * @param radians turns counterclockwise if positive (-2pi, 2pi)
      * @param speed   [0, 1]
      */
-    public void turn(double radians, double speed) {
+    public void setRotation(double radians, double speed) {
+        targetRotation = radians;
         speed = Math.abs(speed);
+        double startRotation = gps.getRotation();
         // Use the GPS location because turn does not correct linear movement. Using the target
         // position could result in an endless loop.
-        double startRotation = gps.getRotation();
-        targetRotation = startRotation + radians;
-        targetRotation = Utils.wrapAngle(targetRotation);
         while (!near(gps.getPosition(), targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             double currentRotation = gps.getRotation();
             double radiansFromStart = currentRotation - startRotation;
