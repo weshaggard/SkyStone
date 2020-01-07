@@ -33,6 +33,10 @@ public class MoonshotArmSystem {
 
     private static final double WINCH_INCHES_TO_TICKS = 150;
     private static final int WINCH_TOLERANCE_TICKS = 20;
+    private static final double WINCH_LOWER_BOUND = 0;
+    private static final double SKYSTONE_HEIGHT_INCHES = 4.25;
+    private static final double WINCH_UPPER_BOUND = 8 * SKYSTONE_HEIGHT_INCHES;
+    private double currentHeightInches;
 
 
 
@@ -83,7 +87,7 @@ public class MoonshotArmSystem {
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         while(!intakeFull()){
-            suck(1);
+            suck(power);
             //Debug.log("sucking");
         }
         suck(0);
@@ -100,33 +104,44 @@ public class MoonshotArmSystem {
 
     }
 
-    public void score(int presetHeight, double power)  {
+    public void primeToScore(double presetHeight, double power)  {
         pulley.setPosition(1);
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        lift((presetHeight * SKYSTONE_HEIGHT_INCHES), power);
+
+
+    }
+
+    public void score(double power){
         frontGrabber.setPosition(0.64);
         pulley.setPosition(1 - (0.077 * 2));
         backGrabber.setPosition(0.9);
+        goToHome(power);
         try {
             Thread.sleep(250);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         pulley.setPosition(0);
-        Debug.log(pulley.getPosition());
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
     }
 
-    private void lift(int inches, double power) {
+    private void lift(double inches, double power) {
         int ticks = (int)(inches * WINCH_INCHES_TO_TICKS);
+        currentHeightInches += inches;
+        if(currentHeightInches < WINCH_LOWER_BOUND){
+            currentHeightInches -= inches;
+            Debug.log("Attempted to go a negative position");
+            return;
+        }
+        if(currentHeightInches > WINCH_UPPER_BOUND){
+            Debug.log("Attempted to stack higher than allowed");
+            return;
+        }
+        backWinch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backWinch.setTargetPosition(ticks);
         backWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontWinch.setPower(power);
@@ -156,7 +171,12 @@ public class MoonshotArmSystem {
     }
 
     public void goToHome(double power) {
-        lift(0, power);
+        lift(-currentHeightInches, power);
+    }
+
+    public void clampFoundation() {
+        foundationGrabberLeft.setPosition(1);
+        foundationGrabberRight.setPosition(0);
     }
 
 

@@ -12,76 +12,135 @@ import teamcode.common.Vector2D;
 public class LeagueThreeTeleOp extends AbstractOpMode {
 
     private static final double WINCH_MOTOR_POWER = 0.5;
-    private static final double RIGHT_INTAKE_MOTOR_POWER = 0.3;
-    private static final double LEFT_INTAKE_MOTOR_POWER = 0.7;
     private MoonshotArmSystem arm;
-    private Thread armUpdate;
+    private Thread armUpdateDelivery;
+    private Thread armUpdateIntake;
     private DriveSystem driveSystem;
-    private Thread driveUpdate;
+    private Thread driveUpdateOne;
+    private Thread driveUpdateTwo;
     private int presetNum;
 
-    private double TURN_SPEED_MODIFIER = 0.3;
-    private double TURN_SPRINT_SPEED_MODIFIER = 0.8;
-    private double LINEAR_SPRINT_SPEED_MODIFIER = 1.0;
-    private double NORMAL_SPEED_MODIFIER = 0.4;
+
+    private double FIRST_DRIVER_NORMAL_MODIFIER_ROTATIONAL = 0.3;
+    private double FIRST_DRIVER_SPRINT_MODIFIER_ROTATIONAL = 0.6;
+    private double FIRST_DRIVER_NORMAL_MODIFIER_LINEAR = 0.5;
+    private double FIRST_DRIVER_SPRINT_MODIFIER_LINEAR = 1.0;
+
+    private double SECOND_DRIVER_NORMAL_MODIFIER_LINEAR = 0.75;
+    private double SECOND_DRIVER_NORMAL_MODIFIER_ROTATIONAL = 0.65;
+    private double SECOND_DRIVER_SPRINT_MODIFIER_LINEAR = 1;
+    private double SECOND_DRIVER_SPRINT_MODIFIER_ROTATIONAL = 1;
+
+    private boolean isDriverMode;
+
+    private boolean isZero;
 
 
     @Override
     protected void onInitialize() {
         arm = new MoonshotArmSystem(this.hardwareMap);
         driveSystem = new DriveSystem(hardwareMap, new GPS(hardwareMap, new Vector2D(36, 72), Math.toRadians(90)), new Vector2D(36, 72), Math.toRadians(90));
-        //presetNum = 1;
+        isZero = true;
 
     }
 
-    private void driveUpdate() {
+
+    private void driveUpdateControllerOne() {
             Vector2D velocity;
+            double turnSpeed = gamepad1.left_stick_x;
             if (gamepad1.left_trigger > 0.3) {
-                velocity = new Vector2D(gamepad1.right_stick_x * LINEAR_SPRINT_SPEED_MODIFIER, gamepad1.right_stick_y * LINEAR_SPRINT_SPEED_MODIFIER);
+                velocity = new Vector2D(gamepad1.right_stick_x * FIRST_DRIVER_SPRINT_MODIFIER_LINEAR, gamepad1.right_stick_y * FIRST_DRIVER_SPRINT_MODIFIER_LINEAR);
+                turnSpeed *= FIRST_DRIVER_SPRINT_MODIFIER_ROTATIONAL;
 
             } else {
-                velocity = new Vector2D(gamepad1.right_stick_x * NORMAL_SPEED_MODIFIER, gamepad1.right_stick_y * NORMAL_SPEED_MODIFIER);
+                velocity = new Vector2D(gamepad1.right_stick_x * FIRST_DRIVER_NORMAL_MODIFIER_LINEAR, gamepad1.right_stick_y * FIRST_DRIVER_NORMAL_MODIFIER_LINEAR);
+                turnSpeed *= FIRST_DRIVER_NORMAL_MODIFIER_ROTATIONAL;
             }
-            driveSystem.continuous(velocity, gamepad1.left_stick_x * TURN_SPEED_MODIFIER);
+            driveSystem.continuous(velocity, turnSpeed);
+    }
+    
+    private void driveUpdateControllerTwo(){
+        Vector2D velocity;
+        double turnSpeed = gamepad2.right_stick_x;
+
+        if(!gamepad2.right_stick_button){
+            velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR);
+        }else{
+            velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR);
+        }
+        if(!gamepad2.left_stick_button){
+            turnSpeed *= SECOND_DRIVER_NORMAL_MODIFIER_ROTATIONAL;
+
+        }else{
+            turnSpeed *= SECOND_DRIVER_SPRINT_MODIFIER_ROTATIONAL;
+        }
+        driveSystem.continuous(velocity, turnSpeed);
     }
 
-        private void armUpdate () {
-            if (gamepad1.a) {
-            } else if (gamepad1.x) {
-                arm.score(presetNum, WINCH_MOTOR_POWER);
-                presetNum++;
-            } else if (gamepad1.y) {
 
-            } else if (gamepad1.right_trigger > 0.3) {
-                arm.intake(1);
+
+        private void armUpdateDelivery() {
+            if (gamepad1.x) {
+                arm.score(WINCH_MOTOR_POWER);
+            } else if (gamepad1.right_bumper) {
+                if(isZero) {
+                    arm.primeToScore(0, WINCH_MOTOR_POWER);
+                    isZero = false;
+                }else{
+                    arm.primeToScore(1, WINCH_MOTOR_POWER);
+                }
+            } else if(gamepad1.left_bumper){
+                arm.primeToScore(-1, WINCH_MOTOR_POWER);
             }
 
         }
+
+    private void armUpdateIntake() {
+
+    }
 
         @Override
         protected void onStart () {
-            armUpdate = new Thread(){
+            armUpdateDelivery = new Thread(){
                 public void run(){
                     while(opModeIsActive()){
-                        armUpdate();
+                        armUpdateDelivery();
                     }
                 }
             };
-            driveUpdate = new Thread() {
+            armUpdateIntake = new Thread(){
+                @Override
+                public void run(){
+                    while(opModeIsActive()){
+                        armUpdateIntake();
+                    }
+                }
+            };
+            driveUpdateOne = new Thread() {
                 public void run() {
                     while (opModeIsActive()) {
-                        driveUpdate();
+                        driveUpdateControllerOne();
                     }
                 }
             };
-            driveUpdate.start();
-            armUpdate.start();
+            driveUpdateTwo = new Thread(){
+                public void run(){
+                    while(opModeIsActive()){
+                        driveUpdateControllerTwo();
+                    }
+                }
+            };
+            driveUpdateOne.start();
+            driveUpdateTwo.start();
+            armUpdateDelivery.start();
+            armUpdateIntake.start();
             while(opModeIsActive());
         }
 
-        @Override
-        protected void onStop () {
-        }
+
+
+    @Override
+    protected void onStop () { }
 
 
         //Patrick's Driver 2 Control scheme
@@ -92,9 +151,16 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     rt modular intake
     lt modular outtake
 
+    For intake and outtake when triggers are not pressed, transfer case is up and the front grabber arm is in the closed position. Only when a trigger is pressed will the transfer case go down and the front grabber arm open out.
+    If intake OR outtake is pressed, it overrides color sensor
+
+
+    Need: Button that unlocks front grabber arm and just push out the stone. then reset.
+    Forget right button hotkeys. Right button becomes override of color sensor. If I press it, it initiates the sequence that the color sensor would
+
     lb (jams)/rb(hotkeys)
     a lb rb back arm come down and eject block
-    b
+
     y
     x lb tranfer case goes down, move front arm up, move slide out and in, eject intake
 
@@ -103,6 +169,15 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     right: lb linear slide rb adjust arm
     up: lb transfer case adjustment rb adjust arm
     down: lb transfer case adjustment rb adjust arm
+     */
+
+
+    /*
+    Christian's Main Driver control
+    x score
+    dpad up/down manual adjustment
+    dpad right out
+    dpad left in
      */
 
 }

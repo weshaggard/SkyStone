@@ -39,6 +39,7 @@ public class DriveSystem {
      * In radians
      */
     private double targetRotation;
+    private double maxTurnSpeed = 0.5;
 
     /**
      * @param hardwareMap
@@ -149,7 +150,7 @@ public class DriveSystem {
                 turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
 
-            Debug.log("ts2: " + turnSpeed);
+            //Debug.log("ts2: " + turnSpeed);
 
             continuous(velocity, turnSpeed);
         }

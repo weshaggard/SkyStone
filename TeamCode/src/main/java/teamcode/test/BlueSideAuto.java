@@ -39,7 +39,7 @@ public class BlueSideAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        driveSystem = null;
+        //driveSystem = null;
         arm = new MoonshotArmSystem(this.hardwareMap);
         vision = new VisionOnInit(this.hardwareMap);
         Vector2D startPosition = new Vector2D(0, 48);
@@ -79,12 +79,13 @@ public class BlueSideAuto extends AbstractOpMode {
         driveSystem.goTo(new Vector2D(24, stoneNum * 8), 0.6);
         driveSystem.setRotation(0,0);
 
+
     }
 
     private void pseudoArc() {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             driveSystem.vertical(-7, VERTICAL_SPEED);
-        //    driveSystem.turn(30, TURN_SPEED);
+            driveSystem.setRotation(Math.toRadians(-30) * i, TURN_SPEED);
         }
         driveSystem.vertical(32, VERTICAL_SPEED);
     }
