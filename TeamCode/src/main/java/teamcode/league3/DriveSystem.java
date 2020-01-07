@@ -11,16 +11,16 @@ import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double MIN_REDUCED_SPEED = 0.2;
-    private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
-    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 96;
-    private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(90);
-    private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(135);
-    private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(10);
+    private static final double MIN_REDUCED_SPEED = 0.15;
+    private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 12;
+    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 72;
+    private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(75);
+    private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
+    private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
     private static final double INCHES_OFFSET_TOLERANCE = 1.5;
     private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(2);
-    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 3;
-    private static final double GO_TO_LATERAL_SPEED_MULTIPLIER = 3.5;
+    private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
+    private static final double GO_TO_LATERAL_SPEED_MULTIPLIER = 3;
     private static final long GO_TO_POST_DELAY = 100;
     // To account for the robot's weight distribution
     private static final double FRONT_LEFT_POWER_MULTIPLIER = 1;
@@ -39,7 +39,6 @@ public class DriveSystem {
      * In radians
      */
     private double targetRotation;
-    private double maxTurnSpeed = 0.5;
 
     /**
      * @param hardwareMap
@@ -123,6 +122,8 @@ public class DriveSystem {
     public void goTo(Vector2D targetPosition, double speed) {
         this.targetPosition = targetPosition;
         speed = Math.abs(speed);
+        double maxTurnSpeed = TURN_CORRECTION_SPEED_MULTIPLIER * speed;
+
         Vector2D startPosition = gps.getPosition();
         while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Vector2D currentPosition = gps.getPosition();
@@ -149,8 +150,6 @@ public class DriveSystem {
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
                 turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
-
-            //Debug.log("ts2: " + turnSpeed);
 
             continuous(velocity, turnSpeed);
         }
@@ -191,7 +190,7 @@ public class DriveSystem {
     }
 
     /**
-     * @param speed   [0, 1]
+     * @param speed [0, 1]
      */
     public void setRotation(double radians, double speed) {
         targetRotation = radians;

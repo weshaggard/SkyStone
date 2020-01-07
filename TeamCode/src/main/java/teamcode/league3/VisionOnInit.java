@@ -1,4 +1,4 @@
-package teamcode.test;
+package teamcode.league3;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import teamcode.common.Debug;
-import teamcode.league3.Constants;
 
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Bitmap.createScaledBitmap;
