@@ -1,12 +1,12 @@
 package teamcode.common;
 
 /**
- * Represents a 2-dimensional vector.
+ * Represents an immutable 2-dimensional vector.
  */
 public final class Vector2D implements Cloneable {
 
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
 
     public Vector2D(double x, double y) {
         this.x = x;
@@ -36,16 +36,8 @@ public final class Vector2D implements Cloneable {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
     public double getY() {
         return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
     }
 
     public double magnitude() {

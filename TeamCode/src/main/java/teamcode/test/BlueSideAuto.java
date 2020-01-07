@@ -65,7 +65,7 @@ public class BlueSideAuto extends AbstractOpMode {
     //supposed to be called when on the bridge tape, assumes the stone is in the correct spot
     private void moveToNextStone(int stoneNum) {
         driveSystem.vertical(12 * (48 - (8 * stoneNum)), VERTICAL_SPEED);
-        driveSystem.turn(-50, TURN_SPEED);
+       // driveSystem.turn(-50, TURN_SPEED);
         driveSystem.vertical(18, VERTICAL_SPEED);
 
 
@@ -83,10 +83,10 @@ public class BlueSideAuto extends AbstractOpMode {
         driveSystem.vertical(deltaVertical, VERTICAL_SPEED);
         if (stoneOrientation >= 0 && stoneOrientation < 90) {
             driveSystem.lateral(deltaLateral - Constants.STONE_LENGTH_INCHES * Math.sin(Math.toRadians(stoneOrientation)), LATERAL_SPEED);
-            driveSystem.turn(stoneOrientation, TURN_SPEED);
+           // driveSystem.turn(stoneOrientation, TURN_SPEED);
         } else if (stoneOrientation >= 90 && stoneOrientation < 180) {
             driveSystem.vertical(deltaVertical, VERTICAL_SPEED);
-            driveSystem.turn(90, TURN_SPEED);
+          //  driveSystem.turn(90, TURN_SPEED);
             driveSystem.vertical(deltaLateral, VERTICAL_SPEED);
             driveSystem.lateral(Constants.STONE_LENGTH_INCHES * Math.sin(stoneOrientation), LATERAL_SPEED);
         }
@@ -108,12 +108,12 @@ public class BlueSideAuto extends AbstractOpMode {
         inchesLateralFromStart += inchesToStoneLateral;
 
         driveSystem.vertical(28, VERTICAL_SPEED);
-        driveSystem.turn(45, TURN_SPEED);
+        //driveSystem.turn(45, TURN_SPEED);
         inchesVerticalFromStart += 28;
         sleep(500);
         driveSystem.vertical(-12, VERTICAL_SPEED);
         inchesVerticalFromStart -= 12;
-        driveSystem.turn(180, TURN_SPEED);
+      //  driveSystem.turn(180, TURN_SPEED);
     }
 
     private void moveToFoundation(int stoneNum) {
@@ -127,7 +127,7 @@ public class BlueSideAuto extends AbstractOpMode {
     private void pseudoArc() {
         for (int i = 0; i < 3; i++) {
             driveSystem.vertical(-7, VERTICAL_SPEED);
-            driveSystem.turn(30, TURN_SPEED);
+        //    driveSystem.turn(30, TURN_SPEED);
         }
         driveSystem.vertical(32, VERTICAL_SPEED);
     }
