@@ -2,16 +2,13 @@ package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
-import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.GPS;
 import teamcode.league3.MoonshotArmSystem;
-import teamcode.test.VisionOnInit.SkystonePos;
+import teamcode.league3.VisionOnInit;
+import teamcode.league3.VisionOnInit.SkystonePos;
 
 @Autonomous(name = "Blue Side Auto")
 public class BlueSideAuto extends AbstractOpMode {

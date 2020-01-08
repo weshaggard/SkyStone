@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
-import teamcode.league3.DriveSystem;
+import teamcode.league3.VisionOnInit;
 
 
 @Autonomous(name= "Webcam Init")
