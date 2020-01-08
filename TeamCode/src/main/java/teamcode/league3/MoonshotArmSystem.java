@@ -89,7 +89,7 @@ public class MoonshotArmSystem {
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         while(!intakeFull()){
             suck(power);
-            //Debug.log("sucking");
+            Debug.log("intaking");
         }
         suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
@@ -175,7 +175,7 @@ public class MoonshotArmSystem {
         int red = intakeSensor.red();
         int green = intakeSensor.green();
         int blue = intakeSensor.blue();
-        Debug.log(green);
+        //Debug.log(green);
         return green > 700;
     }
 
