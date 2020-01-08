@@ -102,7 +102,6 @@ public class MoonshotArmSystem {
         }
         pulley.setPosition(0.077 * 4);
         frontGrabber.setPosition(1); //front CLOSED POS
-
     }
 
     public void attemptToAdjust(){
@@ -170,7 +169,6 @@ public class MoonshotArmSystem {
     public void suck(double power) {
         intakeLeft.setPower(-power);
         intakeRight.setPower(-power);
-
     }
 
     private boolean intakeFull() {
