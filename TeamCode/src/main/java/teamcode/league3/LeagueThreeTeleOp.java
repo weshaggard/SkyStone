@@ -17,11 +17,11 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
     private static final double WINCH_MOTOR_POWER = 0.5;
     private MoonshotArmSystem arm;
-    //private Thread armControllerOne;
-    //private Thread armUpdateControllerTwo;
+    private Thread armControllerOne;
+    private Thread armUpdateControllerTwo;
     private DriveSystem driveSystem;
-    //private Thread driveUpdateOne;
-    //private Thread driveUpdateTwo;
+    private Thread driveUpdateOne;
+    private Thread driveUpdateTwo;
     private int presetNum;
 
 
@@ -169,45 +169,45 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
     @Override
     protected void onStart () {
-        Thread armControllerOne = new Thread(){
+        armControllerOne = new Thread(){
             public void run(){
                 while(opModeIsActive()){
                     armControllerOne();
-                    Debug.log("Thread Active armController 1");
+                    Debug.log("Thread Active ARM 1");
                 }
 
-                Debug.log("Thread Stop armController 1");
+                Debug.log("Thread Stop ARM 1");
             }
         };
-        Thread armUpdateControllerTwo = new Thread(){
+        armUpdateControllerTwo = new Thread(){
             @Override
             public void run(){
                 while(opModeIsActive()){
                     armUpdateControllerTwo();
-                    Debug.log("Thread Active armController 2");
+                    Debug.log("Thread Active ARM 2");
                 }
 
-                Debug.log("Thread Stop armController 2");
+                Debug.log("Thread Stop ARM 2");
             }
         };
-        Thread driveUpdateOne = new Thread() {
+        driveUpdateOne = new Thread() {
             public void run() {
                 while (opModeIsActive()) {
                     driveUpdateControllerOne();
-                    Debug.log("Thread Active driveController 1");
+                    Debug.log("Thread Active DRIVE 1");
                 }
 
-                Debug.log("Thread Stop driveController 1");
+                Debug.log("Thread Stop DRIVE 1");
             }
         };
-        Thread driveUpdateTwo = new Thread(){
+        driveUpdateTwo = new Thread(){
             public void run(){
                 while(opModeIsActive()){
                     driveUpdateControllerTwo();
-                    Debug.log("Thread Active driveController 2");
+                    Debug.log("Thread Active DRIVE 2");
                 }
 
-                Debug.log("Thread Stop driveController 2");
+                Debug.log("Thread Stop DRIVE 2");
             }
         };
         driveUpdateOne.start();
@@ -223,11 +223,10 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
     @Override
     protected void onStop () {
-        try {
-            Thread.currentThread().sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        driveUpdateOne.interrupt();
+        driveUpdateTwo.interrupt();
+        armControllerOne.interrupt();
+        armUpdateControllerTwo.interrupt();
     }
 
 
