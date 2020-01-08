@@ -2,13 +2,20 @@ package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.Vector2D;
+import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.GPS;
 import teamcode.league3.MoonshotArmSystem;
-import teamcode.league3.VisionOnInit;
-import teamcode.league3.VisionOnInit.SkystonePos;
+import teamcode.test.VisionOnInit.SkystonePos;
 
 @Autonomous(name = "Blue Side Auto")
 public class BlueSideAuto extends AbstractOpMode {
@@ -18,7 +25,8 @@ public class BlueSideAuto extends AbstractOpMode {
     private VisionOnInit vision;
     private GPS gps;
     //localizer constants
-    private static final int INCHES_FROM_THE_WALL_AT_START = 48;
+    private static final double INCHES_FROM_THE_WALL_AT_START_X = 16;
+    private static final double INCHES_FROM_THE_WALL_AT_START_Y = 34.5;
     private static final int INCHES_FROM_THE_FOUNDATION_AT_START = 72;
     //speed constants
     private double VERTICAL_SPEED = 0.6;
@@ -39,12 +47,13 @@ public class BlueSideAuto extends AbstractOpMode {
         //driveSystem = null;
         arm = new MoonshotArmSystem(this.hardwareMap);
         vision = new VisionOnInit(this.hardwareMap);
-        Vector2D startPosition = new Vector2D(0, 48);
-        double startRotation = Math.PI / 2;
+        Vector2D startPosition = new Vector2D(INCHES_FROM_THE_WALL_AT_START_X, INCHES_FROM_THE_WALL_AT_START_Y);
+        double startRotation = Math.toRadians(7.4);
         gps = new GPS(hardwareMap, startPosition, startRotation);
         driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         while(!opModeIsActive()) {
             pos = vision.vuforiascan(false, false);
+            Debug.log(pos);
         }
     }
 
@@ -52,14 +61,13 @@ public class BlueSideAuto extends AbstractOpMode {
     protected void onStart(){
         if (pos == SkystonePos.LEFT) {
             moveToStone(6);
-            moveToFoundation(6);
+            driveToFoundation();
         } else if (pos == SkystonePos.CENTER) {
             moveToStone(5);
-            moveToFoundation(5);
+            driveToFoundation();
         } else {
             moveToStone(4);
-            moveToFoundation(4);
-
+            driveToFoundation();
         }
     }
     @Override
@@ -68,15 +76,30 @@ public class BlueSideAuto extends AbstractOpMode {
     }
 
 
-    private void moveToFoundation(int stoneNum) {
+    private void moveToStone(int stoneNum) {
+        driveSystem.goTo(new Vector2D(44, stoneNum * 8 + 10), 0.6);
+        driveSystem.setRotation(Math.toRadians(30),0);
+        moveInToIntakeStone(stoneNum);
+    }
+
+    private void moveInToIntakeStone(int stoneNum){
+        driveSystem.goTo(new Vector2D(48, stoneNum * 8), 0.6);
+    }
+
+    private void driveToFoundation(){
+        driveSystem.goTo(new Vector2D(72, 36), 0.6);
 
     }
 
-    private void moveToStone(int stoneNum) {
-        driveSystem.goTo(new Vector2D(24, stoneNum * 8), 0.6);
-        driveSystem.setRotation(0,0);
-
-
+    private void intakeStone(){
+        TimerTask intakeStone = new TimerTask(){
+            @Override
+            public void run(){
+                arm.intake(0.7);
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(intakeStone, 0);
     }
 
     private void pseudoArc() {
