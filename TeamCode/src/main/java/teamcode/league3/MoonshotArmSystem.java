@@ -64,7 +64,8 @@ public class MoonshotArmSystem {
         foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_OPEN_POSITION);
         foundationGrabberRight.setPosition(FOUNDATION_GRABBER_RIGHT_OPEN_POSITION);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
-        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
+        //backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION); //what it should be
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         pulley.setPosition(PULLEY_RETRACTED_POSITION);
 
@@ -104,6 +105,16 @@ public class MoonshotArmSystem {
 
     }
 
+    public void attemptToAdjust(){
+        pulley.setPosition(0.077 * 2 + pulley.getPosition());
+        frontGrabber.setPosition(1);
+    }
+
+    public void dumpStone(){
+        pulley.setPosition(1);
+        //frontGrabber.setPosition();
+    }
+
     public void primeToScore(double presetHeight, double power)  {
         pulley.setPosition(1);
         try {
@@ -129,7 +140,7 @@ public class MoonshotArmSystem {
         pulley.setPosition(0);
     }
 
-    private void lift(double inches, double power) {
+    public void lift(double inches, double power) {
         int ticks = (int)(inches * WINCH_INCHES_TO_TICKS);
         currentHeightInches += inches;
         if(currentHeightInches < WINCH_LOWER_BOUND){

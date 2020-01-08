@@ -4,6 +4,10 @@ import com.acmerobotics.roadrunner.drive.Drive;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Vector2D;
@@ -13,8 +17,8 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
     private static final double WINCH_MOTOR_POWER = 0.5;
     private MoonshotArmSystem arm;
-    private Thread armUpdateDelivery;
-    private Thread armUpdateIntake;
+    private Thread armControllerOne;
+    private Thread armUpdateControllerTwo;
     private DriveSystem driveSystem;
     private Thread driveUpdateOne;
     private Thread driveUpdateTwo;
@@ -31,21 +35,44 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     private double SECOND_DRIVER_SPRINT_MODIFIER_LINEAR = 1;
     private double SECOND_DRIVER_SPRINT_MODIFIER_ROTATIONAL = 1;
 
-    private boolean isDriverMode;
+    private boolean isControllerOneDelivery;
+    
+    private boolean isZeroControllerOne;
+    private boolean isZeroControllerTwo;
+    
+    
+    private boolean CanUseDPADUpControllerOne;
+    private boolean CanUseDPADDownControllerOne;
+    private Timer DPADUpTimerControllerOne;
+    private Timer DPADDownTimerControllerOne;
 
-    private boolean isZero;
+    private boolean CanUseDPADUpControllerTwo;
+    private boolean CanUseDPADDownControllerTwo;
+    private Timer DPADUpTimerControllerTwo;
+    private Timer DPADDownTimerControllerTwo;
 
 
     @Override
     protected void onInitialize() {
         arm = new MoonshotArmSystem(this.hardwareMap);
         driveSystem = new DriveSystem(hardwareMap, new GPS(hardwareMap, new Vector2D(36, 72), Math.toRadians(90)), new Vector2D(36, 72), Math.toRadians(90));
-        isZero = true;
-
+        isZeroControllerOne = true;
+        isZeroControllerTwo = true;
+        isControllerOneDelivery = true;
+        CanUseDPADUpControllerOne = true;
+        CanUseDPADDownControllerOne = true;
+        DPADUpTimerControllerOne = new Timer();
+        DPADDownTimerControllerOne = new Timer();
+        
+        CanUseDPADUpControllerOne = true;
+        CanUseDPADDownControllerOne = true;
+        DPADUpTimerControllerOne = new Timer();
+        DPADDownTimerControllerTwo = new Timer();
     }
 
 
     private void driveUpdateControllerOne() {
+        if(gamepad2.left_stick_x == 0 && gamepad2.left_stick_y == 0 && gamepad2.right_stick_x == 0 && gamepad2.right_stick_y == 0) {
             Vector2D velocity;
             double turnSpeed = gamepad1.left_stick_x;
             if (gamepad1.left_trigger > 0.3) {
@@ -57,62 +84,147 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 turnSpeed *= FIRST_DRIVER_NORMAL_MODIFIER_ROTATIONAL;
             }
             driveSystem.continuous(velocity, turnSpeed);
+        }
     }
     
     private void driveUpdateControllerTwo(){
-        Vector2D velocity;
-        double turnSpeed = gamepad2.right_stick_x;
+        if(gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0 && gamepad1.right_stick_x == 0 && gamepad1.right_stick_y == 0) {
+            Vector2D velocity;
+            double turnSpeed = gamepad2.right_stick_x;
 
-        if(!gamepad2.right_stick_button){
-            velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR);
-        }else{
-            velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR);
-        }
-        if(!gamepad2.left_stick_button){
-            turnSpeed *= SECOND_DRIVER_NORMAL_MODIFIER_ROTATIONAL;
+            if (!gamepad2.right_stick_button) {
+                velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR);
+            } else {
+                velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_SPRINT_MODIFIER_LINEAR);
+            }
+            if (!gamepad2.left_stick_button) {
+                turnSpeed *= SECOND_DRIVER_NORMAL_MODIFIER_ROTATIONAL;
 
-        }else{
-            turnSpeed *= SECOND_DRIVER_SPRINT_MODIFIER_ROTATIONAL;
+            } else {
+                turnSpeed *= SECOND_DRIVER_SPRINT_MODIFIER_ROTATIONAL;
+            }
+            driveSystem.continuous(velocity, turnSpeed);
         }
-        driveSystem.continuous(velocity, turnSpeed);
     }
 
 
 
-        private void armUpdateDelivery() {
-            if (gamepad1.x) {
-                arm.score(WINCH_MOTOR_POWER);
-            } else if (gamepad1.right_bumper) {
-                if(isZero) {
-                    arm.primeToScore(0, WINCH_MOTOR_POWER);
-                    isZero = false;
-                }else{
-                    arm.primeToScore(1, WINCH_MOTOR_POWER);
+        private void armControllerOne() {
+            if(isControllerOneDelivery) {
+                //Arm update for delivery/Score
+                if (gamepad1.x) {
+                    arm.score(WINCH_MOTOR_POWER);
+                } else if (gamepad1.right_bumper) {
+                    if (isZeroControllerOne) {
+                        arm.primeToScore(0, WINCH_MOTOR_POWER);
+                        isZeroControllerOne = false;
+                    } else {
+                        arm.primeToScore(1, WINCH_MOTOR_POWER);
+                    }
+                } else if (gamepad1.left_bumper) {
+                    arm.primeToScore(-1, WINCH_MOTOR_POWER);
+                }else if(gamepad1.a){
+                    isControllerOneDelivery = false;
+                }else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
+                    arm.lift(0.25, WINCH_MOTOR_POWER);
+                    CanUseDPADUpControllerOne = false;
+                    TimerTask upCooldown = new TimerTask(){
+                        public void run(){
+                            CanUseDPADUpControllerOne = true;
+                        }
+                    };
+                    DPADUpTimerControllerOne.schedule(upCooldown, 200);
+                }else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
+                    arm.lift(-0.25, WINCH_MOTOR_POWER);
+                    CanUseDPADDownControllerOne = false;
+                    TimerTask downCooldown = new TimerTask(){
+                        public void run(){
+                            CanUseDPADDownControllerOne = true;
+                        }
+                    };
+                    DPADDownTimerControllerOne.schedule(downCooldown, 200);
                 }
-            } else if(gamepad1.left_bumper){
-                arm.primeToScore(-1, WINCH_MOTOR_POWER);
+            }else{
+                //Arm update for intake
+                if(gamepad1.a){
+                    isControllerOneDelivery = true;
+                }else if(gamepad1.right_trigger > 0.3){
+                    arm.intake(1);
+                }else if(gamepad1.left_trigger > 0.3){
+                    arm.suck(-1);
+                }else if(gamepad1.b){
+                    arm.attemptToAdjust();
+                }
             }
-
         }
 
-    private void armUpdateIntake() {
+    private void armUpdateControllerTwo() {
+        if(!isControllerOneDelivery) {
+            //Arm update for delivery/Score
+            if (gamepad2.x) {
+                arm.score(WINCH_MOTOR_POWER);
+            } else if (gamepad2.right_bumper) {
+                if (isZeroControllerTwo) {
+                    arm.primeToScore(0, WINCH_MOTOR_POWER);
+                    isZeroControllerTwo = false;
+                } else {
+                    arm.primeToScore(1, WINCH_MOTOR_POWER);
+                }
+            } else if (gamepad1.left_bumper) {
+                arm.primeToScore(-1, WINCH_MOTOR_POWER);
+            }else if(gamepad1.a){
+                isControllerOneDelivery = false;
+            }else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
+                arm.lift(0.25, WINCH_MOTOR_POWER);
+                CanUseDPADUpControllerOne = false;
+                TimerTask upCooldown = new TimerTask(){
+                    public void run(){
+                        CanUseDPADUpControllerOne = true;
+                    }
+                };
+                DPADUpTimerControllerOne.schedule(upCooldown, 200);
+            }else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
+                arm.lift(-0.25, WINCH_MOTOR_POWER);
+                CanUseDPADDownControllerOne = false;
+                TimerTask downCooldown = new TimerTask(){
+                    public void run(){
+                        CanUseDPADDownControllerOne = true;
+                    }
+                };
+                DPADDownTimerControllerOne.schedule(downCooldown, 200);
+            }
+        }else{
+            //Arm update for intake
+            if(gamepad1.a){
+                isControllerOneDelivery = true;
+            }else if(gamepad1.right_trigger > 0.3){
+                arm.intake(1);
+            }else if(gamepad1.left_trigger > 0.3){
+                arm.suck(-1);
+            }else if(gamepad1.b){
+                arm.attemptToAdjust();
+            }
+        }
+
+
+
 
     }
 
         @Override
         protected void onStart () {
-            armUpdateDelivery = new Thread(){
+            armControllerOne = new Thread(){
                 public void run(){
                     while(opModeIsActive()){
-                        armUpdateDelivery();
+                        armControllerOne();
                     }
                 }
             };
-            armUpdateIntake = new Thread(){
+            armUpdateControllerTwo = new Thread(){
                 @Override
                 public void run(){
                     while(opModeIsActive()){
-                        armUpdateIntake();
+                        armUpdateControllerTwo();
                     }
                 }
             };
@@ -132,15 +244,21 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             };
             driveUpdateOne.start();
             driveUpdateTwo.start();
-            armUpdateDelivery.start();
-            armUpdateIntake.start();
+            armControllerOne.start();
+            armUpdateControllerTwo.start();
             while(opModeIsActive());
         }
 
 
 
     @Override
-    protected void onStop () { }
+    protected void onStop () {
+        try {
+            Thread.currentThread().sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 
         //Patrick's Driver 2 Control scheme
