@@ -83,13 +83,14 @@ public class MoonshotArmSystem {
      * @Param powerRight, the power of the right intake motor
      */
     public void intake(double power){
-
+        Debug.log("START intake");
         boxTransfer.setPosition(BOX_RAMPED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        Debug.log("ENTERING intake loop");
         while(!intakeFull()){
             suck(power);
-            //Debug.log("sucking");
+            Debug.log("intaking");
         }
         suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
@@ -102,7 +103,6 @@ public class MoonshotArmSystem {
         }
         pulley.setPosition(0.077 * 4);
         frontGrabber.setPosition(1); //front CLOSED POS
-
     }
 
     public void attemptToAdjust(){
@@ -168,16 +168,16 @@ public class MoonshotArmSystem {
     }
 
     public void suck(double power) {
+        Debug.log("suck Power: " + power);
         intakeLeft.setPower(-power);
         intakeRight.setPower(-power);
-
     }
 
     private boolean intakeFull() {
         int red = intakeSensor.red();
         int green = intakeSensor.green();
         int blue = intakeSensor.blue();
-        Debug.log(green);
+        //Debug.log(green);
         return green > 700;
     }
 

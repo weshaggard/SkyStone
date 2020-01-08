@@ -107,74 +107,26 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         }
     }
 
-
-
-        private void armControllerOne() {
-            if(isControllerOneDelivery) {
-                //Arm update for delivery/Score
-                if (gamepad1.x) {
-                    arm.score(WINCH_MOTOR_POWER);
-                } else if (gamepad1.right_bumper) {
-                    if (isZeroControllerOne) {
-                        arm.primeToScore(0, WINCH_MOTOR_POWER);
-                        isZeroControllerOne = false;
-                    } else {
-                        arm.primeToScore(1, WINCH_MOTOR_POWER);
-                    }
-                } else if (gamepad1.left_bumper) {
-                    arm.primeToScore(-1, WINCH_MOTOR_POWER);
-                }else if(gamepad1.a){
-                    isControllerOneDelivery = false;
-                }else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
-                    arm.lift(0.25, WINCH_MOTOR_POWER);
-                    CanUseDPADUpControllerOne = false;
-                    TimerTask upCooldown = new TimerTask(){
-                        public void run(){
-                            CanUseDPADUpControllerOne = true;
-                        }
-                    };
-                    DPADUpTimerControllerOne.schedule(upCooldown, 200);
-                }else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
-                    arm.lift(-0.25, WINCH_MOTOR_POWER);
-                    CanUseDPADDownControllerOne = false;
-                    TimerTask downCooldown = new TimerTask(){
-                        public void run(){
-                            CanUseDPADDownControllerOne = true;
-                        }
-                    };
-                    DPADDownTimerControllerOne.schedule(downCooldown, 200);
-                }
-            }else{
-                //Arm update for intake
-                if(gamepad1.a){
-                    isControllerOneDelivery = true;
-                }else if(gamepad1.right_trigger > 0.3){
-                    arm.intake(1);
-                }else if(gamepad1.left_trigger > 0.3){
-                    arm.suck(-1);
-                }else if(gamepad1.b){
-                    arm.attemptToAdjust();
-                }
-            }
-        }
-
-    private void armUpdateControllerTwo() {
-        if(!isControllerOneDelivery) {
+    private void armControllerOne() {
+        if(isControllerOneDelivery) {
+            Debug.log("Driver 1 Active");
             //Arm update for delivery/Score
-            if (gamepad2.x) {
+            if (gamepad1.a) {
+                // Toggle the control flag to give the other person control.
+                isControllerOneDelivery = !isControllerOneDelivery;
+            }
+            else if (gamepad1.x) {
                 arm.score(WINCH_MOTOR_POWER);
-            } else if (gamepad2.right_bumper) {
-                if (isZeroControllerTwo) {
+            } else if (gamepad1.right_bumper) {
+                if (isZeroControllerOne) {
                     arm.primeToScore(0, WINCH_MOTOR_POWER);
-                    isZeroControllerTwo = false;
+                    isZeroControllerOne = false;
                 } else {
                     arm.primeToScore(1, WINCH_MOTOR_POWER);
                 }
             } else if (gamepad1.left_bumper) {
                 arm.primeToScore(-1, WINCH_MOTOR_POWER);
-            }else if(gamepad1.a){
-                isControllerOneDelivery = false;
-            }else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
+            } else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
                 arm.lift(0.25, WINCH_MOTOR_POWER);
                 CanUseDPADUpControllerOne = false;
                 TimerTask upCooldown = new TimerTask(){
@@ -193,71 +145,90 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 };
                 DPADDownTimerControllerOne.schedule(downCooldown, 200);
             }
-        }else{
-            //Arm update for intake
-            if(gamepad1.a){
-                isControllerOneDelivery = true;
-            }else if(gamepad1.right_trigger > 0.3){
+        }
+    }
+
+    private void armUpdateControllerTwo() {
+        if(!isControllerOneDelivery) {
+            Debug.log("Driver 2 Active");
+            //Arm update for delivery/Score
+            if (gamepad2.a)
+            {
+                // Toggle the control flag to give the other person control.
+                isControllerOneDelivery = !isControllerOneDelivery;
+            }
+            else if(gamepad2.right_trigger > 0.3){
                 arm.intake(1);
-            }else if(gamepad1.left_trigger > 0.3){
+            }else if(gamepad2.left_trigger > 0.3){
                 arm.suck(-1);
-            }else if(gamepad1.b){
+            }else if(gamepad2.b){
                 arm.attemptToAdjust();
             }
         }
-
-
-
-
     }
 
-        @Override
-        protected void onStart () {
-            armControllerOne = new Thread(){
-                public void run(){
-                    while(opModeIsActive()){
-                        armControllerOne();
-                    }
+    @Override
+    protected void onStart () {
+
+        armControllerOne = new Thread(){
+            public void run(){
+                while(opModeIsActive()){
+                    armControllerOne();
+                    //Debug.log("Thread Active ARM 1");
                 }
-            };
-            armUpdateControllerTwo = new Thread(){
-                @Override
-                public void run(){
-                    while(opModeIsActive()){
-                        armUpdateControllerTwo();
-                    }
+
+                //Debug.log("Thread Stop ARM 1");
+            }
+        };
+        armUpdateControllerTwo = new Thread(){
+            @Override
+            public void run(){
+                while(opModeIsActive()){
+                    armUpdateControllerTwo();
+                    //Debug.log("Thread Active ARM 2");
                 }
-            };
-            driveUpdateOne = new Thread() {
-                public void run() {
-                    while (opModeIsActive()) {
-                        driveUpdateControllerOne();
-                    }
+
+                //Debug.log("Thread Stop ARM 2");
+            }
+        };
+        driveUpdateOne = new Thread() {
+            public void run() {
+                while (opModeIsActive()) {
+                    driveUpdateControllerOne();
+                    //Debug.log("Thread Active DRIVE 1");
                 }
-            };
-            driveUpdateTwo = new Thread(){
-                public void run(){
-                    while(opModeIsActive()){
-                        driveUpdateControllerTwo();
-                    }
+
+                //Debug.log("Thread Stop DRIVE 1");
+            }
+        };
+        driveUpdateTwo = new Thread(){
+            public void run(){
+                while(opModeIsActive()){
+                    driveUpdateControllerTwo();
+                    //Debug.log("Thread Active DRIVE 2");
                 }
-            };
-            driveUpdateOne.start();
-            driveUpdateTwo.start();
-            armControllerOne.start();
-            armUpdateControllerTwo.start();
-            while(opModeIsActive());
+
+                //Debug.log("Thread Stop DRIVE 2");
+            }
+        };
+        driveUpdateOne.start();
+        driveUpdateTwo.start();
+        armControllerOne.start();
+        armUpdateControllerTwo.start();
+        
+        while(opModeIsActive()) {
+            //Debug.log("Thread Active MAIN");
         }
 
-
+        //Debug.log("Thread Stop MAIN");
+    }
 
     @Override
     protected void onStop () {
-        try {
-            Thread.currentThread().sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        driveUpdateOne.interrupt();
+        driveUpdateTwo.interrupt();
+        armControllerOne.interrupt();
+        armUpdateControllerTwo.interrupt();
     }
 
 
