@@ -169,14 +169,15 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
     @Override
     protected void onStart () {
+
         armControllerOne = new Thread(){
             public void run(){
                 while(opModeIsActive()){
                     armControllerOne();
-                    Debug.log("Thread Active ARM 1");
+                    //Debug.log("Thread Active ARM 1");
                 }
 
-                Debug.log("Thread Stop ARM 1");
+                //Debug.log("Thread Stop ARM 1");
             }
         };
         armUpdateControllerTwo = new Thread(){
@@ -184,41 +185,42 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             public void run(){
                 while(opModeIsActive()){
                     armUpdateControllerTwo();
-                    Debug.log("Thread Active ARM 2");
+                    //Debug.log("Thread Active ARM 2");
                 }
 
-                Debug.log("Thread Stop ARM 2");
+                //Debug.log("Thread Stop ARM 2");
             }
         };
         driveUpdateOne = new Thread() {
             public void run() {
                 while (opModeIsActive()) {
                     driveUpdateControllerOne();
-                    Debug.log("Thread Active DRIVE 1");
+                    //Debug.log("Thread Active DRIVE 1");
                 }
 
-                Debug.log("Thread Stop DRIVE 1");
+                //Debug.log("Thread Stop DRIVE 1");
             }
         };
         driveUpdateTwo = new Thread(){
             public void run(){
                 while(opModeIsActive()){
                     driveUpdateControllerTwo();
-                    Debug.log("Thread Active DRIVE 2");
+                    //Debug.log("Thread Active DRIVE 2");
                 }
 
-                Debug.log("Thread Stop DRIVE 2");
+                //Debug.log("Thread Stop DRIVE 2");
             }
         };
         driveUpdateOne.start();
         driveUpdateTwo.start();
         armControllerOne.start();
         armUpdateControllerTwo.start();
+        
         while(opModeIsActive()) {
-            Debug.log("Thread Active MAIN");
+            //Debug.log("Thread Active MAIN");
         }
 
-        Debug.log("Thread Stop MAIN");
+        //Debug.log("Thread Stop MAIN");
     }
 
     @Override
