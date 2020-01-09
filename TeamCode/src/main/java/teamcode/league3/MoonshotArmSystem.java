@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 
 public class MoonshotArmSystem {
@@ -31,7 +32,7 @@ public class MoonshotArmSystem {
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 1.0;
 
-    private static final double WINCH_INCHES_TO_TICKS = 150;
+    private static final double WINCH_INCHES_TO_TICKS = 60.8;
     private static final int WINCH_TOLERANCE_TICKS = 20;
     private static final double WINCH_LOWER_BOUND = 0;
     private static final double SKYSTONE_HEIGHT_INCHES = 4.25;
@@ -64,8 +65,8 @@ public class MoonshotArmSystem {
         foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_OPEN_POSITION);
         foundationGrabberRight.setPosition(FOUNDATION_GRABBER_RIGHT_OPEN_POSITION);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
-        backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
-        //backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION); //what it should be
+        //backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION); //what it should be
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         pulley.setPosition(PULLEY_RETRACTED_POSITION);
 
@@ -74,6 +75,9 @@ public class MoonshotArmSystem {
     private void correctMotors() {
         frontWinch.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
 
 
@@ -88,7 +92,8 @@ public class MoonshotArmSystem {
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         Debug.log("ENTERING intake loop");
-        while(!intakeFull()){
+        while(!intakeFull() && AbstractOpMode.currentOpMode().opModeIsActive()){
+            Debug.log(AbstractOpMode.currentOpMode().opModeIsActive());
             suck(power);
             Debug.log("intaking");
         }
@@ -168,9 +173,9 @@ public class MoonshotArmSystem {
     }
 
     public void suck(double power) {
-        Debug.log("suck Power: " + power);
         intakeLeft.setPower(-power);
         intakeRight.setPower(-power);
+        Debug.log("suck Power: " + power);
     }
 
     private boolean intakeFull() {

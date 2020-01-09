@@ -55,7 +55,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         arm = new MoonshotArmSystem(this.hardwareMap);
-        driveSystem = new DriveSystem(hardwareMap, new GPS(hardwareMap, new Vector2D(36, 72), Math.toRadians(90)), new Vector2D(36, 72), Math.toRadians(90));
+        driveSystem = new DriveSystem(hardwareMap);
         isZeroControllerOne = true;
         isZeroControllerTwo = true;
         isControllerOneDelivery = true;
@@ -135,7 +135,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                     }
                 };
                 DPADUpTimerControllerOne.schedule(upCooldown, 200);
-            }else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
+            } else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
                 arm.lift(-0.25, WINCH_MOTOR_POWER);
                 CanUseDPADDownControllerOne = false;
                 TimerTask downCooldown = new TimerTask(){
@@ -229,6 +229,10 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         driveUpdateTwo.interrupt();
         armControllerOne.interrupt();
         armUpdateControllerTwo.interrupt();
+        DPADDownTimerControllerOne.cancel();
+        DPADUpTimerControllerOne.cancel();
+        DPADDownTimerControllerTwo.cancel();
+        DPADUpTimerControllerTwo.cancel();
     }
 
 
