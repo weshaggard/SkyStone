@@ -12,12 +12,13 @@ public class RedSideAuto extends AbstractOpMode {
 
     private static final double UNIVERSAL_GOTO_SPEED = 0.6;
     private static final double ROTATION_SPEED = 0.5;
+
     private MoonshotArmSystem arm;
     private DriveSystem drive;
     private VisionOnInit vision;
     private GPS gps;
 
-    private SkystonePos pos;
+    private SkystonePos skystonePos;
 
     @Override
     protected void onInitialize() {
@@ -26,7 +27,7 @@ public class RedSideAuto extends AbstractOpMode {
         vision = new VisionOnInit(hardwareMap);
         arm = new MoonshotArmSystem(hardwareMap);
         while (!opModeIsActive()) {
-            pos = vision.vuforiascan(false, true);
+            skystonePos = vision.vuforiascan(false, true);
         }
     }
 
@@ -38,22 +39,12 @@ public class RedSideAuto extends AbstractOpMode {
      */
     @Override
     protected void onStart() {
-        new Thread() {
-            public void run() {
-                while (opModeIsActive()) {
-                    telemetry.addData("GPS Pos: ", gps.getPosition());
-                    telemetry.addData("GPS rot: ", Math.toDegrees(gps.getRotation()));
-                    telemetry.update();
-
-                }
-            }
-        }.start();
-        if (pos == SkystonePos.LEFT) {
+        if (skystonePos == SkystonePos.LEFT) {
             moveToStoneFromStart(1);
-        } else if (pos == SkystonePos.CENTER) {
+        } else if (skystonePos == SkystonePos.CENTER) {
             moveToStoneFromStart(2);
             moveToFoundation();
-        } else if (pos == SkystonePos.RIGHT) {
+        } else if (skystonePos == SkystonePos.RIGHT) {
             moveToStoneFromStart(3);
         }
     }

@@ -17,7 +17,6 @@ public class StoneProcessorTest extends AbstractOpMode {
     @Override
     protected void onStart() {
         arm.intake(1);
-        arm.score(0, 0);
     }
 
     @Override

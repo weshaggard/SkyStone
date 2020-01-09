@@ -7,7 +7,7 @@ public class Constants {
     public static final String FRONT_RIGHT_DRIVE_NAME = "FrontRightDrive";
     public static final String REAR_LEFT_DRIVE_NAME = "RearLeftDrive";
     public static final String REAR_RIGHT_DRIVE_NAME = "RearRightDrive";
-    public static final String LEFT_VERTICAL_ODOMETER_NAME = "RearWinch";
+    public static final String LEFT_VERTICAL_ODOMETER_NAME = "BackLeft";
     public static final String RIGHT_VERTICAL_ODOMETER_NAME = "LeftIntake";
     public static final String HORIZONTAL_ODOMETER_NAME = "RightIntake";
     public static final String DELIVERY = "Delivery";

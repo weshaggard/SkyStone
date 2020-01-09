@@ -15,7 +15,7 @@ import teamcode.league3.Constants;
 import teamcode.league3.DriveSystem;
 import teamcode.league3.GPS;
 import teamcode.league3.MoonshotArmSystem;
-import teamcode.test.VisionOnInit.SkystonePos;
+import teamcode.league3.VisionOnInit;
 
 @Autonomous(name = "Blue Side Auto")
 public class BlueSideAuto extends AbstractOpMode {
@@ -32,7 +32,7 @@ public class BlueSideAuto extends AbstractOpMode {
     private double VERTICAL_SPEED = 0.6;
     private double LATERAL_SPEED = 0.6;
     private double TURN_SPEED = 0.4;
-    private SkystonePos pos;
+    private VisionOnInit.SkystonePos pos;
     Runnable grabStone = new Runnable() {
         @Override
         public void run() {
@@ -59,10 +59,10 @@ public class BlueSideAuto extends AbstractOpMode {
 
     @Override
     protected void onStart(){
-        if (pos == SkystonePos.LEFT) {
+        if (pos == VisionOnInit.SkystonePos.LEFT) {
             moveToStone(6);
             driveToFoundation();
-        } else if (pos == SkystonePos.CENTER) {
+        } else if (pos == VisionOnInit.SkystonePos.CENTER) {
             moveToStone(5);
             driveToFoundation();
         } else {

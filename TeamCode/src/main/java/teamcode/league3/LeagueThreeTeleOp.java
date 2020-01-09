@@ -12,7 +12,7 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Vector2D;
 
-@TeleOp(name= "TeleOp")
+@TeleOp(name = "TeleOp")
 public class LeagueThreeTeleOp extends AbstractOpMode {
 
     private static final double WINCH_MOTOR_POWER = 0.5;
@@ -59,6 +59,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         isZeroControllerOne = true;
         isZeroControllerTwo = true;
         isControllerOneDelivery = true;
+        Debug.log("Player 1 in control");
         CanUseDPADUpControllerOne = true;
         CanUseDPADDownControllerOne = true;
         DPADUpTimerControllerOne = new Timer();
@@ -72,9 +73,9 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
 
 
     private void driveUpdateControllerOne() {
-        if(gamepad2.left_stick_x == 0 && gamepad2.left_stick_y == 0 && gamepad2.right_stick_x == 0 && gamepad2.right_stick_y == 0) {
+        if (gamepad2.left_stick_x == 0 && gamepad2.left_stick_y == 0 && gamepad2.right_stick_x == 0 && gamepad2.right_stick_y == 0) {
             Vector2D velocity;
-            double turnSpeed = gamepad1.left_stick_x;
+            double turnSpeed = -gamepad1.left_stick_x;
             if (gamepad1.left_trigger > 0.3) {
                 velocity = new Vector2D(gamepad1.right_stick_x * FIRST_DRIVER_SPRINT_MODIFIER_LINEAR, gamepad1.right_stick_y * FIRST_DRIVER_SPRINT_MODIFIER_LINEAR);
                 turnSpeed *= FIRST_DRIVER_SPRINT_MODIFIER_ROTATIONAL;
@@ -87,10 +88,10 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         }
     }
 
-    private void driveUpdateControllerTwo(){
-        if(gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0 && gamepad1.right_stick_x == 0 && gamepad1.right_stick_y == 0) {
+    private void driveUpdateControllerTwo() {
+        if (gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0 && gamepad1.right_stick_x == 0 && gamepad1.right_stick_y == 0) {
             Vector2D velocity;
-            double turnSpeed = gamepad2.right_stick_x;
+            double turnSpeed = -gamepad2.right_stick_x;
 
             if (!gamepad2.right_stick_button) {
                 velocity = new Vector2D(gamepad2.left_stick_x * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR, gamepad2.left_stick_y * SECOND_DRIVER_NORMAL_MODIFIER_LINEAR);
@@ -108,14 +109,13 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     }
 
     private void armControllerOne() {
-        if(isControllerOneDelivery) {
-            Debug.log("Driver 1 Active");
+        if (isControllerOneDelivery) {
             //Arm update for delivery/Score
             if (gamepad1.a) {
                 // Toggle the control flag to give the other person control.
-                isControllerOneDelivery = !isControllerOneDelivery;
-            }
-            else if (gamepad1.x) {
+                isControllerOneDelivery = false;
+                Debug.log("Player 1 in control");
+            } else if (gamepad1.x) {
                 arm.score(WINCH_MOTOR_POWER);
             } else if (gamepad1.right_bumper) {
                 if (isZeroControllerOne) {
@@ -126,20 +126,20 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 }
             } else if (gamepad1.left_bumper) {
                 arm.primeToScore(-1, WINCH_MOTOR_POWER);
-            } else if(gamepad1.dpad_up && CanUseDPADUpControllerOne){
-                arm.lift(0.25, WINCH_MOTOR_POWER);
+            } else if (gamepad1.dpad_up && CanUseDPADUpControllerOne) {
+                arm.lift(1, WINCH_MOTOR_POWER);
                 CanUseDPADUpControllerOne = false;
-                TimerTask upCooldown = new TimerTask(){
-                    public void run(){
+                TimerTask upCooldown = new TimerTask() {
+                    public void run() {
                         CanUseDPADUpControllerOne = true;
                     }
                 };
                 DPADUpTimerControllerOne.schedule(upCooldown, 200);
-            } else if(gamepad1.dpad_down && CanUseDPADDownControllerOne){
-                arm.lift(-0.25, WINCH_MOTOR_POWER);
+            } else if (gamepad1.dpad_down && CanUseDPADDownControllerOne) {
+                arm.lift(1, WINCH_MOTOR_POWER);
                 CanUseDPADDownControllerOne = false;
-                TimerTask downCooldown = new TimerTask(){
-                    public void run(){
+                TimerTask downCooldown = new TimerTask() {
+                    public void run() {
                         CanUseDPADDownControllerOne = true;
                     }
                 };
@@ -149,30 +149,28 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     }
 
     private void armUpdateControllerTwo() {
-        if(!isControllerOneDelivery) {
-            Debug.log("Driver 2 Active");
+        if (!isControllerOneDelivery) {
             //Arm update for delivery/Score
-            if (gamepad2.a)
-            {
+            if (gamepad2.a) {
                 // Toggle the control flag to give the other person control.
-                isControllerOneDelivery = !isControllerOneDelivery;
-            }
-            else if(gamepad2.right_trigger > 0.3){
+                isControllerOneDelivery = true;
+                Debug.log("Player 1 in control");
+            } else if (gamepad2.right_trigger > 0.3) {
                 arm.intake(1);
-            }else if(gamepad2.left_trigger > 0.3){
+            } else if (gamepad2.left_trigger > 0.3) {
                 arm.suck(-1);
-            }else if(gamepad2.b){
+            } else if (gamepad2.b) {
                 arm.attemptToAdjust();
             }
         }
     }
 
     @Override
-    protected void onStart () {
+    protected void onStart() {
 
-        armControllerOne = new Thread(){
-            public void run(){
-                while(opModeIsActive()){
+        armControllerOne = new Thread() {
+            public void run() {
+                while (opModeIsActive()) {
                     armControllerOne();
                     //Debug.log("Thread Active ARM 1");
                 }
@@ -180,10 +178,10 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 //Debug.log("Thread Stop ARM 1");
             }
         };
-        armUpdateControllerTwo = new Thread(){
+        armUpdateControllerTwo = new Thread() {
             @Override
-            public void run(){
-                while(opModeIsActive()){
+            public void run() {
+                while (opModeIsActive()) {
                     armUpdateControllerTwo();
                     //Debug.log("Thread Active ARM 2");
                 }
@@ -201,9 +199,9 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 //Debug.log("Thread Stop DRIVE 1");
             }
         };
-        driveUpdateTwo = new Thread(){
-            public void run(){
-                while(opModeIsActive()){
+        driveUpdateTwo = new Thread() {
+            public void run() {
+                while (opModeIsActive()) {
                     driveUpdateControllerTwo();
                     //Debug.log("Thread Active DRIVE 2");
                 }
@@ -216,7 +214,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         armControllerOne.start();
         armUpdateControllerTwo.start();
 
-        while(opModeIsActive()) {
+        while (opModeIsActive()) {
             //Debug.log("Thread Active MAIN");
         }
 
@@ -224,7 +222,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     }
 
     @Override
-    protected void onStop () {
+    protected void onStop() {
         driveUpdateOne.interrupt();
         driveUpdateTwo.interrupt();
         armControllerOne.interrupt();
@@ -232,11 +230,11 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
         DPADDownTimerControllerOne.cancel();
         DPADUpTimerControllerOne.cancel();
         DPADDownTimerControllerTwo.cancel();
-        DPADUpTimerControllerTwo.cancel();
+        // DPADUpTimerControllerTwo.cancel();
     }
 
 
-        //Patrick's Driver 2 Control scheme
+    //Patrick's Driver 2 Control scheme
     /*
     lstick translational rstick rotational
     movement speed todo, not 100%

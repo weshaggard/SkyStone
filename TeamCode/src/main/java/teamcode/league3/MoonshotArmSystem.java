@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
+import teamcode.common.Utils;
 
 public class MoonshotArmSystem {
 
@@ -24,7 +25,7 @@ public class MoonshotArmSystem {
     private static final double BOX_RAMPED_POSITION = 0.37;
     private static final double BACK_GRABBER_OPEN_POSITION = 0.9;
     private static final double BACK_GRABBER_CLOSED_POSITION = 0.5;
-    private static final double FRONT_GRABBER_OPEN_POSITION = 0.68;
+    private static final double FRONT_GRABBER_OPEN_POSITION = 0.9;
     private static final double FRONT_GRABBER_INTAKE_POSITION = 0.84;
     private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
     private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 0;
@@ -36,9 +37,8 @@ public class MoonshotArmSystem {
     private static final int WINCH_TOLERANCE_TICKS = 20;
     private static final double WINCH_LOWER_BOUND = 0;
     private static final double SKYSTONE_HEIGHT_INCHES = 4.25;
-    private static final double WINCH_UPPER_BOUND = 8 * SKYSTONE_HEIGHT_INCHES;
+    private static final double WINCH_UPPER_BOUND = 30;
     private double currentHeightInches;
-
 
 
     //Run Pulley's at 40%!!!
@@ -73,26 +73,31 @@ public class MoonshotArmSystem {
     }
 
     private void correctMotors() {
-        frontWinch.setDirection(DcMotorSimple.Direction.REVERSE);
+        backWinch.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontWinch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backWinch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backWinch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
     }
 
 
     /**
      * puts the block into a scoring position, NOTE that this does NOT raise to a scored position
+     *
      * @Param powerLeft, the power of the left intake motor
      * @Param powerRight, the power of the right intake motor
      */
-    public void intake(double power){
+    public void intake(double power) {
         Debug.log("START intake");
         boxTransfer.setPosition(BOX_RAMPED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         Debug.log("ENTERING intake loop");
-        while(!intakeFull() && AbstractOpMode.currentOpMode().opModeIsActive()){
+        while (!intakeFull() && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Debug.log(AbstractOpMode.currentOpMode().opModeIsActive());
             suck(power);
             Debug.log("intaking");
@@ -110,29 +115,26 @@ public class MoonshotArmSystem {
         frontGrabber.setPosition(1); //front CLOSED POS
     }
 
-    public void attemptToAdjust(){
+    public void attemptToAdjust() {
         pulley.setPosition(0.077 * 2 + pulley.getPosition());
         frontGrabber.setPosition(1);
     }
 
-    public void dumpStone(){
+    public void dumpStone() {
         pulley.setPosition(1);
         //frontGrabber.setPosition();
     }
 
-    public void primeToScore(double presetHeight, double power)  {
-        pulley.setPosition(1);
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void primeToScore(double presetHeight, double power) {
+        if (!Utils.servoNearPosition(pulley, 1, 0.1)) {
+            pulley.setPosition(1);
+            Utils.sleep(1500);
         }
         lift((presetHeight * SKYSTONE_HEIGHT_INCHES), power);
-
-
+        Utils.sleep(100);
     }
 
-    public void score(double power){
+    public void score(double power) {
         frontGrabber.setPosition(0.64);
         pulley.setPosition(1 - (0.077 * 2));
         backGrabber.setPosition(0.9);
@@ -146,30 +148,35 @@ public class MoonshotArmSystem {
     }
 
     public void lift(double inches, double power) {
-        int ticks = (int)(inches * WINCH_INCHES_TO_TICKS);
         currentHeightInches += inches;
-        if(currentHeightInches < WINCH_LOWER_BOUND){
+        if (currentHeightInches < WINCH_LOWER_BOUND) {
             currentHeightInches -= inches;
             Debug.log("Attempted to go a negative position");
             return;
         }
-        if(currentHeightInches > WINCH_UPPER_BOUND){
+        if (currentHeightInches > WINCH_UPPER_BOUND) {
+            currentHeightInches -= inches;
             Debug.log("Attempted to stack higher than allowed");
             return;
         }
-        backWinch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backWinch.setTargetPosition(ticks);
+
+        int targetTicks = (int) (currentHeightInches * WINCH_INCHES_TO_TICKS);
+        frontWinch.setTargetPosition(targetTicks);
+        backWinch.setTargetPosition(targetTicks);
+        frontWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontWinch.setPower(power);
         backWinch.setPower(power);
-        while(!nearHeight());
-        frontWinch.setPower(0);
-        backWinch.setPower(0);
+        while (!nearHeight() && AbstractOpMode.currentOpMode().opModeIsActive()) ;
+        frontWinch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backWinch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double brakePower = 0.125;
+        frontWinch.setPower(brakePower);
+        backWinch.setPower(brakePower);
     }
 
     private boolean nearHeight() {
-        return Math.abs(frontWinch.getTargetPosition() - frontWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS &&
-                Math.abs(backWinch.getTargetPosition() - backWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS;
+        return Math.abs(backWinch.getTargetPosition() - backWinch.getCurrentPosition()) < WINCH_TOLERANCE_TICKS;
     }
 
     public void suck(double power) {
@@ -183,7 +190,7 @@ public class MoonshotArmSystem {
         int green = intakeSensor.green();
         int blue = intakeSensor.blue();
         //Debug.log(green);
-        return green > 700;
+        return green > 500;
     }
 
     public void goToHome(double power) {
