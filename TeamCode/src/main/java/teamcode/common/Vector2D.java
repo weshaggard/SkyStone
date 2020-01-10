@@ -95,7 +95,7 @@ public final class Vector2D implements Cloneable {
 
     @Override
     public String toString() {
-        return String.format("x=%.1f, y=%.1f", x, y);
+        return String.format("[%.1f, %.1f]", x, y);
     }
 
     @Override

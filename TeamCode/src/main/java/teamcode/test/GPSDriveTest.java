@@ -13,7 +13,7 @@ import teamcode.league3.GPS;
 @Autonomous(name = "GPS Drive Test")
 public class GPSDriveTest extends AbstractOpMode {
 
-    private static final double SPEED = 0.5;
+    private static final double SPEED = 0.3;
 
     private GPS gps;
     private DriveSystem driveSystem;

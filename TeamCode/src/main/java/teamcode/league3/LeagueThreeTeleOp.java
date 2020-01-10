@@ -1,10 +1,7 @@
 package teamcode.league3;
 
-import com.acmerobotics.roadrunner.drive.Drive;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -119,15 +116,15 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 arm.score(WINCH_MOTOR_POWER);
             } else if (gamepad1.right_bumper) {
                 if (isZeroControllerOne) {
-                    arm.primeToScore(0, WINCH_MOTOR_POWER);
+                   // arm.primeToScore(0, WINCH_MOTOR_POWER);
                     isZeroControllerOne = false;
                 } else {
-                    arm.primeToScore(1, WINCH_MOTOR_POWER);
+                    //arm.primeToScore(1, WINCH_MOTOR_POWER);
                 }
             } else if (gamepad1.left_bumper) {
-                arm.primeToScore(-1, WINCH_MOTOR_POWER);
+               // arm.primeToScore(-1, WINCH_MOTOR_POWER);
             } else if (gamepad1.dpad_up && CanUseDPADUpControllerOne) {
-                arm.lift(1, WINCH_MOTOR_POWER);
+                arm.lift( WINCH_MOTOR_POWER);
                 CanUseDPADUpControllerOne = false;
                 TimerTask upCooldown = new TimerTask() {
                     public void run() {
@@ -136,7 +133,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 };
                 DPADUpTimerControllerOne.schedule(upCooldown, 200);
             } else if (gamepad1.dpad_down && CanUseDPADDownControllerOne) {
-                arm.lift(1, WINCH_MOTOR_POWER);
+                arm.lift(WINCH_MOTOR_POWER);
                 CanUseDPADDownControllerOne = false;
                 TimerTask downCooldown = new TimerTask() {
                     public void run() {
@@ -156,7 +153,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 isControllerOneDelivery = true;
                 Debug.log("Player 1 in control");
             } else if (gamepad2.right_trigger > 0.3) {
-                arm.intake(1);
+                arm.intakeSequence();
             } else if (gamepad2.left_trigger > 0.3) {
                 arm.suck(-1);
             } else if (gamepad2.b) {
@@ -239,11 +236,11 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     lstick translational rstick rotational
     movement speed todo, not 100%
     translational sprint and rotational sprint indepent, press down on each of the sticks
-    rt modular intake
+    rt modular suck
     lt modular outtake
 
-    For intake and outtake when triggers are not pressed, transfer case is up and the front grabber arm is in the closed position. Only when a trigger is pressed will the transfer case go down and the front grabber arm open out.
-    If intake OR outtake is pressed, it overrides color sensor
+    For suck and outtake when triggers are not pressed, transfer case is up and the front grabber arm is in the closed position. Only when a trigger is pressed will the transfer case go down and the front grabber arm open out.
+    If suck OR outtake is pressed, it overrides color sensor
 
 
     Need: Button that unlocks front grabber arm and just push out the stone. then reset.
@@ -253,7 +250,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
     a lb rb back arm come down and eject block
 
     y
-    x lb tranfer case goes down, move front arm up, move slide out and in, eject intake
+    x lb tranfer case goes down, move front arm up, move slide out and in, eject suck
 
     dpad (activate with rb/lb)
     left lb same as right rb adjust arm

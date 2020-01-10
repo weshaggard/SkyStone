@@ -17,12 +17,12 @@ public class DriveSystem {
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(75);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
     private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
-    private static final double INCHES_OFFSET_TOLERANCE = 1.5;
+    private static final double INCHES_OFFSET_TOLERANCE = 2;
     private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(2);
     private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
-    private static final double GO_TO_LATERAL_SPEED_MULTIPLIER = 3;
     private static final long GO_TO_POST_DELAY = 100;
     // To account for the robot's weight distribution
+    private static final double LATERAL_MOVEMENT_POWER_MULTIPLIER = 2;
     private static final double FRONT_LEFT_POWER_MULTIPLIER = 1;
     private static final double FRONT_RIGHT_POWER_MULTIPLIER = 1;
     private static final double REAR_LEFT_POWER_MULTIPLIER = 1;
@@ -83,7 +83,7 @@ public class DriveSystem {
      */
     public void continuous(Vector2D velocity, double turnSpeed) {
         // Not sure why this is necessary, but it works. If it ain't broke, don't fix it.
-        Vector2D velocity0 = new Vector2D(-velocity.getX(), velocity.getY());
+        Vector2D velocity0 = new Vector2D(-velocity.getX() * LATERAL_MOVEMENT_POWER_MULTIPLIER, velocity.getY());
         double direction = velocity0.getDirection();
 
         double maxPow = Math.sin(Math.PI / 4);
@@ -130,6 +130,11 @@ public class DriveSystem {
             double currentRotation = gps.getRotation();
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
 
+            Debug.clear();
+            Debug.log("current position: " + currentPosition);
+            Debug.log("target positiont: " + targetPosition);
+            Debug.log("target translation: " + targetTranslation);
+
             // Reduce power when leaving start and approaching target position.
             double distanceFromStart = currentPosition.subtract(startPosition).magnitude();
             double distanceToTarget = targetTranslation.magnitude();
@@ -137,8 +142,7 @@ public class DriveSystem {
 
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
-            // Increase lateral speed
-            velocity = new Vector2D(velocity.getX() * GO_TO_LATERAL_SPEED_MULTIPLIER, velocity.getY());
+            Debug.log("velocity: " + velocity);
 
             double rotationOffset = targetRotation - currentRotation;
             if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {

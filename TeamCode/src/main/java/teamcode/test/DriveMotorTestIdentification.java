@@ -7,12 +7,11 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league3.Constants;
 
-@Autonomous(name = "Drive Motor Test")
-public class DriveMotorTest extends AbstractOpMode {
+@Autonomous(name = "Drive Motor Identification")
+public class DriveMotorTestIdentification extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-
     }
 
     @Override

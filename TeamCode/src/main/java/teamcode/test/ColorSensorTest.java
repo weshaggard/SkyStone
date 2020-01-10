@@ -8,24 +8,23 @@ import teamcode.common.Debug;
 import teamcode.league3.Constants;
 import teamcode.league3.MoonshotArmSystem;
 
-@Autonomous(name="colorSensorTest")
+@Autonomous(name = "colorSensorTest")
 public class ColorSensorTest extends AbstractOpMode {
 
-    ColorSensor sensor;
-    MoonshotArmSystem arm;
+    private ColorSensor sensor;
+
     @Override
     protected void onInitialize() {
         sensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
-        //arm = new MoonshotArmSystem(hardwareMap);
     }
 
     @Override
     protected void onStart() {
-        while(opModeIsActive()){
+        while (opModeIsActive()) {
             telemetry.clear();
             telemetry.addData("red: ", sensor.red());
             telemetry.addData("green: ", sensor.green());
-            telemetry.addData("blue: ",  sensor.blue());
+            telemetry.addData("blue: ", sensor.blue());
             telemetry.addData("argb: ", sensor.argb());
             telemetry.update();
 
@@ -34,6 +33,6 @@ public class ColorSensorTest extends AbstractOpMode {
 
     @Override
     protected void onStop() {
-
     }
+
 }

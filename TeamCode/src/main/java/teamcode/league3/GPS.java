@@ -3,7 +3,6 @@ package teamcode.league3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 /**
@@ -12,10 +11,10 @@ import teamcode.common.Vector2D;
 public class GPS {
 
     private static final double ODOMETER_INCHES_TO_TICKS = 1102;
-    private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.5;
+    private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.4;
     private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 0.00006714153;
-    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
-    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = 1;
+    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = -1;
+    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = -1;
     private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
 
     /**
@@ -76,13 +75,13 @@ public class GPS {
         rotation = newRotation;
 
         double horizontalPos = HORIZONTAL_ODOMETER_MULTIPLIER * horizontal.getCurrentPosition();
-        double deltaHorizontal = horizontalPos - prevHorizontalPos + deltaRotTicks *
-                HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
+        double rotationOffset = deltaRotTicks * HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
+        double deltaHorizontal = horizontalPos - prevHorizontalPos - rotationOffset;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
 
-        double y = position.getY() + averageDeltaVertical * Math.sin(rotation) +
+        double y = position.getY() + averageDeltaVertical * Math.sin(rotation) -
                 deltaHorizontal * Math.cos(rotation);
-        double x = position.getX() + averageDeltaVertical * Math.cos(rotation) -
+        double x = position.getX() + averageDeltaVertical * Math.cos(rotation) +
                 deltaHorizontal * Math.sin(rotation);
 
         Vector2D newPosition = new Vector2D(x, y);

@@ -1,4 +1,4 @@
-package teamcode.test;
+package teamcode.league3;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -22,7 +22,7 @@ public class RedSIdeAuto0 extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         Vector2D startPosition = new Vector2D(135, 31);
-        double startRotation = Math.toRadians(187);
+        double startRotation = Math.PI;
         GPS gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         arm = new MoonshotArmSystem(hardwareMap);
@@ -73,7 +73,7 @@ public class RedSIdeAuto0 extends AbstractOpMode {
         arm.suck(1);
         sleep(1000);
         arm.suck(0);
-        // intake sequence
+        // suck sequence
 
         // back up
         drive.vertical(-8, SPEED);

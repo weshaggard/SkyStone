@@ -23,13 +23,15 @@ import teamcode.common.Debug;
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Bitmap.createScaledBitmap;
 
-public class VisionOnInit{
+public class VisionOnInit {
 
     VuforiaLocalizer vuforia;
     private static final String VUFORIA_KEY = "AQR2KKb/////AAABmcBOjjqXfkjtrjI9/Ps5Rs1yoVMyJe0wdjaX8pHqOaPu2gRcObwPjsuWCCo7Xt52/kJ4dAZfUM5Gy73z3ogM2E2qzyVObda1EFHZuUrrYkJzKM3AhY8vUz6R3fH0c/R9j/pufFYAABOAFoc5PtjMQ2fbeFI95UYXtl0u+6OIkCUJ3Zw71tvoD9Fs/cOiLB45FrWrxHPbinEhsOlCTWK/sAC2OK2HuEsBFCebaV57vKyATHW4w2LMWEZaCByHMk9RJDR38WCqivXz753bsiBVMbCzPYzwzc3DKztTbK8/cXqPPBLBKwU8ls0RN52akror1xE9lPwwksMXwJwolpyIZGnZngWcBWX4lLH+HlDNZ8Qm";
 
     public VisionOnInit(HardwareMap hardwareMap) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().
+                getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         WebcamName webcamName = hardwareMap.get(WebcamName.class, Constants.WEBCAM);
         parameters.cameraName = webcamName;
@@ -41,8 +43,8 @@ public class VisionOnInit{
     }
 
     public SkystonePos vuforiascan(boolean saveBitmaps, boolean red) {
-            Image rgbImage = null;
-            int rgbTries = 0;
+        Image rgbImage = null;
+        int rgbTries = 0;
         /*
         double colorcountL = 0;
         double colorcountC = 0;

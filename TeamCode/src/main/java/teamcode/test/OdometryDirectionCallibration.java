@@ -7,11 +7,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import teamcode.common.AbstractOpMode;
 import teamcode.league3.Constants;
 
-@Autonomous(name = "Odometry Diagnostics")
+@Autonomous(name = "Odometry Direction Callibration")
 /**
  * Use to ensure that all odometers are working and running in the expected direction.
  */
-public class OdometryDiagnostics extends AbstractOpMode {
+public class OdometryDirectionCallibration extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {

@@ -13,10 +13,16 @@ public abstract class AbstractOpMode extends LinearOpMode {
     @Override
     public final void runOpMode() {
         opMode = this;
-        onInitialize();
-        waitForStart();
-        onStart();
-        onStop();
+        try {
+            onInitialize();
+            waitForStart();
+            onStart();
+            onStop();
+        } catch (Exception e) {
+            Debug.log(e);
+            // give time to read exception
+            Utils.sleep(5000);
+        }
     }
 
     protected abstract void onInitialize();
