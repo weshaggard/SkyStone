@@ -10,7 +10,7 @@ import teamcode.common.Vector2D;
 @Autonomous(name = "Blue Side Auto 0")
 public class BlueSideAuto0 extends AbstractOpMode {
 
-    private static final double SPEED = 0.2;
+    private static final double SPEED = 1;
 
     private DriveSystem drive;
     private MoonshotArmSystem arm;
@@ -18,7 +18,7 @@ public class BlueSideAuto0 extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(9, 31);
+        Vector2D startPosition = new Vector2D(16, 31);
         double startRotation = 0;
         GPS gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
@@ -30,26 +30,25 @@ public class BlueSideAuto0 extends AbstractOpMode {
             Debug.log("Config: " + skyStoneConfig);
         }
         skyStoneConfig = skyStoneConfigForPos(skystonePos);
-
     }
 
     private SkyStoneConfiguration skyStoneConfigForPos(VisionOnInit.SkystonePos pos) {
-        switch (pos) {
-            case LEFT:
-                return SkyStoneConfiguration.THREE_SIX;
-            case CENTER:
-                return SkyStoneConfiguration.TWO_FIVE;
-            case RIGHT:
-                return SkyStoneConfiguration.ONE_FOUR;
-            default:
-                // if nothing is detected, guess
-                return SkyStoneConfiguration.TWO_FIVE;
+        if (pos != null) {
+            switch (pos) {
+                case LEFT:
+                    return SkyStoneConfiguration.THREE_SIX;
+                case CENTER:
+                    return SkyStoneConfiguration.TWO_FIVE;
+                case RIGHT:
+                    return SkyStoneConfiguration.ONE_FOUR;
+            }
         }
+        // if nothing is detected, guess
+        return SkyStoneConfiguration.TWO_FIVE;
     }
 
     @Override
     protected void onStart() {
-        drive.goTo(new Vector2D(25, 31), 0.5);
         intakeStone(true);
         scoreStone();
         intakeStone(false);
@@ -61,28 +60,24 @@ public class BlueSideAuto0 extends AbstractOpMode {
      * @param firstRun true if grabbing first SkyStone, false otherwise
      */
     private void intakeStone(boolean firstRun) {
-        Vector2D skyStoneLocation = new Vector2D(44, 52);
         int skyStoneNum = firstRun ? skyStoneConfig.getFirstStone() : skyStoneConfig.getSecondStone();
-        skyStoneLocation.subtract(new Vector2D(0, skyStoneNum * 8));
+        double y = 60 - skyStoneNum * 8;
+        drive.goTo(new Vector2D(36, y), SPEED);
+        drive.setRotation(-Math.PI / 2, SPEED);
+        drive.goTo(new Vector2D(56, y), SPEED);
 
-        //Debug.log("Going to SkyStone at " + skyStoneLocation);
-        drive.goTo(skyStoneLocation, SPEED);
-
-        arm.suck(1);
-        sleep(1000);
+        arm.suck(0.5);
+        sleep(2000);
         arm.suck(0);
         // suck sequence
 
         // back up
-        // Debug.log("Backing up");
-        drive.vertical(-8, SPEED);
-        // Debug.log("Facing foundation");
+        drive.goTo(new Vector2D(36, y), SPEED);
         drive.setRotation(Math.PI / 2, SPEED);
     }
 
     private void scoreStone() {
-        // Debug.log("Scoring");
-        drive.goTo(new Vector2D(36, 120), SPEED);
+        drive.goTo(new Vector2D(36, 112), SPEED);
 
         // score sequence
     }

@@ -11,9 +11,9 @@ import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double MIN_REDUCED_SPEED = 0.15;
+    private static final double MIN_REDUCED_SPEED = 0.2;
     private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 12;
-    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 72;
+    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(75);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
     private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
@@ -131,6 +131,8 @@ public class DriveSystem {
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
 
             Debug.clear();
+            Debug.log("cur = " + currentRotation);
+            Debug.log("tar = " + targetRotation);
             Debug.log("current position: " + currentPosition);
             Debug.log("target positiont: " + targetPosition);
             Debug.log("target translation: " + targetTranslation);
@@ -152,7 +154,7 @@ public class DriveSystem {
             }
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
-                turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
+               turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
 
             continuous(velocity, turnSpeed);

@@ -13,8 +13,9 @@ public class GPS {
     private static final double ODOMETER_INCHES_TO_TICKS = 1102;
     private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.4;
     private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 0.00006714153;
-    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = -1;
-    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = -1;
+    // These multipliers assume a MoonshotArmSystem has been instantiated.
+    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
+    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = 1;
     private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
 
     /**
