@@ -130,13 +130,6 @@ public class DriveSystem {
             double currentRotation = gps.getRotation();
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
 
-            Debug.clear();
-            Debug.log("cur = " + currentRotation);
-            Debug.log("tar = " + targetRotation);
-            Debug.log("current position: " + currentPosition);
-            Debug.log("target positiont: " + targetPosition);
-            Debug.log("target translation: " + targetTranslation);
-
             // Reduce power when leaving start and approaching target position.
             double distanceFromStart = currentPosition.subtract(startPosition).magnitude();
             double distanceToTarget = targetTranslation.magnitude();
@@ -144,7 +137,6 @@ public class DriveSystem {
 
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
-            Debug.log("velocity: " + velocity);
 
             double rotationOffset = targetRotation - currentRotation;
             if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {
