@@ -33,6 +33,8 @@ public class MoonshotArmSystem {
     private Servo backGrabber, frontGrabber;
     private ColorSensor intakeSensor;
 
+    private boolean intaking;
+
     public MoonshotArmSystem(HardwareMap hardwareMap) {
         intakeLeft = hardwareMap.get(DcMotor.class, Constants.LEFT_INTAKE);
         intakeRight = hardwareMap.get(DcMotor.class, Constants.RIGHT_INTAKE);
@@ -56,13 +58,11 @@ public class MoonshotArmSystem {
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         pulley.setPosition(PULLEY_RETRACTED_POSITION);
-
     }
 
     private void correctMotors() {
         backWinch.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        intakeLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
@@ -79,19 +79,41 @@ public class MoonshotArmSystem {
         boxTransfer.setPosition(BOX_RAMPED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        intaking = true;
         Debug.log("ENTERING suck loop");
         while (!intakeFull() && AbstractOpMode.currentOpMode().opModeIsActive()) {
+            if (!intaking) {
+                suck(0);
+                // this means cancelIntakeSequence() has been called.
+                return;
+            }
             suck(INTAKE_POWER);
             Debug.log("intaking");
         }
         suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
         Debug.log("transfer case down");
-        backGrabber.setPosition(0.5); //Back CLOSED POS
+        backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
         Utils.sleep(1500);
         pulley.setPosition(0.077 * 4);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
     }
+
+    /**
+     * Stop the robot from intaking while in intake sequence.
+     */
+    public void cancelIntakeSequence() {
+        intaking = false;
+    }
+
+    public void setFrontGrabberPosition(boolean open) {
+        if (open) {
+            frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        } else {
+            frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
+        }
+    }
+
 
     public void attemptToAdjust() {
         pulley.setPosition(0.077 * 2 + pulley.getPosition());
@@ -103,7 +125,7 @@ public class MoonshotArmSystem {
         //frontGrabber.setPosition();
     }
 
-    public void score(double power) {
+    public void score() {
         frontGrabber.setPosition(0.64);
         pulley.setPosition(1 - (0.077 * 2));
         backGrabber.setPosition(0.9);
@@ -122,12 +144,12 @@ public class MoonshotArmSystem {
 
     public void suck(double power) {
         intakeLeft.setPower(power);
-        intakeRight.setPower(power);
+        intakeRight.setPower(-power);
     }
 
     private boolean intakeFull() {
         int green = intakeSensor.green();
-        return green > 800;
+        return green > 600;
     }
 
     public void clampFoundation() {

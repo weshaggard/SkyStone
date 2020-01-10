@@ -11,9 +11,9 @@ import teamcode.common.Vector2D;
 
 public class DriveSystem {
 
-    private static final double MIN_REDUCED_SPEED = 0.15;
+    private static final double MIN_REDUCED_SPEED = 0.2;
     private static final double ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 12;
-    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 72;
+    private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(75);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
     private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
@@ -130,11 +130,6 @@ public class DriveSystem {
             double currentRotation = gps.getRotation();
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
 
-            Debug.clear();
-            Debug.log("current position: " + currentPosition);
-            Debug.log("target positiont: " + targetPosition);
-            Debug.log("target translation: " + targetTranslation);
-
             // Reduce power when leaving start and approaching target position.
             double distanceFromStart = currentPosition.subtract(startPosition).magnitude();
             double distanceToTarget = targetTranslation.magnitude();
@@ -142,7 +137,6 @@ public class DriveSystem {
 
             // Account for the orientation of the robot.
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
-            Debug.log("velocity: " + velocity);
 
             double rotationOffset = targetRotation - currentRotation;
             if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {
@@ -152,7 +146,7 @@ public class DriveSystem {
             }
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
-                turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
+               turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
 
             continuous(velocity, turnSpeed);

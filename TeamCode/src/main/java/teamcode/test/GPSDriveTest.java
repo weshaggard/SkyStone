@@ -21,7 +21,7 @@ public class GPSDriveTest extends AbstractOpMode {
     @Override
     protected void onInitialize() {
         Vector2D startPosition = new Vector2D(24, 24);
-        double startRotation = Math.PI / 2;
+        double startRotation = 0;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         driveSystem = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
     }

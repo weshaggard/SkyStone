@@ -137,14 +137,14 @@ public class VisionOnInit {
                 cropHeight = (int) ((165.0 / 720.0) * bitmap.getHeight());
             }
 
-            Debug.log("vuforiascan"
-                    + " cropStartX: " + cropStartX
-                    + " cropStartY: " + cropStartY
-                    + " cropWidth: " + cropWidth
-                    + " cropHeight: " + cropHeight
-                    + " Width: " + bitmap.getWidth()
-                    + " Height: " + bitmap.getHeight()
-            );
+//            Debug.log("vuforiascan"
+//                    + " cropStartX: " + cropStartX
+//                    + " cropStartY: " + cropStartY
+//                    + " cropWidth: " + cropWidth
+//                    + " cropHeight: " + cropHeight
+//                    + " Width: " + bitmap.getWidth()
+//                    + " Height: " + bitmap.getHeight()
+//           );
 
 
             bitmap = createBitmap(bitmap, cropStartX, cropStartY, cropWidth, cropHeight); //Cropped Bitmap to show only stones
@@ -261,9 +261,9 @@ public class VisionOnInit {
             pos = SkystonePos.RIGHT;
         }
 
-        Debug.log("black/yellow L: " + blackCountL + "/" + yellowCountL);
-        Debug.log("black/yellow C: " + blackCountC + "/" + yellowCountC);
-        Debug.log("black/yellow R: " + blackCountR + "/" + yellowCountR);
+//        Debug.log("black/yellow L: " + blackCountL + "/" + yellowCountL);
+//        Debug.log("black/yellow C: " + blackCountC + "/" + yellowCountC);
+//        Debug.log("black/yellow R: " + blackCountR + "/" + yellowCountR);
 
         return pos;
     }
