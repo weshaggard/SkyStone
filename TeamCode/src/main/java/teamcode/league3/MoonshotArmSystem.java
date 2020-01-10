@@ -108,9 +108,9 @@ public class MoonshotArmSystem {
 
     public void setFrontGrabberPosition(boolean open) {
         if (open) {
-            frontGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+            frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         } else {
-            frontGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
+            frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         }
     }
 
