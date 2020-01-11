@@ -9,17 +9,17 @@ import teamcode.league3.Constants;
 @Autonomous(name="ServoOptimizationc ")
 public class ServoOptimization extends AbstractOpMode {
 
-    private Servo frontGrabber;
+    private Servo servo;
 
     @Override
     protected void onInitialize() {
-        frontGrabber = hardwareMap.servo.get(Constants.BACK_GRABBER);
+        servo = hardwareMap.servo.get(Constants.FRONT_GRABBER);
     }
 
     @Override
     protected void onStart() {
-        frontGrabber.setPosition(1);
-        while(!opModeIsActive());
+        servo.setPosition(1);
+        while(opModeIsActive());
     }
 
     @Override

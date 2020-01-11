@@ -1,5 +1,6 @@
 package teamcode.league3;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
@@ -9,6 +10,7 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Vector2D;
 
+@Disabled
 @TeleOp(name = "TeleOp")
 public class LeagueThreeTeleOp extends AbstractOpMode {
 
@@ -124,7 +126,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             } else if (gamepad1.left_bumper) {
                // arm.primeToScore(-1, WINCH_MOTOR_POWER);
             } else if (gamepad1.dpad_up && CanUseDPADUpControllerOne) {
-                arm.lift( WINCH_MOTOR_POWER);
+                //arm.lift( WINCH_MOTOR_POWER);
                 CanUseDPADUpControllerOne = false;
                 TimerTask upCooldown = new TimerTask() {
                     public void run() {
@@ -133,7 +135,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 };
                 DPADUpTimerControllerOne.schedule(upCooldown, 200);
             } else if (gamepad1.dpad_down && CanUseDPADDownControllerOne) {
-                arm.lift(WINCH_MOTOR_POWER);
+                //arm.lift(WINCH_MOTOR_POWER);
                 CanUseDPADDownControllerOne = false;
                 TimerTask downCooldown = new TimerTask() {
                     public void run() {
