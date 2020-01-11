@@ -8,13 +8,15 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
+import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Blue Side Auto 0")
-public class BlueSideAuto0 extends AbstractOpMode {
+@Autonomous(name = "Blue 2 Stone on Foundation")
+public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
 
     private static final double SPEED = 1;
 
+    private GPS gps;
     private DriveSystem drive;
     private MoonshotArmSystem arm;
     private Timer timer1;
@@ -23,9 +25,9 @@ public class BlueSideAuto0 extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(16, 31);
+        Vector2D startPosition = new Vector2D(9, 38.5);
         double startRotation = 0;
-        GPS gps = new GPS(hardwareMap, startPosition, startRotation);
+        gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         arm = new MoonshotArmSystem(hardwareMap);
         timer1 = new Timer();
@@ -57,44 +59,57 @@ public class BlueSideAuto0 extends AbstractOpMode {
     @Override
     protected void onStart() {
         intakeStone(true);
-        scoreStone();
+        scoreStone(true);
         intakeStone(false);
-        scoreStone();
+        scoreStone(true);
         park();
     }
 
     /**
-     * @param firstRun true if grabbing first SkyStone, false otherwise
+     * @param firstStone true if grabbing first SkyStone, false otherwise
      */
-    private void intakeStone(boolean firstRun) {
-        int skyStoneNum = firstRun ? skyStoneConfig.getFirstStone() : skyStoneConfig.getSecondStone();
-        double y1 = 60 - skyStoneNum * 8;
+    private void intakeStone(boolean firstStone) {
+        int skyStoneNum = firstStone ? skyStoneConfig.getFirstStone() : skyStoneConfig.getSecondStone();
+        double y;
         double rotation;
+        if (skyStoneNum == 4) {
+            // grabbing the first stone unleashes devastation, so go for 6th
+            // stone (which is farther from devastation)
+            skyStoneNum = 6;
+        }
         if (skyStoneNum == 1) {
-            y1 -= 18;
+            y = 28;
             rotation = Math.PI / 2;
         } else {
+            y = 68 - skyStoneNum * 8;
             rotation = -Math.PI / 2;
+            if (!firstStone) {
+                rotation += Math.toRadians(15);
+            }
         }
+        drive.goTo(new Vector2D(32, y), SPEED);
 
-        drive.goTo(new Vector2D(36, y1), SPEED);
-        if (firstRun) {
+        if (firstStone) {
+            arm.initCapstoneServo();
             arm.setFrontGrabberPosition(true);
         }
+
         drive.setRotation(rotation, SPEED);
-        drive.goTo(new Vector2D(60, y1), SPEED);
+        double x = 52;
+        if (!firstStone) {
+            // x += 4; // to account for consistent error
+        }
+        drive.goTo(new Vector2D(x, y), SPEED);
 
         // go in for stone
         TimerTask startIntakeTask = new TimerTask() {
             @Override
             public void run() {
-                arm.intakeSequence();
+                arm.intakeSequenceAUTO();
             }
         };
         timer1.schedule(startIntakeTask, 0);
-        Debug.log("START driving forward to capture stone");
         drive.vertical(8, SPEED);
-        Debug.log("DONE driving forward to capture stone");
 
         TimerTask cancelIntakeTask = new TimerTask() {
             @Override
@@ -102,19 +117,26 @@ public class BlueSideAuto0 extends AbstractOpMode {
                 arm.cancelIntakeSequence();
             }
         };
-        // cancel intake after some time
+        // cancel intake after some time if no stone has been found
         timer2.schedule(cancelIntakeTask, 3000);
 
         // come out
-        drive.goTo(new Vector2D(36, y1), SPEED);
+        drive.goTo(new Vector2D(36, y), SPEED);
         drive.setRotation(-Math.PI / 2, SPEED);
+
+        TimerTask primeToScoreTask = new TimerTask() {
+            @Override
+            public void run() {
+                arm.primeToScoreAUTO();
+            }
+        };
+        timer1.schedule(primeToScoreTask, 0);
     }
 
-    private void scoreStone() {
-        drive.goTo(new Vector2D(36, 84), SPEED);
-        arm.score();
-
-        // score sequence
+    private void scoreStone(boolean firstStone) {
+        drive.goTo(new Vector2D(36, 106), SPEED);
+        // place stone on foundation
+        arm.scoreAUTO();
     }
 
     private void park() {
@@ -124,6 +146,7 @@ public class BlueSideAuto0 extends AbstractOpMode {
 
     @Override
     protected void onStop() {
+        gps.shutdown();
         timer1.cancel();
         timer2.cancel();
     }

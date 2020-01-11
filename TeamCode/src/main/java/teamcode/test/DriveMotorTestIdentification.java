@@ -1,12 +1,14 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.league3.Constants;
 
+@Disabled
 @Autonomous(name = "Drive Motor Identification")
 public class DriveMotorTestIdentification extends AbstractOpMode {
 

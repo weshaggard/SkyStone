@@ -1,6 +1,7 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import teamcode.common.AbstractOpMode;
@@ -8,6 +9,7 @@ import teamcode.common.Debug;
 import teamcode.league3.Constants;
 import teamcode.league3.MoonshotArmSystem;
 
+@Disabled
 @Autonomous(name = "colorSensorTest")
 public class ColorSensorTest extends AbstractOpMode {
 

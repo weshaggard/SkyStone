@@ -21,7 +21,7 @@ public class MoonshotArmSystem {
     private static final double FRONT_GRABBER_INTAKE_POSITION = 0.84;
     private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
     private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 1;
-    private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 1;
+    private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
     private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
     private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0;
 
@@ -111,10 +111,11 @@ public class MoonshotArmSystem {
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
     }
 
-    public void extend(){
+    public void extend() {
         pulley.setPosition(1);
     }
-    public void retract(){
+
+    public void retract() {
         pulley.setPosition(0);
     }
 
@@ -165,7 +166,7 @@ public class MoonshotArmSystem {
             // brake power
             power = 0.125;
         }
-        if(power < 0 && brake){
+        if (power < 0 && brake) {
             power /= 4.0;
         }
 
@@ -179,12 +180,10 @@ public class MoonshotArmSystem {
     }
 
 
-
     private boolean intakeFull() {
         int green = intakeSensor.green();
         return green > 600;
     }
-
 
 
     public void capstoneScoring() {
@@ -200,18 +199,18 @@ public class MoonshotArmSystem {
         capstoneServo.setPosition(0.5);
     }
 
-    private enum FoundationGrabberState{
+    private enum FoundationGrabberState {
         CLOSED, OPEN
     }
 
     private FoundationGrabberState foundationGrabberState;
 
     public void adjustFoundation() {
-        if(foundationGrabberState == FoundationGrabberState.OPEN){
+        if (foundationGrabberState == FoundationGrabberState.OPEN) {
             foundationGrabberLeft.setPosition(1);
             foundationGrabberRight.setPosition(0);
             foundationGrabberState = FoundationGrabberState.CLOSED;
-        }else{
+        } else {
             foundationGrabberLeft.setPosition(0);
             foundationGrabberRight.setPosition(1);
             foundationGrabberState = FoundationGrabberState.OPEN;
@@ -230,5 +229,32 @@ public class MoonshotArmSystem {
     //Touch Sensor?(Lift)
     //through bore encoder on the Winch
 
+
+    // making it work with auto by copy pasting in a super janky way cuz we outta time
+
+    public void intakeSequenceAUTO() {
+        suck(INTAKE_POWER);
+        boxTransfer.setPosition(BOX_RAMPED_POSITION);
+        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        intaking = true;
+        while (!intakeFull() && intaking && AbstractOpMode.currentOpMode().opModeIsActive()) ;
+        suck(0);
+    }
+
+    public void primeToScoreAUTO() {
+        boxTransfer.setPosition(BOX_FLAT_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
+        frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
+        Utils.sleep(500);
+        pulley.setPosition(1);
+    }
+
+    public void scoreAUTO() {
+        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        Utils.sleep(500);
+        pulley.setPosition(0);
+    }
 
 }

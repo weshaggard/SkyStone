@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import teamcode.common.AbstractOpMode;
 import teamcode.league3.Constants;
 
+@Disabled
 @Autonomous(name = "Odometry Direction Callibration")
 /**
  * Use to ensure that all odometers are working and running in the expected direction.

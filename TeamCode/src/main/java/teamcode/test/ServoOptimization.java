@@ -1,11 +1,13 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.league3.Constants;
 
+@Disabled
 @Autonomous(name="ServoOptimizationc ")
 public class ServoOptimization extends AbstractOpMode {
 
