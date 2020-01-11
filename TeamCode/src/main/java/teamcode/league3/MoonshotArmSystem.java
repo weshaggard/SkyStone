@@ -20,8 +20,11 @@ public class MoonshotArmSystem {
     private static final double FRONT_GRABBER_OPEN_POSITION = 0.64;
     private static final double FRONT_GRABBER_INTAKE_POSITION = 0.84;
     private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
-    private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 0;
-    private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
+    private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 1;
+    private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 1;
+    private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
+    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0;
+
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 1.0;
 
@@ -62,6 +65,7 @@ public class MoonshotArmSystem {
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         pulley.setPosition(PULLEY_RETRACTED_POSITION);
+        capstoneServo.setPosition(0.98);
     }
 
     private void correctMotors() {
@@ -102,7 +106,7 @@ public class MoonshotArmSystem {
         boxTransfer.setPosition(BOX_FLAT_POSITION);
         Debug.log("transfer case down");
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
-        Utils.sleep(1500);
+        Utils.sleep(500);
         pulley.setPosition(0.077 * 4);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
     }
@@ -119,6 +123,7 @@ public class MoonshotArmSystem {
      */
     public void cancelIntakeSequence() {
         Debug.log("cancelling intake");
+        boxTransfer.setPosition(BOX_FLAT_POSITION);
         intaking = false;
     }
 
@@ -132,8 +137,13 @@ public class MoonshotArmSystem {
 
 
     public void attemptToAdjust() {
-        pulley.setPosition(0.077 * 2 + pulley.getPosition());
+        pulley.setPosition(0.1);
+        frontGrabber.setPosition(0.64);
+        pulley.setPosition(0);
         frontGrabber.setPosition(1);
+        pulley.setPosition(0.077 * 4);
+
+
     }
 
     public void dumpStone() {
@@ -168,6 +178,8 @@ public class MoonshotArmSystem {
         intakeRight.setPower(-power);
     }
 
+
+
     private boolean intakeFull() {
         int green = intakeSensor.green();
         return green > 600;
@@ -177,10 +189,15 @@ public class MoonshotArmSystem {
 
     public void capstoneScoring() {
         pulley.setPosition(0.077 * 2);
+        capstoneServo.setPosition(0.98);
     }
 
     public void outtakeServoPos() {
 
+    }
+
+    public void initCapstoneServo() {
+        capstoneServo.setPosition(0.5);
     }
 
     private enum FoundationGrabberState{
