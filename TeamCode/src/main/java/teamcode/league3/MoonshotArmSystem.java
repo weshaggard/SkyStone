@@ -33,6 +33,7 @@ public class MoonshotArmSystem {
     private Servo backGrabber, frontGrabber;
     private ColorSensor intakeSensor;
 
+    private int colorSensorBound;
     private boolean intaking;
 
     public MoonshotArmSystem(HardwareMap hardwareMap) {
@@ -47,6 +48,7 @@ public class MoonshotArmSystem {
         frontGrabber = hardwareMap.get(Servo.class, Constants.FRONT_GRABBER);
         pulley = hardwareMap.get(Servo.class, Constants.PULLEY_SERVO);
         intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
+        colorSensorBound = intakeSensor.green() + 150;
         correctMotors();
         resetServos();
     }
@@ -122,7 +124,8 @@ public class MoonshotArmSystem {
 
     public void dumpStone() {
         pulley.setPosition(1);
-        //frontGrabber.setPosition();
+        frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
+        backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
     }
 
     public void score() {
@@ -149,7 +152,7 @@ public class MoonshotArmSystem {
 
     private boolean intakeFull() {
         int green = intakeSensor.green();
-        return green > 600;
+        return green > colorSensorBound;
     }
 
     public void clampFoundation() {

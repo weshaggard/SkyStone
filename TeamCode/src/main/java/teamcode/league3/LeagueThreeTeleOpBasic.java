@@ -54,15 +54,15 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
         }else if(gamepad1.left_trigger > 0.3) {
             arm.suck(-1);
         }else if(gamepad1.dpad_right){
-            arm.primeToScore();
+            //arm.primeToScore();
         }else if(gamepad1.dpad_up){
             arm.lift(WINCH_MOTOR_POWER);
         }else if(gamepad1.dpad_down){
             arm.lift(-WINCH_MOTOR_POWER);
         }else if(gamepad1.x){
-            arm.score(WINCH_MOTOR_POWER);
+            //arm.score(WINCH_MOTOR_POWER);
         }else if(gamepad1.a){
-            arm.reset();
+            //arm.reset();
         }
     }
 

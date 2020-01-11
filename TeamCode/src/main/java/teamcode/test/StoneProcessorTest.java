@@ -1,8 +1,12 @@
 package teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.league3.MoonshotArmSystem;
 
+
+@Autonomous(name="StoneProce ss")
 public class StoneProcessorTest extends AbstractOpMode {
 
 
@@ -16,6 +20,7 @@ public class StoneProcessorTest extends AbstractOpMode {
     @Override
     protected void onStart() {
         arm.intakeSequence();
+        while(opModeIsActive());
     }
 
     @Override
