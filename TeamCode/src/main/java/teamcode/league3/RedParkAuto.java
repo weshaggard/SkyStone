@@ -2,33 +2,40 @@ package teamcode.league3;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
 
 @Autonomous(name = "Red Park")
 public class RedParkAuto extends AbstractOpMode {
 
-    private static final double SPEED = 1;
-
-    private GPS gps;
     private DriveSystem drive;
+    private Timer timer;
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(135, 96);
-        double startRotation = -Math.PI / 2;
-        gps = new GPS(hardwareMap, startPosition, startRotation);
-        drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
+        drive = new DriveSystem(hardwareMap);
+        timer = new Timer();
     }
 
     @Override
     protected void onStart() {
-        drive.goTo(new Vector2D(135, 72), SPEED);
+        TimerTask brakeTask = new TimerTask() {
+            @Override
+            public void run() {
+                drive.brake();
+            }
+        };
+        timer.schedule(brakeTask, 2000);
+        drive.continuous(new Vector2D(0, 0.3), 0);
+        while (opModeIsActive()) ;
     }
 
     @Override
     protected void onStop() {
-        gps.shutdown();
     }
+
 
 }

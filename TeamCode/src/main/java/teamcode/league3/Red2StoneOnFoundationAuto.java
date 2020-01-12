@@ -11,7 +11,7 @@ import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Red 2 Stone on Foundation")
+@Autonomous(name = "Red 2 Stones on Foundation")
 public class Red2StoneOnFoundationAuto extends AbstractOpMode {
 
     private static final double SPEED = 1;
@@ -25,35 +25,14 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(144 - 9, 38.5);
+        Vector2D startPosition = new Vector2D(144 - 9, 35);
         double startRotation = Math.PI;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         arm = new MoonshotArmSystem(hardwareMap);
         timer1 = new Timer();
         timer2 = new Timer();
-        VisionOnInit vision = new VisionOnInit(hardwareMap);
-        VisionOnInit.SkystonePos skystonePos = null;
-        while (!opModeIsActive()) {
-            skystonePos = vision.vuforiascan(false, false);
-            Debug.log(skystonePos);
-        }
-        skyStoneConfig = skyStoneConfigForPos(skystonePos);
-    }
-
-    private SkyStoneConfiguration skyStoneConfigForPos(VisionOnInit.SkystonePos pos) {
-        if (pos != null) {
-            switch (pos) {
-                case LEFT:
-                    return SkyStoneConfiguration.ONE_FOUR;
-                case CENTER:
-                    return SkyStoneConfiguration.TWO_FIVE;
-                case RIGHT:
-                    return SkyStoneConfiguration.THREE_SIX;
-            }
-        }
-        // if nothing is detected, guess
-        return SkyStoneConfiguration.TWO_FIVE;
+        skyStoneConfig = SkyStoneConfiguration.TWO_FIVE;
     }
 
     @Override
@@ -70,6 +49,9 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
      */
     private void intakeStone(boolean firstStone) {
         int skyStoneNum = firstStone ? skyStoneConfig.getFirstStone() : skyStoneConfig.getSecondStone();
+        if (skyStoneNum == 6) {
+            return;
+        }
         double y;
         double rotation;
         if (skyStoneNum == 4) {
@@ -87,7 +69,7 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
                 rotation -= Math.toRadians(15);
             }
         }
-        drive.goTo(new Vector2D(144 - 32, y), SPEED);
+        drive.goTo(new Vector2D(144 - 30, y), SPEED);
 
         if (firstStone) {
             arm.initCapstoneServo();
@@ -95,9 +77,9 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
         }
 
         drive.setRotation(rotation, SPEED);
-        double x = 144 - 52;
+        double x = 144 - 51;
         if (!firstStone) {
-            // x -= 4; // to account for consistent error
+           // x += 5; // to account for consistent error
         }
         drive.goTo(new Vector2D(x, y), SPEED);
 
@@ -109,7 +91,7 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
             }
         };
         timer1.schedule(startIntakeTask, 0);
-        drive.vertical(8, SPEED);
+        drive.vertical(8, SPEED, 4);
 
         TimerTask cancelIntakeTask = new TimerTask() {
             @Override
@@ -121,7 +103,7 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
         timer2.schedule(cancelIntakeTask, 3000);
 
         // come out
-        drive.goTo(new Vector2D(144 - 36, y), SPEED);
+        drive.goTo(new Vector2D(144 - 34, y), SPEED);
         drive.setRotation(3 * Math.PI / 2, SPEED);
 
         TimerTask primeToScoreTask = new TimerTask() {
@@ -134,7 +116,11 @@ public class Red2StoneOnFoundationAuto extends AbstractOpMode {
     }
 
     private void scoreStone(boolean firstStone) {
-        drive.goTo(new Vector2D(144 - 36, 106), SPEED);
+        int skyStoneNum = firstStone ? skyStoneConfig.getFirstStone() : skyStoneConfig.getSecondStone();
+        if (skyStoneNum == 6) {
+            return;
+        }
+        drive.goTo(new Vector2D(144 - 34, 98), SPEED, 5);
         // place stone on foundation
         arm.scoreAUTO();
     }

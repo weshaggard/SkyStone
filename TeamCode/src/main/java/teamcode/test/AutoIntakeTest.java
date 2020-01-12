@@ -1,12 +1,14 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
 import teamcode.league3.MoonshotArmSystem;
 
+@Disabled
 @Autonomous(name = "Auto Intake Test")
 public class AutoIntakeTest extends AbstractOpMode {
 

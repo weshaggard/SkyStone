@@ -12,7 +12,7 @@ import teamcode.common.Utils;
 
 public class MoonshotArmSystem {
 
-    private static final double INTAKE_POWER = 1;
+    private static final double INTAKE_POWER = 0.85;
     private static final double BOX_FLAT_POSITION = 0.5;
     private static final double BOX_RAMPED_POSITION = 0.37;
     private static final double BACK_GRABBER_OPEN_POSITION = 0.9;
@@ -23,7 +23,7 @@ public class MoonshotArmSystem {
     private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 1;
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
     private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
-    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0;
+    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 1;
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 1.0;
@@ -139,7 +139,7 @@ public class MoonshotArmSystem {
 
     public void attemptToAdjust() {
         pulley.setPosition(0.1);
-        frontGrabber.setPosition(0.64);
+        frontGrabber.setPosition(0.6);
         pulley.setPosition(0);
         frontGrabber.setPosition(1);
         pulley.setPosition(0.077 * 4);
@@ -164,7 +164,7 @@ public class MoonshotArmSystem {
     public void lift(double power, boolean brake) {
         if (power == 0 && brake) {
             // brake power
-            power = 0.125;
+            power = 0.1;
         }
         if (power < 0 && brake) {
             power /= 4.0;
@@ -182,7 +182,7 @@ public class MoonshotArmSystem {
 
     private boolean intakeFull() {
         int green = intakeSensor.green();
-        return green > 600;
+        return green > 900;
     }
 
 
@@ -190,6 +190,8 @@ public class MoonshotArmSystem {
         pulley.setPosition(0.077 * 2);
         capstoneServo.setPosition(0.98);
     }
+
+
 
     public void outtakeServoPos() {
 
@@ -207,12 +209,12 @@ public class MoonshotArmSystem {
 
     public void adjustFoundation() {
         if (foundationGrabberState == FoundationGrabberState.OPEN) {
-            foundationGrabberLeft.setPosition(1);
-            foundationGrabberRight.setPosition(0);
+            foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_CLOSED_POSITION);
+            foundationGrabberRight.setPosition(FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION);
             foundationGrabberState = FoundationGrabberState.CLOSED;
         } else {
-            foundationGrabberLeft.setPosition(0);
-            foundationGrabberRight.setPosition(1);
+            foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_OPEN_POSITION);
+            foundationGrabberRight.setPosition(FOUNDATION_GRABBER_RIGHT_OPEN_POSITION);
             foundationGrabberState = FoundationGrabberState.OPEN;
         }
     }
@@ -240,10 +242,10 @@ public class MoonshotArmSystem {
         intaking = true;
         while (!intakeFull() && intaking && AbstractOpMode.currentOpMode().opModeIsActive()) ;
         suck(0);
+        boxTransfer.setPosition(BOX_FLAT_POSITION);
     }
 
     public void primeToScoreAUTO() {
-        boxTransfer.setPosition(BOX_FLAT_POSITION);
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         Utils.sleep(500);

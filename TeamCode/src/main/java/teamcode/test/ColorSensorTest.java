@@ -9,7 +9,7 @@ import teamcode.common.Debug;
 import teamcode.league3.Constants;
 import teamcode.league3.MoonshotArmSystem;
 
-@Disabled
+
 @Autonomous(name = "colorSensorTest")
 public class ColorSensorTest extends AbstractOpMode {
 

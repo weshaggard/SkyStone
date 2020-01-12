@@ -4,6 +4,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
@@ -119,13 +122,25 @@ public class DriveSystem {
      * @param targetPosition in inches
      * @param speed          [0, 1]
      */
-    public void goTo(Vector2D targetPosition, double speed) {
-        this.targetPosition = targetPosition;
+    public void goTo(Vector2D targetPosition, double speed, double cancelTimeSeconds) {
         speed = Math.abs(speed);
+        boolean[] cancel = {false};
+        TimerTask cancelTask = new TimerTask() {
+            @Override
+            public void run() {
+                cancel[0] = true;
+                Debug.log("Stuck. Cancelling goTo");
+            }
+        };
+        Timer timer = new Timer();
+        double distance = targetPosition.subtract(gps.getPosition()).magnitude();
+        timer.schedule(cancelTask, (long) (cancelTimeSeconds * 1000));
+
+        this.targetPosition = targetPosition;
         double maxTurnSpeed = TURN_CORRECTION_SPEED_MULTIPLIER * speed;
 
         Vector2D startPosition = gps.getPosition();
-        while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
+        while (!near(targetPosition, targetRotation) && !cancel[0] && AbstractOpMode.currentOpMode().opModeIsActive()) {
             Vector2D currentPosition = gps.getPosition();
             double currentRotation = gps.getRotation();
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
@@ -146,13 +161,18 @@ public class DriveSystem {
             }
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
-               turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
+                turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
             }
 
             continuous(velocity, turnSpeed);
         }
         brake();
         Utils.sleep(GO_TO_POST_DELAY);
+        timer.cancel();
+    }
+
+    public void goTo(Vector2D targetPosition, double speed) {
+        goTo(targetPosition, speed, 99999);
     }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
@@ -175,10 +195,14 @@ public class DriveSystem {
         return Math.min(accelerationPower, decelerationPower);
     }
 
-    public void vertical(double inches, double speed) {
+    public void vertical(double inches, double speed, double cancelTimeSeconds) {
         Vector2D translation = Vector2D.up().multiply(inches).rotate(targetRotation - Math.PI / 2);
         targetPosition = targetPosition.add(translation);
-        goTo(targetPosition, speed);
+        goTo(targetPosition, speed, cancelTimeSeconds);
+    }
+
+    public void vertical(double inches, double speed) {
+        vertical(inches, speed, 99999);
     }
 
     public void lateral(double inches, double speed) {
