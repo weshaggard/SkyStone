@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
-import teamcode.league3.MoonshotArmSystem;
+import teamcode.state.MoonshotArmSystem;
 
 @Disabled
 @Autonomous(name = "Auto Intake Test")

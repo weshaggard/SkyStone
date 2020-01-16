@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Vector2D;
-import teamcode.league3.DriveSystem;
-import teamcode.league3.GPS;
+import teamcode.state.DriveSystem;
+import teamcode.state.GPS;
 
 @Disabled
 @TeleOp(name = "Odometry Drive Callibration")

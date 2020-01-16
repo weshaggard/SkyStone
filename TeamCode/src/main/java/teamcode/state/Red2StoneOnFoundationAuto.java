@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -6,12 +6,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Blue 2 Stones on Foundation")
-public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
+@Autonomous(name = "Red 2 Stones on Foundation")
+public class Red2StoneOnFoundationAuto extends AbstractOpMode {
 
     private static final double SPEED = 1;
 
@@ -24,8 +23,8 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(9, 38.5);
-        double startRotation = 0;
+        Vector2D startPosition = new Vector2D(144 - 9, 35);
+        double startRotation = Math.PI;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         arm = new MoonshotArmSystem(hardwareMap);
@@ -63,12 +62,12 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
             rotation = Math.PI / 2;
         } else {
             y = 68 - skyStoneNum * 8;
-            rotation = -Math.PI / 2;
+            rotation = 3 * Math.PI / 2;
             if (!firstStone) {
-                rotation += Math.toRadians(15);
+                rotation -= Math.toRadians(15);
             }
         }
-        drive.goTo(new Vector2D(32, y), SPEED);
+        drive.goTo(new Vector2D(144 - 30, y), SPEED);
 
         if (firstStone) {
             arm.initCapstoneServo();
@@ -76,9 +75,9 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         }
 
         drive.setRotation(rotation, SPEED);
-        double x = 52.5;
+        double x = 144 - 51;
         if (!firstStone) {
-            x += 4; // to account for consistent error
+           // x += 5; // to account for consistent error
         }
         drive.goTo(new Vector2D(x, y), SPEED);
 
@@ -102,8 +101,8 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         timer2.schedule(cancelIntakeTask, 3000);
 
         // come out
-        drive.goTo(new Vector2D(34, y), SPEED);
-        drive.setRotation(-Math.PI / 2, SPEED);
+        drive.goTo(new Vector2D(144 - 34, y), SPEED);
+        drive.setRotation(3 * Math.PI / 2, SPEED);
 
         TimerTask primeToScoreTask = new TimerTask() {
             @Override
@@ -119,14 +118,14 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         if (skyStoneNum == 6) {
             return;
         }
-        drive.goTo(new Vector2D(36, 98), SPEED,5);
+        drive.goTo(new Vector2D(144 - 34, 98), SPEED, 5);
         // place stone on foundation
         arm.scoreAUTO();
     }
 
     private void park() {
         // Debug.log("Parking");
-        drive.goTo(new Vector2D(36, 72), SPEED);
+        drive.goTo(new Vector2D(144 - 36, 72), SPEED);
     }
 
     @Override

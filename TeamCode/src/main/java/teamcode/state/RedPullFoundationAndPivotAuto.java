@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -6,8 +6,8 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Blue Pull Foundation Simple")
-public class BluePullFoundationSimpleAuto extends AbstractOpMode {
+@Autonomous(name = "Red Pull Foundation and Pivot")
+public class RedPullFoundationAndPivotAuto extends AbstractOpMode {
 
     private static final double SPEED = 1;
 
@@ -17,8 +17,8 @@ public class BluePullFoundationSimpleAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(9, 4 * 26);
-        double startRotation = Math.PI;
+        Vector2D startPosition = new Vector2D(144 - 9, 105);
+        double startRotation = 0;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
     }
@@ -26,7 +26,7 @@ public class BluePullFoundationSimpleAuto extends AbstractOpMode {
     @Override
     protected void onStart() {
         // approach
-        Vector2D foundationPosition = new Vector2D(15, 144 - 30);
+        Vector2D foundationPosition = new Vector2D(144 - 15, 144 - 30);
         drive.goTo(foundationPosition, SPEED);
 
         // grab
@@ -34,15 +34,19 @@ public class BluePullFoundationSimpleAuto extends AbstractOpMode {
         Utils.sleep(1000);
 
         // pull
-        Vector2D pullPosition = new Vector2D(19, 144 - 30);
-        drive.goTo(pullPosition, SPEED);
+        Vector2D pivotPosition = new Vector2D(144 - 19, 144 - 30);
+        drive.goTo(pivotPosition, SPEED);
 
-        // let go
+        // pivot
+        drive.setRotation(-Math.PI / 2, SPEED);
         arm.adjustFoundation();
+
+        // push
+        drive.continuous(Vector2D.up().multiply(0.5), 0);
         Utils.sleep(1000);
 
         // park
-        Vector2D parkPosition = new Vector2D(9, 72);
+        Vector2D parkPosition = new Vector2D(108, 72);
         drive.goTo(parkPosition, SPEED);
     }
 

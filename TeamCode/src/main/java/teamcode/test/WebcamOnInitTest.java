@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
-import teamcode.league3.VisionOnInit;
+import teamcode.state.VisionOnInit;
 
 @Disabled
 @Autonomous(name = "Webcam Init")

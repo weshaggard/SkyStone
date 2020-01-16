@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
-import teamcode.league3.Constants;
+import teamcode.state.Constants;
 
 @Disabled
 @Autonomous(name = "Drive Motor Identification")

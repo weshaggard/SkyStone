@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,13 +12,12 @@ import teamcode.test.REVExtensions2.RevBulkData;
  */
 public class GPS {
 
-    private static final double ODOMETER_INCHES_TO_TICKS = 1102;
+    private static final double ODOMETER_TICKS_TO_INCHES = 1 / 1102;
     private static final double HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS = 0.4;
     private static final double VERTICAL_ODOMETER_TICKS_TO_RADIANS = 0.00006714153;
-    // These multipliers assume a MoonshotArmSystem has been instantiated.
-    private static final int LEFT_VERTICAL_ODOMETER_MULTIPLIER = 1;
-    private static final int RIGHT_VERTICAL_ODOMETER_MULTIPLIER = -1;
-    private static final int HORIZONTAL_ODOMETER_MULTIPLIER = -1;
+    private static final int LEFT_VERTICAL_ODOMETER_DIRECTION = 1;
+    private static final int RIGHT_VERTICAL_ODOMETER_DIRECTION = -1;
+    private static final int HORIZONTAL_ODOMETER_DIRECTION = -1;
 
     /**
      * Whether or not this GPS should continue to update positions.
@@ -41,8 +40,8 @@ public class GPS {
 //    private RevBulkData data2;
 
     /**
-     * @param currentPosition in inches
-     * @param rotation        in radians
+     * @param position in inches
+     * @param rotation in radians
      */
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
 //        hub1 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
@@ -90,7 +89,7 @@ public class GPS {
         double newRotation = rotation + deltaRotTicks * VERTICAL_ODOMETER_TICKS_TO_RADIANS;
         rotation = newRotation;
 
-        double horizontalPos = HORIZONTAL_ODOMETER_MULTIPLIER * horizontal.getCurrentPosition();
+        double horizontalPos = HORIZONTAL_ODOMETER_DIRECTION * horizontal.getCurrentPosition();
         double rotationOffset = deltaRotTicks * HORIZONTAL_ODOMETER_ROTATION_OFFSET_TICKS;
         double deltaHorizontal = horizontalPos - prevHorizontalPos - rotationOffset;
         double averageDeltaVertical = (deltaLeftVertical + deltaRightVertical) / 2;
@@ -112,7 +111,7 @@ public class GPS {
      * Returns the position of the robot as read by the odometers. In inches
      */
     public Vector2D getPosition() {
-        return position.multiply(1 / ODOMETER_INCHES_TO_TICKS);
+        return position.multiply(ODOMETER_TICKS_TO_INCHES);
     }
 
     /**
