@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import teamcode.common.Vector2D;
+import teamcode.test.REVExtensions2.ExpansionHubEx;
+import teamcode.test.REVExtensions2.RevBulkData;
 
 /**
  * Always call shutdown() in onStop() of AbstractOpMode.
@@ -33,11 +35,22 @@ public class GPS {
     private final DcMotor leftVertical, rightVertical, horizontal;
     private double prevLeftVerticalPos, prevRightVerticalPos, prevHorizontalPos;
 
+//    private ExpansionHubEx hub1;
+//    private ExpansionHubEx hub2;
+//    private RevBulkData data1;
+//    private RevBulkData data2;
+
     /**
      * @param currentPosition in inches
      * @param rotation        in radians
      */
     public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
+//        hub1 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
+//        hub2 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+//        data1 = hub1.getBulkInputData();
+//        data2 = hub2.getBulkInputData();
+
+
         this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
         this.rotation = rotation;
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
@@ -66,6 +79,8 @@ public class GPS {
     }
 
     private void updateLocation() {
+//        double leftVerticalPos = LEFT_VERTICAL_ODOMETER_MULTIPLIER * data1.getMotorCurrentPosition(leftVertical);
+//        double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_MULTIPLIER * data2.getMotorCurrentPosition(rightVertical);
         double leftVerticalPos = LEFT_VERTICAL_ODOMETER_MULTIPLIER * leftVertical.getCurrentPosition();
         double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_MULTIPLIER * rightVertical.getCurrentPosition();
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;

@@ -27,4 +27,5 @@ public class Constants {
 
     //game constants
     public static final double STONE_LENGTH_INCHES = 8.0;
+    public static final String LIFT_TOUCH_SENSOR = "LiftTouchSensor";
 }

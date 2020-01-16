@@ -1,10 +1,13 @@
 package teamcode.league3;
 
+import android.text.method.Touch;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -27,6 +30,8 @@ public class MoonshotArmSystem {
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 1.0;
+    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1300;
+    private static final int WINCH_TOLERANCE_TICKS = 500;
 
     private DcMotor intakeLeft, intakeRight;
     private DcMotor frontWinch, backWinch;
@@ -36,6 +41,7 @@ public class MoonshotArmSystem {
     private Servo backGrabber, frontGrabber;
     private Servo capstoneServo;
     private ColorSensor intakeSensor;
+    private TouchSensor liftSensor;
 
     private boolean intaking;
 
@@ -51,9 +57,9 @@ public class MoonshotArmSystem {
         frontGrabber = hardwareMap.get(Servo.class, Constants.FRONT_GRABBER);
         pulley = hardwareMap.get(Servo.class, Constants.PULLEY_SERVO);
         intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
+        liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         capstoneServo = hardwareMap.get(Servo.class, Constants.CAPSTONE_SERVO);
         foundationGrabberState = FoundationGrabberState.OPEN;
-
         correctMotors();
         resetServos();
     }
@@ -70,6 +76,9 @@ public class MoonshotArmSystem {
 
     private void correctMotors() {
         backWinch.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        backWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -172,6 +181,31 @@ public class MoonshotArmSystem {
 
         frontWinch.setPower(-power);
         backWinch.setPower(-power);
+    }
+
+    public void encoderLift(double inches, double power){
+        int ticks = (int)(inches * WINCH_MOTOR_INCHES_TO_TICKS);
+        backWinch.setTargetPosition(ticks);
+        frontWinch.setTargetPosition(ticks);
+        frontWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontWinch.setPower(power);
+        backWinch.setPower(power);
+        while(!winchNearTarget());
+        frontWinch.setPower(0);
+        backWinch.setPower(0);
+    }
+
+    public void liftToHome(double power){
+        backWinch.setPower(-power);
+        frontWinch.setPower(-power);
+        while(!liftSensor.isPressed());
+        backWinch.setPower(0);
+        frontWinch.setPower(0);
+    }
+
+    private boolean winchNearTarget(){
+        return (Math.abs(frontWinch.getCurrentPosition() - frontWinch.getTargetPosition()) < WINCH_TOLERANCE_TICKS) && (Math.abs(backWinch.getCurrentPosition() - backWinch.getTargetPosition()) < WINCH_TOLERANCE_TICKS);
     }
 
     public void suck(double power) {
