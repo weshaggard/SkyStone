@@ -22,6 +22,11 @@ public class DriveSystem {
 
     private static final double LINEAR_OFFSET_TOLERANCE_INCHES = 2;
     private static final double ROTATIONAL_OFFSET_TOLERANCE_RADIANS = Math.toRadians(2);
+    /**
+     * Used to determine when goTo should be cancelled in the event the robot becomes stuck.
+     */
+    private static final double INCHES_PER_SECOND = 40;
+    private static final double ACCELERATION_BUFFER_SECONDS = 2;
     private static final double EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
 
     private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
@@ -45,6 +50,7 @@ public class DriveSystem {
      * In radians
      */
     private double targetRotation;
+    private Timer cancelGoToTimer;
 
     /**
      * @param hardwareMap
@@ -62,6 +68,7 @@ public class DriveSystem {
         this.gps = gps;
         targetPosition = currentPosition;
         targetRotation = currentRotation;
+        cancelGoToTimer = new Timer();
     }
 
     /**
@@ -124,24 +131,25 @@ public class DriveSystem {
      * @param targetPosition in inches
      * @param speed          [0, 1]
      */
-    public void goTo(Vector2D targetPosition, double speed, double cancelTimeSeconds) {
+    public void goTo(Vector2D targetPosition, double speed) {
         speed = Math.abs(speed);
+
+        double totalDistance = targetPosition.subtract(this.targetPosition).magnitude();
+        double cancelTimeSeconds = totalDistance / speed / INCHES_PER_SECOND + ACCELERATION_BUFFER_SECONDS;
         boolean[] cancel = {false};
-        TimerTask cancelTask = new TimerTask() {
-            @Override
-            public void run() {
-                cancel[0] = true;
-                Debug.log("Stuck. Cancelling goTo");
-            }
-        };
-        Timer timer = new Timer();
-        timer.schedule(cancelTask, (long) (cancelTimeSeconds * 1000));
+        cancelGoToWhenStuck(cancelTimeSeconds, cancel);
 
         this.targetPosition = targetPosition;
         double maxTurnSpeed = TURN_CORRECTION_SPEED_MULTIPLIER * speed;
 
         Vector2D startPosition = gps.getPosition();
-        while (!near(targetPosition, targetRotation) && !cancel[0] && AbstractOpMode.currentOpMode().opModeIsActive()) {
+        while (!near(targetPosition, targetRotation) && AbstractOpMode.currentOpMode().opModeIsActive()) {
+            if (cancel[0]) {
+                Debug.log("Stuck!");
+                Debug.log("Cancelling goTo!");
+                return;
+            }
+
             Vector2D currentPosition = gps.getPosition();
             double currentRotation = gps.getRotation();
             Vector2D targetTranslation = targetPosition.subtract(currentPosition);
@@ -160,6 +168,7 @@ public class DriveSystem {
                 Debug.log("Emergency stop!");
                 AbstractOpMode.currentOpMode().requestOpModeStop();
             }
+
             double turnSpeed = rotationOffset * TURN_CORRECTION_SPEED_MULTIPLIER * speed;
             if (Math.abs(turnSpeed) > maxTurnSpeed) {
                 turnSpeed = Math.signum(turnSpeed) * maxTurnSpeed;
@@ -169,11 +178,17 @@ public class DriveSystem {
         }
         brake();
         Utils.sleep(GO_TO_POST_DELAY);
-        timer.cancel();
     }
 
-    public void goTo(Vector2D targetPosition, double speed) {
-        goTo(targetPosition, speed, 99999);
+    private void cancelGoToWhenStuck(double cancelTimeSeconds, boolean[] cancel) {
+        TimerTask cancelTask = new TimerTask() {
+            @Override
+            public void run() {
+                cancel[0] = true;
+            }
+        };
+        cancelGoToTimer.schedule(cancelTask, (long) (cancelTimeSeconds * 1000));
+
     }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
@@ -196,14 +211,10 @@ public class DriveSystem {
         return Math.min(accelerationPower, decelerationPower);
     }
 
-    public void vertical(double inches, double speed, double cancelTimeSeconds) {
+    public void vertical(double inches, double speed) {
         Vector2D translation = Vector2D.up().multiply(inches).rotate(targetRotation - Math.PI / 2);
         targetPosition = targetPosition.add(translation);
-        goTo(targetPosition, speed, cancelTimeSeconds);
-    }
-
-    public void vertical(double inches, double speed) {
-        vertical(inches, speed, 99999);
+        goTo(targetPosition, speed);
     }
 
     public void lateral(double inches, double speed) {
@@ -271,6 +282,10 @@ public class DriveSystem {
         double rotationOffset = rotation - currentRotation;
         return positionOffset.magnitude() < LINEAR_OFFSET_TOLERANCE_INCHES &&
                 Math.abs(rotationOffset) < ROTATIONAL_OFFSET_TOLERANCE_RADIANS;
+    }
+
+    public void shutdown() {
+        cancelGoToTimer.cancel();
     }
 
 }

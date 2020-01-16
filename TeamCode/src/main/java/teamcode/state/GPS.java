@@ -43,14 +43,13 @@ public class GPS {
      * @param position in inches
      * @param rotation in radians
      */
-    public GPS(HardwareMap hardwareMap, Vector2D currentPosition, double rotation) {
+    public GPS(HardwareMap hardwareMap, Vector2D position, double rotation) {
 //        hub1 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
 //        hub2 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
 //        data1 = hub1.getBulkInputData();
 //        data2 = hub2.getBulkInputData();
 
-
-        this.position = currentPosition.multiply(ODOMETER_INCHES_TO_TICKS);
+        this.position = position.multiply(1 / ODOMETER_TICKS_TO_INCHES);
         this.rotation = rotation;
         leftVertical = hardwareMap.dcMotor.get(Constants.LEFT_VERTICAL_ODOMETER_NAME);
         rightVertical = hardwareMap.dcMotor.get(Constants.RIGHT_VERTICAL_ODOMETER_NAME);
@@ -80,8 +79,8 @@ public class GPS {
     private void updateLocation() {
 //        double leftVerticalPos = LEFT_VERTICAL_ODOMETER_MULTIPLIER * data1.getMotorCurrentPosition(leftVertical);
 //        double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_MULTIPLIER * data2.getMotorCurrentPosition(rightVertical);
-        double leftVerticalPos = LEFT_VERTICAL_ODOMETER_MULTIPLIER * leftVertical.getCurrentPosition();
-        double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_MULTIPLIER * rightVertical.getCurrentPosition();
+        double leftVerticalPos = LEFT_VERTICAL_ODOMETER_DIRECTION * leftVertical.getCurrentPosition();
+        double rightVerticalPos = RIGHT_VERTICAL_ODOMETER_DIRECTION * rightVertical.getCurrentPosition();
         double deltaLeftVertical = leftVerticalPos - prevLeftVerticalPos;
         double deltaRightVertical = rightVerticalPos - prevRightVerticalPos;
 
