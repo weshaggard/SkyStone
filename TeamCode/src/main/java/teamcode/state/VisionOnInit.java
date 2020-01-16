@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -17,8 +17,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import teamcode.common.Debug;
 
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Bitmap.createScaledBitmap;

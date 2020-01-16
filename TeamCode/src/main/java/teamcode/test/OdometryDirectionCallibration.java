@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import teamcode.common.AbstractOpMode;
-import teamcode.league3.Constants;
+import teamcode.state.Constants;
 
 @Disabled
 @Autonomous(name = "Odometry Direction Callibration")

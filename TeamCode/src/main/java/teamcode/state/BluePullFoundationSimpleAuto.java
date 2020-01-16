@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -6,8 +6,8 @@ import teamcode.common.AbstractOpMode;
 import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
-@Autonomous(name = "Blue Pull Foundation and Pivot")
-public class BluePullFoundationAndPivotAuto extends AbstractOpMode {
+@Autonomous(name = "Blue Pull Foundation Simple")
+public class BluePullFoundationSimpleAuto extends AbstractOpMode {
 
     private static final double SPEED = 1;
 
@@ -17,7 +17,7 @@ public class BluePullFoundationAndPivotAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        Vector2D startPosition = new Vector2D(9, 105);
+        Vector2D startPosition = new Vector2D(9, 4 * 26);
         double startRotation = Math.PI;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
@@ -34,15 +34,11 @@ public class BluePullFoundationAndPivotAuto extends AbstractOpMode {
         Utils.sleep(1000);
 
         // pull
-        Vector2D pivotPosition = new Vector2D(19, 144 - 30);
-        drive.goTo(pivotPosition, SPEED);
+        Vector2D pullPosition = new Vector2D(19, 144 - 30);
+        drive.goTo(pullPosition, SPEED);
 
-        // pivot
-        drive.setRotation(3 * Math.PI / 2, SPEED);
+        // let go
         arm.adjustFoundation();
-
-        // push
-        drive.continuous(Vector2D.up().multiply(0.5), 0);
         Utils.sleep(1000);
 
         // park

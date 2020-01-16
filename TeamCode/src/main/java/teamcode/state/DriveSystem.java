@@ -1,4 +1,4 @@
-package teamcode.league3;
+package teamcode.state;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -19,13 +19,16 @@ public class DriveSystem {
     private static final double DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES = 48;
     private static final double ACCELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(75);
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
-    private static final double JERK_EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
-    private static final double INCHES_OFFSET_TOLERANCE = 2;
-    private static final double RADIANS_OFFSET_TOLERANCE = Math.toRadians(2);
+
+    private static final double LINEAR_OFFSET_TOLERANCE_INCHES = 2;
+    private static final double ROTATIONAL_OFFSET_TOLERANCE_RADIANS = Math.toRadians(2);
+    private static final double EMERGENCY_STOP_THRESHOLD_RADIANS = Math.toRadians(15);
+
     private static final double TURN_CORRECTION_SPEED_MULTIPLIER = 1.5;
-    private static final long GO_TO_POST_DELAY = 100;
-    // To account for the robot's weight distribution
     private static final double LATERAL_MOVEMENT_POWER_MULTIPLIER = 2;
+    private static final long GO_TO_POST_DELAY = 100;
+
+    // To account for the robot's weight distribution
     private static final double FRONT_LEFT_POWER_MULTIPLIER = 1;
     private static final double FRONT_RIGHT_POWER_MULTIPLIER = 1;
     private static final double REAR_LEFT_POWER_MULTIPLIER = 1;
@@ -85,14 +88,13 @@ public class DriveSystem {
      * @param turnSpeed counterclockwise if positive
      */
     public void continuous(Vector2D velocity, double turnSpeed) {
-        // Not sure why this is necessary, but it works. If it ain't broke, don't fix it.
         Vector2D velocity0 = new Vector2D(-velocity.getX() * LATERAL_MOVEMENT_POWER_MULTIPLIER, velocity.getY());
         double direction = velocity0.getDirection();
 
         double maxPow = Math.sin(Math.PI / 4);
         double power = velocity.magnitude() / maxPow;
 
-        double angle = direction - Math.PI / 4;
+        double angle = direction + 3 * Math.PI / 4;
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
@@ -133,7 +135,6 @@ public class DriveSystem {
             }
         };
         Timer timer = new Timer();
-        double distance = targetPosition.subtract(gps.getPosition()).magnitude();
         timer.schedule(cancelTask, (long) (cancelTimeSeconds * 1000));
 
         this.targetPosition = targetPosition;
@@ -154,7 +155,7 @@ public class DriveSystem {
             Vector2D velocity = targetTranslation.normalize().multiply(power).rotate(Math.PI / 2 - currentRotation);
 
             double rotationOffset = targetRotation - currentRotation;
-            if (Math.abs(rotationOffset) > JERK_EMERGENCY_STOP_THRESHOLD_RADIANS) {
+            if (Math.abs(rotationOffset) > EMERGENCY_STOP_THRESHOLD_RADIANS) {
                 Debug.log("Collision detected!");
                 Debug.log("Emergency stop!");
                 AbstractOpMode.currentOpMode().requestOpModeStop();
@@ -268,8 +269,8 @@ public class DriveSystem {
         Vector2D positionOffset = position.subtract(currentPosition);
         double currentRotation = gps.getRotation();
         double rotationOffset = rotation - currentRotation;
-        return positionOffset.magnitude() < INCHES_OFFSET_TOLERANCE &&
-                Math.abs(rotationOffset) < RADIANS_OFFSET_TOLERANCE;
+        return positionOffset.magnitude() < LINEAR_OFFSET_TOLERANCE_INCHES &&
+                Math.abs(rotationOffset) < ROTATIONAL_OFFSET_TOLERANCE_RADIANS;
     }
 
 }
