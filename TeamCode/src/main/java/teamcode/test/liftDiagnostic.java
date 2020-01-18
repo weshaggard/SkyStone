@@ -1,16 +1,14 @@
 package teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.state.MoonshotArmSystem;
 
 
-@Autonomous(name="StoneProcess")
-public class StoneProcessorTest extends AbstractOpMode {
-
-
+@TeleOp(name="The Lift is hecking bad")
+public class liftDiagnostic extends AbstractOpMode {
     private MoonshotArmSystem arm;
 
     @Override
@@ -20,8 +18,10 @@ public class StoneProcessorTest extends AbstractOpMode {
 
     @Override
     protected void onStart() {
-        arm.intakeSequence();
-        while(opModeIsActive());
+        while(opModeIsActive()){
+            telemetry.addData("Current Encoder Value: ", arm.getLiftEncoder().getCurrentPosition());
+            telemetry.update();
+        }
     }
 
     @Override

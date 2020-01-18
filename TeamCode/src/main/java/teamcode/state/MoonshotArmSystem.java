@@ -1,5 +1,6 @@
 package teamcode.state;
 
+import android.media.MediaPlayer;
 import android.text.method.Touch;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -8,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -29,12 +32,15 @@ public class MoonshotArmSystem {
     private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 1;
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
-    private static final double PULLEY_EXTENDED_POSITION = 1.0;
-    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1300;
+    private static final double PULLEY_EXTENDED_POSITION = 0.32;
+    private static final double PULLEY_PRIMED_POSITION = 0.0924;
+
+    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1000;
     private static final int WINCH_TOLERANCE_TICKS = 500;
 
     private DcMotor intakeLeft, intakeRight;
     private DcMotor frontWinch, backWinch;
+    private DcMotor liftEncoder;
     private Servo pulley;
     private Servo boxTransfer;
     private Servo foundationGrabberLeft, foundationGrabberRight;
@@ -43,6 +49,7 @@ public class MoonshotArmSystem {
     private ColorSensor intakeSensor;
     private TouchSensor liftSensor;
 
+
     private boolean intaking;
 
     public MoonshotArmSystem(HardwareMap hardwareMap) {
@@ -50,15 +57,16 @@ public class MoonshotArmSystem {
         intakeRight = hardwareMap.get(DcMotor.class, Constants.RIGHT_INTAKE);
         frontWinch = hardwareMap.get(DcMotor.class, Constants.LEFT_WINCH);
         backWinch = hardwareMap.get(DcMotor.class, Constants.RIGHT_WINCH);
+        liftEncoder = hardwareMap.get(DcMotor.class, Constants.LIFT_ENCODER_NAME);
         boxTransfer = hardwareMap.get(Servo.class, Constants.BOX_TRANSFER);
         foundationGrabberLeft = hardwareMap.get(Servo.class, Constants.LEFT_FOUNDATION_GRABBER);
         foundationGrabberRight = hardwareMap.get(Servo.class, Constants.RIGHT_FOUNDATION_GRABBER);
         backGrabber = hardwareMap.get(Servo.class, Constants.BACK_GRABBER);
         frontGrabber = hardwareMap.get(Servo.class, Constants.FRONT_GRABBER);
         pulley = hardwareMap.get(Servo.class, Constants.PULLEY_SERVO);
-        intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
-        liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         capstoneServo = hardwareMap.get(Servo.class, Constants.CAPSTONE_SERVO);
+        intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
+        //liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         foundationGrabberState = FoundationGrabberState.OPEN;
         correctMotors();
         resetServos();
@@ -77,8 +85,7 @@ public class MoonshotArmSystem {
     private void correctMotors() {
         backWinch.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        backWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontWinch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -115,17 +122,18 @@ public class MoonshotArmSystem {
         boxTransfer.setPosition(BOX_FLAT_POSITION);
         Debug.log("transfer case down");
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
-        Utils.sleep(500);
-        pulley.setPosition(0.077 * 4);
+        Utils.sleep(700);
+        pulley.setPosition(PULLEY_PRIMED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
     }
 
     public void extend() {
-        pulley.setPosition(1);
+        pulley.setPosition(PULLEY_EXTENDED_POSITION);
+        Debug.log("here");
     }
 
     public void retract() {
-        pulley.setPosition(0);
+        pulley.setPosition(PULLEY_RETRACTED_POSITION);
     }
 
     /**
@@ -146,25 +154,25 @@ public class MoonshotArmSystem {
     }
 
 
-    public void attemptToAdjust() {
+    public void attemptToAdjust() throws InterruptedException {
         pulley.setPosition(0.1);
         frontGrabber.setPosition(0.6);
         pulley.setPosition(0);
+        Thread.currentThread().sleep(100);
         frontGrabber.setPosition(1);
-        pulley.setPosition(0.077 * 4);
-
+        pulley.setPosition(0.077 * 1.5);
 
     }
 
     public void dumpStone() {
-        pulley.setPosition(1);
+        pulley.setPosition(PULLEY_EXTENDED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
     }
 
     public void score() {
         frontGrabber.setPosition(0.64);
-        pulley.setPosition(1 - (0.077 * 2));
+        pulley.setPosition(0.27);
         backGrabber.setPosition(0.9);
         Utils.sleep(250);
         pulley.setPosition(0);
@@ -184,28 +192,37 @@ public class MoonshotArmSystem {
     }
 
     public void encoderLift(double inches, double power){
+        Debug.clear();
         int ticks = (int)(inches * WINCH_MOTOR_INCHES_TO_TICKS);
-        backWinch.setTargetPosition(ticks);
-        frontWinch.setTargetPosition(ticks);
-        frontWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backWinch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontWinch.setPower(power);
-        backWinch.setPower(power);
-        while(!winchNearTarget());
-        frontWinch.setPower(0);
-        backWinch.setPower(0);
+        Debug.log(ticks);
+        liftEncoder.setTargetPosition(-ticks);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontWinch.setPower(-power);
+        backWinch.setPower(-power);
+        Debug.log("entering winch loop");
+        while(!winchNearTarget());{
+            Debug.log("current: "+ liftEncoder.getCurrentPosition());
+            Debug.log("target: "+ liftEncoder.getTargetPosition());
+        }
+        Debug.clear();
+        //double brakePower = calculateBrakePower(inches + 9);
+        frontWinch.setPower(-0.125);
+        backWinch.setPower(-0.125);
+
     }
 
-    public void liftToHome(double power){
-        backWinch.setPower(-power);
-        frontWinch.setPower(-power);
-        while(!liftSensor.isPressed());
-        backWinch.setPower(0);
-        frontWinch.setPower(0);
+    private double calculateBrakePower(double currentInches) {
+        //this is derived from Newtons universal law of gravity, Gm1m2 / r^2
+        double numerator = 19.95468777;
+        double denominator = Math.pow(currentInches * 0.0254, 2);
+        double force =  numerator / denominator;
+        return force;
     }
+
+
 
     private boolean winchNearTarget(){
-        return (Math.abs(frontWinch.getCurrentPosition() - frontWinch.getTargetPosition()) < WINCH_TOLERANCE_TICKS) && (Math.abs(backWinch.getCurrentPosition() - backWinch.getTargetPosition()) < WINCH_TOLERANCE_TICKS);
+        return (Math.abs(liftEncoder.getCurrentPosition() - liftEncoder.getTargetPosition()) < WINCH_TOLERANCE_TICKS);
     }
 
     public void suck(double power) {
@@ -233,6 +250,10 @@ public class MoonshotArmSystem {
 
     public void initCapstoneServo() {
         capstoneServo.setPosition(0.5);
+    }
+
+    public DcMotor getLiftEncoder() {
+        return liftEncoder;
     }
 
     private enum FoundationGrabberState {

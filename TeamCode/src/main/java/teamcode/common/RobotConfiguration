@@ -3,23 +3,26 @@ This is mostly a convinience for programmers to be able to reference the Config 
 
 Expansion Hub 1:
     Motor:
-        0. Name:  Type:
-        1. Name:  Type:
-        2. Name:  Type:
-        3. Name:  Type:
+        0. Name: FrontRightDrive  Type: REV Robotics 20:1 HD Hex Motor    Power Source: FrontRightDrive    Encoder Source: N/A
+        1. Name: RearRightDrive  Type: REV Robotics 20:1 HD Hex Motor    Power Source: FrontLeftDrive    Encoder Source: N/A
+        2. Name: RightIntake  Type: Unspecified Motor    Power Source: RightIntake    Encoder Source: HorizontalOdometer
+        3. Name: LeftIntake  Type: Unspecified Motor    Power Source: LeftIntake    Encoder Source: RightVerticalOdometer
 
     Servo:
-        0. Name:  Type:
-        1. Name:  Type:
+        0. Name: BoxTransfer Type: Servo
+        1. Name: CapstoneServo Type: Servo
         2. Name:  Type:
         3. Name:  Type:
         4. Name:  Type:
-        5. Name:  Type:
+        5. Name: LeftFoundationGrabber Type: Servo
     Digital Device:
+        0. Name: IntakeTouchSensor Type: REV Touch Sensor
 
     Analog Device:
 
     I2C Bus 0:
+        0. Name: imu Type: REV imu
+        1. Name: IntakeColorSensor Type: REV Color Sensor V3
 
     I2C Bus 1:
 
@@ -31,23 +34,24 @@ Expansion Hub 1:
 
 Expansion Hub 2:
     Motor:
-        0. Name:  Type:
-        1. Name:  Type:
-        2. Name:  Type:
-        3. Name:  Type:
+        0. Name: RearLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: RearLeftDrive    Encoder Source:
+        1. Name: FrontLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: FrontLeftDrive    Encoder Source:
+        2. Name: RearWinch Type: Unspecified Motor   Power Source: RearWinch    Encoder Source: LeftVerticalOdometer
+        3. Name: FrontWinch Type: Unspecified Motor   Power Source: FrontWinch    Encoder Source: LiftEncoder
 
     Servo:
-        0. Name:  Type:
+        0. Name: FrontGrabber Type: Servo
         1. Name:  Type:
-        2. Name:  Type:
+        2. Name: Pulley Type: Servo
         3. Name:  Type:
-        4. Name:  Type:
-        5. Name:  Type:
+        4. Name: RightFoundationGrabber (NOTE: DO NOT USE)  Type: Servo
+        5. Name: BackGrabber Type: Servo
     Digital Device:
 
     Analog Device:
 
     I2C Bus 0:
+        0. imu1
 
     I2C Bus 1:
 

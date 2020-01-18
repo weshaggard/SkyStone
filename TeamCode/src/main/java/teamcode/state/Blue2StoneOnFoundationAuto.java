@@ -89,7 +89,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
             }
         };
         timer1.schedule(startIntakeTask, 0);
-        drive.vertical(8, SPEED, 4);
+        //drive.vertical(8, SPEED, 4);
 
         TimerTask cancelIntakeTask = new TimerTask() {
             @Override
@@ -118,7 +118,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         if (skyStoneNum == 6) {
             return;
         }
-        drive.goTo(new Vector2D(36, 98), SPEED,5);
+        //drive.goTo(new Vector2D(36, 98), SPEED,5);
         // place stone on foundation
         arm.scoreAUTO();
     }

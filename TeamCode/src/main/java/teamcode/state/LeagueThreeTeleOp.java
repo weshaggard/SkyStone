@@ -159,7 +159,11 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             } else if (gamepad2.left_trigger > 0.3) {
                 arm.suck(-1);
             } else if (gamepad2.b) {
-                arm.attemptToAdjust();
+                try {
+                    arm.attemptToAdjust();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

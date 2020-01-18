@@ -10,7 +10,7 @@ public class Constants {
     public static final String LEFT_VERTICAL_ODOMETER_NAME = "RearWinch";
     public static final String RIGHT_VERTICAL_ODOMETER_NAME = "LeftIntake";
     public static final String HORIZONTAL_ODOMETER_NAME = "RightIntake";
-    public static final String DELIVERY = "Delivery";
+    public static final String LIFT_ENCODER_NAME = "FrontWinch";
     public static final String LEFT_INTAKE = "LeftIntake";
     public static final String RIGHT_INTAKE = "RightIntake";
     public static final String LEFT_WINCH = "FrontWinch";
@@ -27,5 +27,5 @@ public class Constants {
 
     //game constants
     public static final double STONE_LENGTH_INCHES = 8.0;
-    public static final String LIFT_TOUCH_SENSOR = "LiftTouchSensor";
+
 }

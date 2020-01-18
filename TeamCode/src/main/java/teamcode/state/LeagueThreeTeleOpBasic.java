@@ -9,7 +9,7 @@ import teamcode.common.Vector2D;
 @TeleOp(name = "Tele-Op")
 public class LeagueThreeTeleOpBasic extends AbstractOpMode {
 
-    private static final double WINCH_MOTOR_POWER = 0.7;
+    private static final double WINCH_MOTOR_POWER = 1.0;
     private MoonshotArmSystem arm;
     private DriveSystem drive;
 
@@ -72,27 +72,15 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
         } else if (gamepad1.dpad_right) {
             arm.extend();
         } else if (gamepad1.dpad_up) {
-            while (gamepad1.dpad_up) {
-                arm.lift(WINCH_MOTOR_POWER, true);
-            }
-            arm.lift(0, true);
+            arm.encoderLift(4, WINCH_MOTOR_POWER );
         } else if (gamepad1.dpad_down) {
-            while (gamepad1.dpad_down) {
-                arm.lift(-WINCH_MOTOR_POWER, true);
-            }
-            arm.lift(0, true);
+            arm.encoderLift(4, -WINCH_MOTOR_POWER);
         } else if (gamepad1.x) {
             arm.score();
         } else if (gamepad2.dpad_up) {
-            while (gamepad2.dpad_up) {
-                arm.lift(WINCH_MOTOR_POWER / 2.0, true);
-            }
-            arm.lift(0, true);
+            arm.encoderLift(1,WINCH_MOTOR_POWER / 2.0 );
         } else if (gamepad2.dpad_down) {
-            while (gamepad2.dpad_down) {
-                arm.lift(-WINCH_MOTOR_POWER / 2.0, true);
-            }
-            arm.lift(0, true);
+            arm.encoderLift(1, -WINCH_MOTOR_POWER / 2.0);
         }
         if (gamepad1.right_stick_button && !rightStickDown) {
             rightStickDown = true;
@@ -119,7 +107,11 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
             arm.lift(0, false);
             //that is dangerous, do NOT do this near the top
         } else if (gamepad2.a) {
-            arm.attemptToAdjust();
+            try {
+                arm.attemptToAdjust();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -160,7 +152,7 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
 
 
     /*
-    front of robot to be lift
+    front of robot to be encoderLift
 
      */
 }

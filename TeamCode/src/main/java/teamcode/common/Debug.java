@@ -28,9 +28,10 @@ public class Debug {
 
     private Debug(){
         // Brian why would you instantiate Debug?
+        //Debug debug = new Debug();
     }
 
-    public static synchronized void log(Object message) {
+    public static synchronized  void log(Object message) {
         lines.add(message);
         if (lines.size() > MAX_NUM_LINES) {
             lines.remove(0);
