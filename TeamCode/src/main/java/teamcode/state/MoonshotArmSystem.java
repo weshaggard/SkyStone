@@ -1,16 +1,11 @@
 package teamcode.state;
 
-import android.media.MediaPlayer;
-import android.text.method.Touch;
-
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -30,13 +25,16 @@ public class MoonshotArmSystem {
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
     private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
     private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 1;
+    private static final double MAX_WINCH_POWER = 1;
+    private static final double WINCH_BRAKE_POWER = 0.125;
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 0.32;
     private static final double PULLEY_PRIMED_POSITION = 0.0924;
 
-    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1000;
-    private static final int WINCH_TOLERANCE_TICKS = 500;
+    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1600;
+    private static final int WINCH_TOLERANCE_TICKS = 1000;
+    private static final double MAX_WINCH_HEIGHT_INCHES = 34;
 
     private DcMotor intakeLeft, intakeRight;
     private DcMotor frontWinch, backWinch;
@@ -83,9 +81,11 @@ public class MoonshotArmSystem {
     }
 
     private void correctMotors() {
-        backWinch.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontWinch.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        liftEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -154,14 +154,13 @@ public class MoonshotArmSystem {
     }
 
 
-    public void attemptToAdjust() throws InterruptedException {
+    public void attemptToAdjust() {
         pulley.setPosition(0.1);
         frontGrabber.setPosition(0.6);
         pulley.setPosition(0);
-        Thread.currentThread().sleep(100);
+        Utils.sleep(100);
         frontGrabber.setPosition(1);
         pulley.setPosition(0.077 * 1.5);
-
     }
 
     public void dumpStone() {
@@ -178,50 +177,102 @@ public class MoonshotArmSystem {
         pulley.setPosition(0);
     }
 
-    public void lift(double power, boolean brake) {
-        if (power == 0 && brake) {
-            // brake power
-            power = 0.1;
+    public void liftContinuously(double power) {
+        if (power == 0) {
+            power = WINCH_BRAKE_POWER;
+        } else if (power < 0) {
+            power *= WINCH_DESCENT_POWER_MULTPILIER;
         }
-        if (power < 0 && brake) {
-            power /= 4.0;
-        }
-
-        frontWinch.setPower(-power);
-        backWinch.setPower(-power);
+        frontWinch.setPower(power);
+        backWinch.setPower(power);
     }
 
-    public void encoderLift(double inches, double power){
-        Debug.clear();
-        int ticks = (int)(inches * WINCH_MOTOR_INCHES_TO_TICKS);
-        Debug.log(ticks);
-        liftEncoder.setTargetPosition(-ticks);
-        liftEncoder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontWinch.setPower(-power);
-        backWinch.setPower(-power);
-        Debug.log("entering winch loop");
-        while(!winchNearTarget());{
-            Debug.log("current: "+ liftEncoder.getCurrentPosition());
-            Debug.log("target: "+ liftEncoder.getTargetPosition());
+    /**
+     * @param inches 0 is the lowest position the arm can go to
+     */
+    public void setLiftHeight(double inches) {
+        inches = Math.max(0, inches);
+        inches = Math.min(MAX_WINCH_HEIGHT_INCHES, inches);
+        int newTargetTicks = (int) (inches * WINCH_MOTOR_INCHES_TO_TICKS);
+        liftEncoder.setTargetPosition(newTargetTicks);
+        while (!Utils.motorNearTarget(liftEncoder, WINCH_TOLERANCE_TICKS) &&
+                AbstractOpMode.currentOpMode().opModeIsActive()) {
+            int currentWinchPosition = liftEncoder.getCurrentPosition();
+            int ticksFromStart = currentWinchPosition - targetWinchPositionTicks;
+            int ticksToTarget = liftEncoder.getTargetPosition() - currentWinchPosition;
+            Debug.clear();
+            Debug.log("from start: " + ticksFromStart);
+            Debug.log("to target:" + ticksToTarget);
+            double modulatedPower = getModulatedWinchPower(ticksFromStart, ticksToTarget);
+            Debug.log(modulatedPower);
+            frontWinch.setPower(modulatedPower);
+            backWinch.setPower(modulatedPower);
         }
-        Debug.clear();
-        //double brakePower = calculateBrakePower(inches + 9);
-        frontWinch.setPower(-0.125);
-        backWinch.setPower(-0.125);
+        targetWinchPositionTicks = newTargetTicks;
+        brakeWinches();
+    }
 
+    private int targetWinchPositionTicks = 0;
+    private static final double WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 4 * WINCH_MOTOR_INCHES_TO_TICKS;
+    private static final double WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 8 * WINCH_MOTOR_INCHES_TO_TICKS;
+    private static final double MIN_REDUCED_WINCH_POWER = 0.7;
+    private static final double WINCH_DESCENT_POWER_MULTPILIER = 0.25;
+
+    private double getModulatedWinchPower(double ticksFromStart, double ticksToTarget) {
+        double accelerationPower;
+        double decelerationPower;
+        if (Math.abs(ticksFromStart) < WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS) {
+            accelerationPower = Utils.lerp(MIN_REDUCED_WINCH_POWER, 1,
+                    Math.abs(ticksFromStart) / WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS);
+        } else {
+            accelerationPower = MAX_WINCH_POWER;
+        }
+        if (ticksToTarget < WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS) {
+            decelerationPower = Utils.lerp(MIN_REDUCED_WINCH_POWER, 1,
+                    Math.abs(ticksToTarget) / WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS);
+        } else {
+            decelerationPower = MAX_WINCH_POWER;
+        }
+        double sign = Math.signum(ticksToTarget);
+        if (sign == 0.0) {
+            sign = 1;
+        }
+        accelerationPower *= sign;
+        decelerationPower *= sign;
+        if (accelerationPower < 0) {
+            accelerationPower *= WINCH_DESCENT_POWER_MULTPILIER;
+        }
+        if (decelerationPower < 0) {
+            decelerationPower *= WINCH_DESCENT_POWER_MULTPILIER;
+        }
+        Debug.log("acceleration: " + accelerationPower);
+        Debug.log("deceleration: " + decelerationPower);
+        if (Math.abs(accelerationPower) < Math.abs(decelerationPower)) {
+            return accelerationPower;
+        } else {
+            return decelerationPower;
+        }
+    }
+
+    public double getLiftHeight() {
+        return liftEncoder.getCurrentPosition() / WINCH_MOTOR_INCHES_TO_TICKS;
+    }
+
+    public void brakeWinches() {
+        frontWinch.setPower(WINCH_BRAKE_POWER);
+        backWinch.setPower(WINCH_BRAKE_POWER);
     }
 
     private double calculateBrakePower(double currentInches) {
         //this is derived from Newtons universal law of gravity, Gm1m2 / r^2
         double numerator = 19.95468777;
         double denominator = Math.pow(currentInches * 0.0254, 2);
-        double force =  numerator / denominator;
+        double force = numerator / denominator;
         return force;
     }
 
 
-
-    private boolean winchNearTarget(){
+    private boolean winchNearTarget() {
         return (Math.abs(liftEncoder.getCurrentPosition() - liftEncoder.getTargetPosition()) < WINCH_TOLERANCE_TICKS);
     }
 
@@ -241,7 +292,6 @@ public class MoonshotArmSystem {
         pulley.setPosition(0.077 * 2);
         capstoneServo.setPosition(0.98);
     }
-
 
 
     public void outtakeServoPos() {
