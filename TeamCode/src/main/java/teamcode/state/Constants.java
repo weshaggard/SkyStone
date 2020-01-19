@@ -27,5 +27,7 @@ public class Constants {
 
     //game constants
     public static final double STONE_LENGTH_INCHES = 8.0;
+    public static final double STONE_HEIGHT_INCHES = 4.1;
+    public static final double STONE_WIDTH_INCHES = 4.0;
 
 }

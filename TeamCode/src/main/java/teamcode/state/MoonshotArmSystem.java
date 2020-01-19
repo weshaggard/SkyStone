@@ -35,12 +35,13 @@ public class MoonshotArmSystem {
     private static final double PULLEY_EXTENDED_POSITION = 0.32;
     private static final double PULLEY_PRIMED_POSITION = 0.0924;
 
-    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1000;
+    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1591.2;
     private static final int WINCH_TOLERANCE_TICKS = 500;
 
     private DcMotor intakeLeft, intakeRight;
     private DcMotor frontWinch, backWinch;
     private DcMotor liftEncoder;
+    private LiftLocalizer localizer;
     private Servo pulley;
     private Servo boxTransfer;
     private Servo foundationGrabberLeft, foundationGrabberRight;
@@ -68,9 +69,65 @@ public class MoonshotArmSystem {
         intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
         //liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         foundationGrabberState = FoundationGrabberState.OPEN;
+        localizer = new LiftLocalizer();
         correctMotors();
         resetServos();
     }
+
+     class LiftLocalizer{
+        final double  TICKS_TO_STONE_NUMS = Constants.STONE_HEIGHT_INCHES;
+        final int startingEncoderValue;
+        private final int TICKS_PER_REVOLUTION = 8192;
+        double stoneNum;
+
+
+        LiftLocalizer(){
+            startingEncoderValue = liftEncoder.getCurrentPosition();
+            stoneNum = 1;
+            Thread localizerUpdate = new Thread(){
+                @Override
+                public void run(){
+                    while(AbstractOpMode.currentOpMode().opModeIsActive() && !AbstractOpMode.currentOpMode().isStopRequested()){
+                        update();
+                    }
+                }
+            };
+            localizerUpdate.start();
+
+        }
+
+        synchronized void update(){
+            int currentLiftEncoderValue = liftEncoder.getCurrentPosition();
+            if(isNearStart(currentLiftEncoderValue)){
+                //determines if this is the zero
+                stoneNum = 1;
+
+            }
+            double inches = currentLiftEncoderValue * WINCH_MOTOR_INCHES_TO_TICKS;
+            stoneNum = (inches + 4.95) / 4.1;
+            Debug.log("StoneNum: " + stoneNum);
+            Debug.log("CurrentInches:" + inches);
+
+
+        }
+
+        boolean isNearStart(int currentPosition){
+            return currentPosition > startingEncoderValue - WINCH_TOLERANCE_TICKS && currentPosition < startingEncoderValue + WINCH_TOLERANCE_TICKS;
+        }
+
+    }
+
+    /*
+    base height: 1.25 in
+    X          y
+    0          1
+    3.25       2
+    7.35       3
+
+    x = 4.1(y - 2) + 3.25
+    y = (x + 4.95) / 4.1
+
+     */
 
     private void resetServos() {
         foundationGrabberLeft.setPosition(FOUNDATION_GRABBER_LEFT_OPEN_POSITION);
@@ -89,6 +146,29 @@ public class MoonshotArmSystem {
 
         intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+
+    public void snapBack(boolean roundUp){
+        double roundedStoneNum;
+        if(roundUp) {
+            roundedStoneNum = Math.ceil(localizer.stoneNum);
+        }else{
+            roundedStoneNum = Math.floor(localizer.stoneNum);
+        }
+
+
+        double stoneNumDifference = Math.abs(roundedStoneNum - localizer.stoneNum);
+        if(stoneNumDifference < 0.01) {
+            if (roundUp) {
+                stoneNumDifference += 1;
+            } else {
+                stoneNumDifference -= 1;
+            }
+        }
+
+        double inches = stoneNumDifference * Constants.STONE_HEIGHT_INCHES;
+        setLiftHeight();
     }
 
 
@@ -313,5 +393,6 @@ public class MoonshotArmSystem {
         Utils.sleep(500);
         pulley.setPosition(0);
     }
+
 
 }
