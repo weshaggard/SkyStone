@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -25,8 +24,7 @@ public class MoonshotArmSystem {
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
     private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
     private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 1;
-    private static final double MAX_WINCH_POWER = 1;
-    private static final double WINCH_BRAKE_POWER = 0.125;
+
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
     private static final double PULLEY_EXTENDED_POSITION = 0.32;
@@ -34,7 +32,14 @@ public class MoonshotArmSystem {
 
     private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1600;
     private static final int WINCH_TOLERANCE_TICKS = 1000;
-    private static final double MAX_WINCH_HEIGHT_INCHES = 34;
+    private static final double MAX_WINCH_HEIGHT_INCHES = 32;
+    private static final double MAX_WINCH_POWER = 1;
+    private static final double WINCH_BRAKE_POWER = 0.15;
+    private static final double WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 4 * WINCH_MOTOR_INCHES_TO_TICKS;
+    private static final double WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 8 * WINCH_MOTOR_INCHES_TO_TICKS;
+    private static final double MIN_REDUCED_WINCH_POWER = 0.7;
+    private static final double WINCH_DESCENT_POWER_MULTIPILIER = 0.25;
+
 
     private DcMotor intakeLeft, intakeRight;
     private DcMotor frontWinch, backWinch;
@@ -45,9 +50,8 @@ public class MoonshotArmSystem {
     private Servo backGrabber, frontGrabber;
     private Servo capstoneServo;
     private ColorSensor intakeSensor;
-    private TouchSensor liftSensor;
 
-
+    private int targetWinchPositionTicks = 0;
     private boolean intaking;
 
     public MoonshotArmSystem(HardwareMap hardwareMap) {
@@ -181,7 +185,7 @@ public class MoonshotArmSystem {
         if (power == 0) {
             power = WINCH_BRAKE_POWER;
         } else if (power < 0) {
-            power *= WINCH_DESCENT_POWER_MULTPILIER;
+            power *= WINCH_DESCENT_POWER_MULTIPILIER;
         }
         frontWinch.setPower(power);
         backWinch.setPower(power);
@@ -212,12 +216,6 @@ public class MoonshotArmSystem {
         brakeWinches();
     }
 
-    private int targetWinchPositionTicks = 0;
-    private static final double WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 4 * WINCH_MOTOR_INCHES_TO_TICKS;
-    private static final double WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 8 * WINCH_MOTOR_INCHES_TO_TICKS;
-    private static final double MIN_REDUCED_WINCH_POWER = 0.7;
-    private static final double WINCH_DESCENT_POWER_MULTPILIER = 0.25;
-
     private double getModulatedWinchPower(double ticksFromStart, double ticksToTarget) {
         double accelerationPower;
         double decelerationPower;
@@ -240,10 +238,10 @@ public class MoonshotArmSystem {
         accelerationPower *= sign;
         decelerationPower *= sign;
         if (accelerationPower < 0) {
-            accelerationPower *= WINCH_DESCENT_POWER_MULTPILIER;
+            accelerationPower *= WINCH_DESCENT_POWER_MULTIPILIER;
         }
         if (decelerationPower < 0) {
-            decelerationPower *= WINCH_DESCENT_POWER_MULTPILIER;
+            decelerationPower *= WINCH_DESCENT_POWER_MULTIPILIER;
         }
         Debug.log("acceleration: " + accelerationPower);
         Debug.log("deceleration: " + decelerationPower);

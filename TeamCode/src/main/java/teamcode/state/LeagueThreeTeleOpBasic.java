@@ -72,15 +72,15 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
         } else if (gamepad1.dpad_right) {
             arm.extend();
         } else if (gamepad1.dpad_up) {
-            arm.encoderLift(4, WINCH_MOTOR_POWER );
+            arm.setLiftHeight(4);
         } else if (gamepad1.dpad_down) {
-            arm.encoderLift(4, -WINCH_MOTOR_POWER);
+            arm.setLiftHeight(4);
         } else if (gamepad1.x) {
             arm.score();
         } else if (gamepad2.dpad_up) {
-            arm.encoderLift(1,WINCH_MOTOR_POWER / 2.0 );
+            arm.setLiftHeight(1);
         } else if (gamepad2.dpad_down) {
-            arm.encoderLift(1, -WINCH_MOTOR_POWER / 2.0);
+            arm.setLiftHeight(1);
         }
         if (gamepad1.right_stick_button && !rightStickDown) {
             rightStickDown = true;
@@ -104,16 +104,11 @@ public class LeagueThreeTeleOpBasic extends AbstractOpMode {
             bDown = false;
         }
         if (gamepad1.y) {
-            arm.lift(0, false);
+            arm.setLiftHeight(0);
             //that is dangerous, do NOT do this near the top
         } else if (gamepad2.a) {
-            try {
-                arm.attemptToAdjust();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            arm.attemptToAdjust();
         }
-
     }
 
     private void cancelUpdate() {

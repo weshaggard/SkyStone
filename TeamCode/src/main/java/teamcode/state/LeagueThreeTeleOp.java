@@ -118,13 +118,13 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 arm.score();
             } else if (gamepad1.right_bumper) {
                 if (isZeroControllerOne) {
-                   // arm.primeToScore(0, WINCH_MOTOR_POWER);
+                    // arm.primeToScore(0, WINCH_MOTOR_POWER);
                     isZeroControllerOne = false;
                 } else {
                     //arm.primeToScore(1, WINCH_MOTOR_POWER);
                 }
             } else if (gamepad1.left_bumper) {
-               // arm.primeToScore(-1, WINCH_MOTOR_POWER);
+                // arm.primeToScore(-1, WINCH_MOTOR_POWER);
             } else if (gamepad1.dpad_up && CanUseDPADUpControllerOne) {
                 //arm.lift( WINCH_MOTOR_POWER);
                 CanUseDPADUpControllerOne = false;
@@ -159,11 +159,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
             } else if (gamepad2.left_trigger > 0.3) {
                 arm.suck(-1);
             } else if (gamepad2.b) {
-                try {
-                    arm.attemptToAdjust();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                arm.attemptToAdjust();
             }
         }
     }

@@ -25,7 +25,7 @@ public class LiftEncoderTest extends AbstractOpMode {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        arm.encoderLift(8, 0.7);
+        arm.setLiftHeight(8);
         while(opModeIsActive());
 
     }
