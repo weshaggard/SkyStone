@@ -11,7 +11,7 @@ Expansion Hub 1:
     Servo:
         0. Name: BoxTransfer Type: Servo
         1. Name: CapstoneServo Type: Servo
-        2. Name:  Type:
+        2. Name: RightFoundationGrabber  Type: Servo
         3. Name:  Type:
         4. Name:  Type:
         5. Name: LeftFoundationGrabber Type: Servo
@@ -34,8 +34,8 @@ Expansion Hub 1:
 
 Expansion Hub 2:
     Motor:
-        0. Name: RearLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: RearLeftDrive    Encoder Source:
-        1. Name: FrontLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: FrontLeftDrive    Encoder Source:
+        0. Name: RearLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: RearLeftDrive    Encoder Source: N/A
+        1. Name: FrontLeftDrive Type: REV Robotics 20:1 HD Hex Motor   Power Source: FrontLeftDrive    Encoder Source: N/A
         2. Name: RearWinch Type: Unspecified Motor   Power Source: RearWinch    Encoder Source: LeftVerticalOdometer
         3. Name: FrontWinch Type: Unspecified Motor   Power Source: FrontWinch    Encoder Source: LiftEncoder
 
@@ -58,3 +58,6 @@ Expansion Hub 2:
     I2C Bus 2:
 
     I2C Bus 3:
+
+Webcam 1
+    Name: Webcam    Type: webcam

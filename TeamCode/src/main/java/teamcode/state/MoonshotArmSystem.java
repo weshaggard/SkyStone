@@ -9,10 +9,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.Utils;
+import teamcode.common.Vector2D;
 
 public class MoonshotArmSystem {
 
-    private static final double INTAKE_POWER = 0.85;
+    private static final double INTAKE_POWER = 1;
     private static final double BOX_FLAT_POSITION = 0.5;
     private static final double BOX_RAMPED_POSITION = 0.37;
     private static final double BACK_GRABBER_OPEN_POSITION = 0.9;
@@ -22,19 +23,21 @@ public class MoonshotArmSystem {
     private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
     private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 1;
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
-    private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
-    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 1;
+    private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0.5;
+    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0.5;
 
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
-    private static final double PULLEY_EXTENDED_POSITION = 0.32;
+    private static final double PULLEY_EXTENDED_POSITION = 0.33;
     private static final double PULLEY_PRIMED_POSITION = 0.0924;
 
-    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1600;
-    private static final int WINCH_TOLERANCE_TICKS = 1000;
+    private static final double WINCH_MOTOR_INCHES_TO_TICKS = 1591.2;
+    private static final int WINCH_TOLERANCE_TICKS = 500;
     private static final double MAX_WINCH_HEIGHT_INCHES = 32;
     private static final double MAX_WINCH_POWER = 1;
     private static final double WINCH_BRAKE_POWER = 0.15;
+    private static final double WINCH_BRAKE_POWER_DROOPING = 0.10; // chrisitian likes this better but i wwant to keep the original b/c it is a functional braking power
+    private static final double WINCH_BRAKE_POWER_HIGH = 0.12;
     private static final double WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 4 * WINCH_MOTOR_INCHES_TO_TICKS;
     private static final double WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 8 * WINCH_MOTOR_INCHES_TO_TICKS;
     private static final double MIN_REDUCED_WINCH_POWER = 0.7;
@@ -49,7 +52,7 @@ public class MoonshotArmSystem {
     private Servo boxTransfer;
     private Servo foundationGrabberLeft, foundationGrabberRight;
     private Servo backGrabber, frontGrabber;
-    private Servo capstoneServo;
+    //private Servo capstoneServo;
     private ColorSensor intakeSensor;
 
     private int targetWinchPositionTicks = 0;
@@ -67,7 +70,7 @@ public class MoonshotArmSystem {
         backGrabber = hardwareMap.get(Servo.class, Constants.BACK_GRABBER);
         frontGrabber = hardwareMap.get(Servo.class, Constants.FRONT_GRABBER);
         pulley = hardwareMap.get(Servo.class, Constants.PULLEY_SERVO);
-        capstoneServo = hardwareMap.get(Servo.class, Constants.CAPSTONE_SERVO);
+        //capstoneServo = hardwareMap.get(Servo.class, Constants.CAPSTONE_SERVO);
         intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
         //liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         foundationGrabberState = FoundationGrabberState.OPEN;
@@ -77,10 +80,10 @@ public class MoonshotArmSystem {
     }
 
      class LiftLocalizer{
-        final double  TICKS_TO_STONE_NUMS = Constants.STONE_HEIGHT_INCHES;
+
         final int startingEncoderValue;
-        private final int TICKS_PER_REVOLUTION = 8192;
         double stoneNum;
+        double currentInches;
 
 
         LiftLocalizer(){
@@ -98,6 +101,10 @@ public class MoonshotArmSystem {
 
         }
 
+        public LiftLocalizer getLocalizer(){
+            return localizer;
+        }
+
         synchronized void update(){
             int currentLiftEncoderValue = liftEncoder.getCurrentPosition();
             if(isNearStart(currentLiftEncoderValue)){
@@ -105,10 +112,11 @@ public class MoonshotArmSystem {
                 stoneNum = 1;
 
             }
-            double inches = currentLiftEncoderValue * WINCH_MOTOR_INCHES_TO_TICKS;
-            stoneNum = (inches + 4.95) / 4.1;
-            Debug.log("StoneNum: " + stoneNum);
-            Debug.log("CurrentInches:" + inches);
+            currentInches = (double)currentLiftEncoderValue  / WINCH_MOTOR_INCHES_TO_TICKS;
+            stoneNum = (currentInches + 4.95) / 4.1;
+//            Debug.log("Ticks: " + currentLiftEncoderValue);
+//            Debug.log("StoneNum: " + stoneNum);
+//            Debug.log("CurrentInches:" + inches);
 
 
         }
@@ -138,7 +146,7 @@ public class MoonshotArmSystem {
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         pulley.setPosition(PULLEY_RETRACTED_POSITION);
-        capstoneServo.setPosition(0.98);
+        //capstoneServo.setPosition(0.98);
     }
 
     private void correctMotors() {
@@ -162,17 +170,27 @@ public class MoonshotArmSystem {
         }
 
 
-        double stoneNumDifference = Math.abs(roundedStoneNum - localizer.stoneNum);
+        double stoneNumDifference = roundedStoneNum - localizer.stoneNum ;
         if(stoneNumDifference < 0.01) {
             if (roundUp) {
-                stoneNumDifference += 1;
+//                stoneNumDifference += 1;
+                roundedStoneNum += 1;
             } else {
-                stoneNumDifference -= 1;
+//                stoneNumDifference -= 1;
+                roundedStoneNum -= 1;
             }
         }
 
-        double inches = stoneNumDifference * Constants.STONE_HEIGHT_INCHES;
-        setLiftHeight();
+
+//        double liftHeightInches = stoneNumDifference * Constants.STONE_HEIGHT_INCHES;
+        double liftHeightInches = 3.25 + Constants.STONE_HEIGHT_INCHES * (roundedStoneNum - 2);
+        Debug.clear();
+        Debug.log("GetLiftHeight" + getLiftHeight());
+        Debug.log("CurrentInches" + localizer.currentInches);
+        Debug.log("StoneNum: " + localizer.stoneNum);
+        Debug.log("RoundedStoneNum" + roundedStoneNum);
+        Debug.log("LiftHeightIn: " + liftHeightInches);
+        setLiftHeight(liftHeightInches);
     }
 
 
@@ -254,16 +272,42 @@ public class MoonshotArmSystem {
     }
 
     public void score() {
-        frontGrabber.setPosition(0.64);
+        frontGrabber.setPosition(0.5);
+        pulley.setPosition(0.27);
+        backGrabber.setPosition(0.9);
+
+    }
+
+    public void reset(){
+
+        while(!localizer.isNearStart(liftEncoder.getCurrentPosition())){
+            liftContinuously(-0.5);
+        }
+        liftContinuously(0);
+        Utils.sleep(250);
+        pulley.setPosition(0);
+        frontGrabber.setPosition(0.63);
+        //frontGrabber.setPosition(0.9);
+
+    }
+
+    public void resetArmPosition(){
+        frontGrabber.setPosition(0.63);
         pulley.setPosition(0.27);
         backGrabber.setPosition(0.9);
         Utils.sleep(250);
         pulley.setPosition(0);
+
     }
 
     public void liftContinuously(double power) {
         if (power == 0) {
-            power = WINCH_BRAKE_POWER;
+            if(localizer.stoneNum > 8.5){
+                Debug.log("Very High up");
+                power = WINCH_BRAKE_POWER_HIGH;
+            }else {
+                power = WINCH_BRAKE_POWER_DROOPING;
+            }
         } else if (power < 0) {
             power *= WINCH_DESCENT_POWER_MULTIPILIER;
         }
@@ -278,12 +322,15 @@ public class MoonshotArmSystem {
         inches = Math.max(0, inches);
         inches = Math.min(MAX_WINCH_HEIGHT_INCHES, inches);
         int newTargetTicks = (int) (inches * WINCH_MOTOR_INCHES_TO_TICKS);
+        int currentWinchPosition;
+        int ticksFromStart;
+        int ticksToTarget;
         liftEncoder.setTargetPosition(newTargetTicks);
         while (!Utils.motorNearTarget(liftEncoder, WINCH_TOLERANCE_TICKS) &&
                 AbstractOpMode.currentOpMode().opModeIsActive()) {
-            int currentWinchPosition = liftEncoder.getCurrentPosition();
-            int ticksFromStart = currentWinchPosition - targetWinchPositionTicks;
-            int ticksToTarget = liftEncoder.getTargetPosition() - currentWinchPosition;
+            currentWinchPosition = liftEncoder.getCurrentPosition();
+            ticksFromStart = currentWinchPosition - targetWinchPositionTicks;
+            ticksToTarget = liftEncoder.getTargetPosition() - currentWinchPosition;
             Debug.clear();
             Debug.log("from start: " + ticksFromStart);
             Debug.log("to target:" + ticksToTarget);
@@ -295,6 +342,8 @@ public class MoonshotArmSystem {
         targetWinchPositionTicks = newTargetTicks;
         brakeWinches();
     }
+
+
 
     private double getModulatedWinchPower(double ticksFromStart, double ticksToTarget) {
         double accelerationPower;
@@ -362,13 +411,14 @@ public class MoonshotArmSystem {
 
     private boolean intakeFull() {
         int green = intakeSensor.green();
+        Debug.log("Green: " + green);
         return green > 900;
     }
 
 
     public void capstoneScoring() {
         pulley.setPosition(0.077 * 2);
-        capstoneServo.setPosition(0.98);
+        //capstoneServo.setPosition(0.98);
     }
 
 
@@ -377,7 +427,7 @@ public class MoonshotArmSystem {
     }
 
     public void initCapstoneServo() {
-        capstoneServo.setPosition(0.5);
+        //capstoneServo.setPosition(0.5);
     }
 
     public DcMotor getLiftEncoder() {

@@ -115,7 +115,7 @@ public class LeagueThreeTeleOp extends AbstractOpMode {
                 isControllerOneDelivery = false;
                 Debug.log("Player 1 in control");
             } else if (gamepad1.x) {
-                arm.score();
+                //arm.score();
             } else if (gamepad1.right_bumper) {
                 if (isZeroControllerOne) {
                     // arm.primeToScore(0, WINCH_MOTOR_POWER);
