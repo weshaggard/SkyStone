@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
+import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
 import teamcode.common.Vector2D;
 
@@ -23,6 +24,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
+        //Debug.log("init started");
         Vector2D startPosition = new Vector2D(9, 38.5);
         double startRotation = 0;
         gps = new GPS(hardwareMap, startPosition, startRotation);
@@ -31,15 +33,18 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         timer1 = new Timer();
         timer2 = new Timer();
         skyStoneConfig = SkyStoneConfiguration.TWO_FIVE;
+        //Debug.log("init finished");
     }
 
     @Override
     protected void onStart() {
+        //Debug.log("start started");
         intakeStone(true);
         scoreStone(true);
         intakeStone(false);
         scoreStone(true);
         park();
+        //Debug.log("start finished");
     }
 
     /**

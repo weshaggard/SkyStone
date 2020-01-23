@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2017 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,12 +18,16 @@ package teamcode.test.REVExtensions2;/*
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package teamcode.test.revextensions2;
 
 import com.qualcomm.hardware.lynx.LynxController;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoControllerEx;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.ServoConfigurationType;
+
+import static teamcode.test.revextensions2.Utils.getLynxFromController;
+
 
 /**
  * Extends a ServoImplEx to provide access to new features.
@@ -46,7 +50,7 @@ public class ExpansionHubServo extends ServoImplEx
                 servo.getDirection(),
                 ServoConfigurationType.getStandardServoType());
 
-        expansionHubEx = new ExpansionHubEx(Utils.getLynxFromController((LynxController) servo.getController()));
+        expansionHubEx = new ExpansionHubEx(getLynxFromController((LynxController) servo.getController()));
     }
 
     /***

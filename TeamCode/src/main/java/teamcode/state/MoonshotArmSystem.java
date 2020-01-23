@@ -13,7 +13,7 @@ import teamcode.common.Vector2D;
 
 public class MoonshotArmSystem {
 
-    private static final double INTAKE_POWER = 1;
+    private static final double INTAKE_POWER = 0.85;
     private static final double BOX_FLAT_POSITION = 0.5;
     private static final double BOX_RAMPED_POSITION = 0.37;
     private static final double BACK_GRABBER_OPEN_POSITION = 0.9;
@@ -452,18 +452,18 @@ public class MoonshotArmSystem {
         }
     }
 
-
-    //2 suck motors
-    //1 transfer servo (0, 0.5)
-    //2 servos linked (1 servo)(0, 1)
-    //2 grabber servos
-    //2 winch motors (opposite directions)
-    //2 foundation servos
-    //Possibly Capstone Servo
-    //Color Sensor
-    //Touch Sensor?(Lift)
-    //through bore encoder on the Winch
-
+//
+//    2 suck motors
+//    1 transfer servo (0, 0.5)
+//    2 servos linked (1 servo)(0, 1)
+//    2 grabber servos
+//    2 winch motors (opposite directions)
+//    2 foundation servos
+//    Possibly Capstone Servo
+//    Color Sensor
+//    Touch Sensor?(Lift)
+//    through bore encoder on the Winch
+//
 
     // making it work with auto by copy pasting in a super janky way cuz we outta time
 

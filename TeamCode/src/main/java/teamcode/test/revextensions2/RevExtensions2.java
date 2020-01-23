@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +19,8 @@ package teamcode.test.REVExtensions2;/*
  * SOFTWARE.
  */
 
+package teamcode.test.revextensions2;
+
 import android.content.Context;
 
 import com.qualcomm.robotcore.eventloop.opmode.AnnotatedOpModeManager;
@@ -28,6 +30,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
+
 
 /***
  * This class manages hotswapping of the hardwareMap

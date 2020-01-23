@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +18,10 @@ package teamcode.test.REVExtensions2;/*
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+package teamcode.test.revextensions2;
+
+
 
 class RevBulkDataException extends RE2Exception
 {

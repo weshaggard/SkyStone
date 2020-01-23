@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +18,8 @@ package teamcode.test.REVExtensions2;/*
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+package teamcode.test.revextensions2;
 
 import android.graphics.Color;
 
@@ -40,6 +42,7 @@ import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

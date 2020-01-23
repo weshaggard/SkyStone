@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2017 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,9 +19,13 @@ package teamcode.test.REVExtensions2;/*
  * SOFTWARE.
  */
 
+package teamcode.test.revextensions2;
+
 import com.qualcomm.hardware.lynx.LynxController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
+
+import static teamcode.test.revextensions2.Utils.getLynxFromController;
 
 
 /**
@@ -39,7 +43,7 @@ public class ExpansionHubMotor extends DcMotorImplEx
     ExpansionHubMotor(DcMotor motor)
     {
         super(motor.getController(), motor.getPortNumber(), motor.getDirection(), motor.getMotorType());
-        expansionHubEx = new ExpansionHubEx(Utils.getLynxFromController((LynxController) motor.getController()));
+        expansionHubEx = new ExpansionHubEx(getLynxFromController((LynxController) motor.getController()));
     }
 
     /**

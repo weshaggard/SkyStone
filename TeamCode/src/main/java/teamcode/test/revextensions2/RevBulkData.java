@@ -1,4 +1,4 @@
-package teamcode.test.REVExtensions2;/*
+/*
  * Copyright (c) 2018 OpenFTC Team
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +19,8 @@ package teamcode.test.REVExtensions2;/*
  * SOFTWARE.
  */
 
+package teamcode.test.revextensions2;
+
 import com.qualcomm.hardware.lynx.LynxAnalogInputController;
 import com.qualcomm.hardware.lynx.LynxController;
 import com.qualcomm.hardware.lynx.LynxDcMotorController;
@@ -35,6 +37,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannelImpl;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
+
 
 import java.lang.reflect.Field;
 
@@ -59,7 +62,7 @@ public class RevBulkData
      *               was after. (They might have issued this command
      *               to the wrong LynxModule)
      */
-    public RevBulkData(LynxGetBulkInputDataResponse response, LynxModule module)
+    RevBulkData(LynxGetBulkInputDataResponse response, LynxModule module)
     {
         this.response = response;
         this.module = module;
