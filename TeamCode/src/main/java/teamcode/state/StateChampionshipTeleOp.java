@@ -92,7 +92,7 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
 
         } else if (gamepad1.dpad_down) {
             while (gamepad1.dpad_down) {
-                arm.liftContinuously(-0.2);
+                arm.fastDroop();
             }
             arm.liftContinuously(0);
 
@@ -103,9 +103,12 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
         } else if (gamepad1.dpad_left) {
             // free button
         } else if (gamepad1.left_bumper) {
-            arm.extend();
+            while(gamepad1.left_bumper) {
+                arm.liftContinuously(0, true);
+            }
+            arm.liftContinuously(0);
         } else if (gamepad1.y) {
-            arm.resetArmPosition();
+            arm.dumpStone();
         }
         if (gamepad1.right_stick_button && !rightStickDown) {
             rightStickDown = true;
@@ -121,6 +124,7 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
         if (!gamepad1.right_bumper) {
             rbDown = false;
         }
+
 
         if (gamepad2.a) {
             driverOne = !driverOne;
@@ -162,6 +166,7 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
             }
             if (flipDriveControls) {
                 velocity = velocity.multiply(-1);
+                turnSpeed *= -1;
             }
 
             turnSpeed += TURN_SPEED_CORRECTION_MODIFIER * velocity.magnitude();

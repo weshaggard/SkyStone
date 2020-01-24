@@ -97,6 +97,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         if (skyStoneNum == 4) {
             // grabbing the first stone unleashes devastation, so go for 6th
             // stone (which is farther from devastation)
+            //unnecessary with new intake?
             skyStoneNum = 6;
         }
         if (skyStoneNum == 1) {
@@ -164,13 +165,12 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         // place stone on foundation
         arm.score();
         Utils.sleep(500);
-        TimerTask resetArm = new TimerTask() {
-            @Override
-            public void run() {
+        new Thread(){
+            public void run(){
                 arm.resetArmPosition();
             }
-        };
-        timer1.schedule(resetArm, 0);
+        }.start();
+
     }
 
     private void park() {

@@ -36,7 +36,7 @@ public class MoonshotArmSystem {
     private static final double MAX_WINCH_HEIGHT_INCHES = 32;
     private static final double MAX_WINCH_POWER = 1;
     private static final double WINCH_BRAKE_POWER = 0.15;
-    private static final double WINCH_BRAKE_POWER_DROOPING = 0.10; // chrisitian likes this better but i wwant to keep the original b/c it is a functional braking power
+    private static final double WINCH_BRAKE_POWER_DROOPING = 0.05; // chrisitian likes this better but i wwant to keep the original b/c it is a functional braking power
     private static final double WINCH_BRAKE_POWER_HIGH = 0.12;
     private static final double WINCH_ACCELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 4 * WINCH_MOTOR_INCHES_TO_TICKS;
     private static final double WINCH_DECELERATION_POWER_REDUCTION_THRESHOLD_TICKS = 8 * WINCH_MOTOR_INCHES_TO_TICKS;
@@ -78,6 +78,7 @@ public class MoonshotArmSystem {
         correctMotors();
         resetServos();
     }
+
 
     class LiftLocalizer {
 
@@ -227,11 +228,20 @@ public class MoonshotArmSystem {
     public void primeToScore() {
         suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
-        Debug.log("transfer case down");
+        //Debug.log("transfer case down");
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
-        Utils.sleep(700);
+        Utils.sleep(350);
         pulley.setPosition(PULLEY_PRIMED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
+    }
+
+
+    /**
+     *
+     * @return an array of doubles where 0 is left and 1 is right
+     */
+    public double[] getIntakePowers(){
+        return new double[]{intakeLeft.getPower(), intakeRight.getPower()};
     }
 
     public void extend() {
@@ -294,21 +304,37 @@ public class MoonshotArmSystem {
     }
 
     public void resetArmPosition() {
-        pulley.setPosition(0.27);
+        //pulley.setPosition(0.27);
         pulley.setPosition(0);
         backGrabber.setPosition(0.9);
-        Utils.sleep(1000);
+        //Utils.sleep(1000);
         frontGrabber.setPosition(0.63);
     }
 
-    public void liftContinuously(double power) {
+    public void liftContinuously(double power, boolean droop ) {
         if (power == 0) {
-            if (localizer.stoneNum > 8.5) {
-                Debug.log("Very High up");
-                power = WINCH_BRAKE_POWER_HIGH;
-            } else {
+            if(droop){
+                Debug.log("Droop active");
                 power = WINCH_BRAKE_POWER_DROOPING;
+            }else{
+                power = WINCH_BRAKE_POWER;
             }
+        } else if (power < 0) {
+            power *= WINCH_DESCENT_POWER_MULTIPILIER;
+        }
+        frontWinch.setPower(power);
+        backWinch.setPower(power);
+    }
+
+    public void fastDroop() {
+        frontWinch.setPower(0.02);
+        backWinch.setPower(0.02);
+    }
+
+
+    public void liftContinuously(double power){
+        if (power == 0) {
+            power = WINCH_BRAKE_POWER;
         } else if (power < 0) {
             power *= WINCH_DESCENT_POWER_MULTIPILIER;
         }
