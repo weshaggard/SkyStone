@@ -60,12 +60,17 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
     @Override
     protected void onStart() {
         initIntake();
+        Debug.log("intake 1");
         intakeStone(true);
+        Debug.log("score 1");
         scoreStone(true);
+        Debug.log("intake 2");
         intakeStone(false);
+        Debug.log("score 2");
         scoreStone(true);
+        Debug.log("park");
         park();
-        //Debug.log("start finished");
+        Utils.sleep(5000);
     }
 
     private void initIntake() {
@@ -112,7 +117,10 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         }
 
         drive.setRotation(rotation, SPEED);
-        double x = 52.5;
+        double x = 51;
+        if (!firstStone) {
+            x -= 1.5;
+        }
         drive.goTo(new Vector2D(x, y), SPEED);
 
         // go in for stone
@@ -123,7 +131,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
             }
         };
         timer1.schedule(startIntakeTask, 0);
-        drive.vertical(8, SPEED);
+        drive.vertical(2, SPEED);
 
         TimerTask cancelIntakeTask = new TimerTask() {
             @Override
@@ -162,7 +170,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
                 arm.resetArmPosition();
             }
         };
-        timer1.schedule(resetArm,0);
+        timer1.schedule(resetArm, 0);
     }
 
     private void park() {

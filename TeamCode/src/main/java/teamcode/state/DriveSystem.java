@@ -21,7 +21,7 @@ public class DriveSystem {
     private static final double DECELERATION_TURN_SPEED_REDUCTION_THRESHOLD_RADIANS = Math.toRadians(115);
 
     private static final double LINEAR_OFFSET_TOLERANCE_INCHES = 2;
-    private static final double ROTATIONAL_OFFSET_TOLERANCE_RADIANS = Math.toRadians(2);
+    private static final double ROTATIONAL_OFFSET_TOLERANCE_RADIANS = Math.toRadians(5);
     /**
      * Used to determine when goTo should be cancelled in the event the robot becomes stuck.
      */
@@ -195,7 +195,7 @@ public class DriveSystem {
         double totalDistance = distanceFromStart + distanceToTarget;
         double accelerationThreshold;
         double decelerationThreshold;
-        double maxThreshold = 84;
+        double maxThreshold = 48;
         if (totalDistance < maxThreshold) {
             accelerationThreshold = Utils.lerp(0, ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES, totalDistance / maxThreshold);
         } else {

@@ -3,8 +3,6 @@ package teamcode.state;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import teamcode.common.Debug;
-import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 /**
