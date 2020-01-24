@@ -79,20 +79,20 @@ public class MoonshotArmSystem {
         resetServos();
     }
 
-     class LiftLocalizer{
+    class LiftLocalizer {
 
         final int startingEncoderValue;
         double stoneNum;
         double currentInches;
 
 
-        LiftLocalizer(){
+        LiftLocalizer() {
             startingEncoderValue = liftEncoder.getCurrentPosition();
             stoneNum = 1;
-            Thread localizerUpdate = new Thread(){
+            Thread localizerUpdate = new Thread() {
                 @Override
-                public void run(){
-                    while(AbstractOpMode.currentOpMode().opModeIsActive() && !AbstractOpMode.currentOpMode().isStopRequested()){
+                public void run() {
+                    while (AbstractOpMode.currentOpMode().opModeIsActive() && !AbstractOpMode.currentOpMode().isStopRequested()) {
                         update();
                     }
                 }
@@ -101,18 +101,18 @@ public class MoonshotArmSystem {
 
         }
 
-        public LiftLocalizer getLocalizer(){
+        public LiftLocalizer getLocalizer() {
             return localizer;
         }
 
-        synchronized void update(){
+        synchronized void update() {
             int currentLiftEncoderValue = liftEncoder.getCurrentPosition();
-            if(isNearStart(currentLiftEncoderValue)){
+            if (isNearStart(currentLiftEncoderValue)) {
                 //determines if this is the zero
                 stoneNum = 1;
 
             }
-            currentInches = (double)currentLiftEncoderValue  / WINCH_MOTOR_INCHES_TO_TICKS;
+            currentInches = (double) currentLiftEncoderValue / WINCH_MOTOR_INCHES_TO_TICKS;
             stoneNum = (currentInches + 4.95) / 4.1;
 //            Debug.log("Ticks: " + currentLiftEncoderValue);
 //            Debug.log("StoneNum: " + stoneNum);
@@ -121,7 +121,7 @@ public class MoonshotArmSystem {
 
         }
 
-        boolean isNearStart(int currentPosition){
+        boolean isNearStart(int currentPosition) {
             return currentPosition > startingEncoderValue - WINCH_TOLERANCE_TICKS && currentPosition < startingEncoderValue + WINCH_TOLERANCE_TICKS;
         }
 
@@ -150,8 +150,6 @@ public class MoonshotArmSystem {
     }
 
     private void correctMotors() {
-        frontWinch.setDirection(DcMotorSimple.Direction.REVERSE);
-
         liftEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -160,18 +158,25 @@ public class MoonshotArmSystem {
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    public void setBoxTransferPosition(boolean down) {
+        if (down) {
+            boxTransfer.setPosition(BOX_RAMPED_POSITION);
+        } else {
+            boxTransfer.setPosition(BOX_FLAT_POSITION);
+        }
+    }
 
-    public void snapBack(boolean roundUp){
+    public void snapBack(boolean roundUp) {
         double roundedStoneNum;
-        if(roundUp) {
+        if (roundUp) {
             roundedStoneNum = Math.ceil(localizer.stoneNum);
-        }else{
+        } else {
             roundedStoneNum = Math.floor(localizer.stoneNum);
         }
 
 
-        double stoneNumDifference = roundedStoneNum - localizer.stoneNum ;
-        if(stoneNumDifference < 0.01) {
+        double stoneNumDifference = roundedStoneNum - localizer.stoneNum;
+        if (stoneNumDifference < 0.01) {
             if (roundUp) {
 //                stoneNumDifference += 1;
                 roundedStoneNum += 1;
@@ -275,37 +280,33 @@ public class MoonshotArmSystem {
         frontGrabber.setPosition(0.5);
         pulley.setPosition(0.27);
         backGrabber.setPosition(0.9);
-
     }
 
-    public void reset(){
-
-        while(!localizer.isNearStart(liftEncoder.getCurrentPosition())){
+    public void reset() {
+        while (!localizer.isNearStart(liftEncoder.getCurrentPosition())) {
             liftContinuously(-0.5);
         }
         liftContinuously(0);
         Utils.sleep(250);
         pulley.setPosition(0);
+        Utils.sleep(1000);
         frontGrabber.setPosition(0.63);
-        //frontGrabber.setPosition(0.9);
-
     }
 
-    public void resetArmPosition(){
-        frontGrabber.setPosition(0.63);
+    public void resetArmPosition() {
         pulley.setPosition(0.27);
-        backGrabber.setPosition(0.9);
-        Utils.sleep(250);
         pulley.setPosition(0);
-
+        backGrabber.setPosition(0.9);
+        Utils.sleep(1000);
+        frontGrabber.setPosition(0.63);
     }
 
     public void liftContinuously(double power) {
         if (power == 0) {
-            if(localizer.stoneNum > 8.5){
+            if (localizer.stoneNum > 8.5) {
                 Debug.log("Very High up");
                 power = WINCH_BRAKE_POWER_HIGH;
-            }else {
+            } else {
                 power = WINCH_BRAKE_POWER_DROOPING;
             }
         } else if (power < 0) {
@@ -336,13 +337,12 @@ public class MoonshotArmSystem {
             Debug.log("to target:" + ticksToTarget);
             double modulatedPower = getModulatedWinchPower(ticksFromStart, ticksToTarget);
             Debug.log(modulatedPower);
-            frontWinch.setPower(modulatedPower);
-            backWinch.setPower(modulatedPower);
+            frontWinch.setPower(-modulatedPower);
+            backWinch.setPower(-modulatedPower);
         }
         targetWinchPositionTicks = newTargetTicks;
         brakeWinches();
     }
-
 
 
     private double getModulatedWinchPower(double ticksFromStart, double ticksToTarget) {

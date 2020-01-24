@@ -95,7 +95,7 @@ public class DriveSystem {
      * @param turnSpeed counterclockwise if positive
      */
     public void continuous(Vector2D velocity, double turnSpeed) {
-        Vector2D velocity0 = new Vector2D(-velocity.getX() * LATERAL_MOVEMENT_POWER_MULTIPLIER, velocity.getY());
+        Vector2D velocity0 = new Vector2D(velocity.getX() * LATERAL_MOVEMENT_POWER_MULTIPLIER, -velocity.getY());
         double direction = velocity0.getDirection();
 
         double maxPow = Math.sin(Math.PI / 4);
@@ -192,19 +192,33 @@ public class DriveSystem {
     }
 
     private double getModulatedLinearDrivePower(double maxSpeed, double distanceFromStart, double distanceToTarget) {
+        double totalDistance = distanceFromStart + distanceToTarget;
+        double accelerationThreshold;
+        double decelerationThreshold;
+        double maxThreshold = 84;
+        if (totalDistance < maxThreshold) {
+            accelerationThreshold = Utils.lerp(0, ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES, totalDistance / maxThreshold);
+        } else {
+            accelerationThreshold = ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES;
+        }
+        if (totalDistance < maxThreshold) {
+            decelerationThreshold = Utils.lerp(0, DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES, totalDistance / maxThreshold);
+        } else {
+            decelerationThreshold = DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES;
+        }
         double accelerationPower;
         double decelerationPower;
-        if (distanceFromStart < ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES) {
+        if (distanceFromStart < accelerationThreshold) {
             accelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceFromStart /
-                            ACCELERATION_SPEED_REDUCTION_THRESHOLD_INCHES));
+                            accelerationThreshold));
         } else {
             accelerationPower = maxSpeed;
         }
-        if (distanceToTarget < DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES) {
+        if (distanceToTarget < decelerationThreshold) {
             decelerationPower = Math.min(maxSpeed, Utils.lerp(MIN_REDUCED_SPEED,
                     1, distanceToTarget /
-                            DECELERATION_SPEED_REDUCTION_THRESHOLD_INCHES));
+                            decelerationThreshold));
         } else {
             decelerationPower = maxSpeed;
         }

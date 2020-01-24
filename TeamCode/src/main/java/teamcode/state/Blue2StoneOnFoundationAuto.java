@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
 import teamcode.common.SkyStoneConfiguration;
+import teamcode.common.Utils;
 import teamcode.common.Vector2D;
 
 @Autonomous(name = "Blue 2 Stones on Foundation")
@@ -24,27 +25,58 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
 
     @Override
     protected void onInitialize() {
-        //Debug.log("init started");
         Vector2D startPosition = new Vector2D(9, 38.5);
         double startRotation = 0;
         gps = new GPS(hardwareMap, startPosition, startRotation);
         drive = new DriveSystem(hardwareMap, gps, startPosition, startRotation);
         arm = new MoonshotArmSystem(hardwareMap);
+        arm.setBoxTransferPosition(true);
         timer1 = new Timer();
         timer2 = new Timer();
-        skyStoneConfig = SkyStoneConfiguration.TWO_FIVE;
-        //Debug.log("init finished");
+        VisionOnInit vision = new VisionOnInit(hardwareMap);
+        VisionOnInit.SkystonePos skystonePos = null;
+        while (!opModeIsActive()) {
+            skystonePos = vision.vuforiascan(false, false);
+            Debug.log(skystonePos);
+        }
+        skyStoneConfig = skyStoneConfigForPos(skystonePos);
+    }
+
+    private SkyStoneConfiguration skyStoneConfigForPos(VisionOnInit.SkystonePos pos) {
+        if (pos != null) {
+            switch (pos) {
+                case LEFT:
+                    return SkyStoneConfiguration.ONE_FOUR;
+                case CENTER:
+                    return SkyStoneConfiguration.TWO_FIVE;
+                case RIGHT:
+                    return SkyStoneConfiguration.THREE_SIX;
+            }
+        }
+        // if nothing is detected, guess
+        return SkyStoneConfiguration.TWO_FIVE;
     }
 
     @Override
     protected void onStart() {
-        //Debug.log("start started");
+        initIntake();
         intakeStone(true);
         scoreStone(true);
         intakeStone(false);
         scoreStone(true);
         park();
         //Debug.log("start finished");
+    }
+
+    private void initIntake() {
+        arm.suck(-1);
+        TimerTask shutOffIntake = new TimerTask() {
+            @Override
+            public void run() {
+                arm.suck(0);
+            }
+        };
+        timer1.schedule(shutOffIntake, 500);
     }
 
     /**
@@ -81,9 +113,6 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
 
         drive.setRotation(rotation, SPEED);
         double x = 52.5;
-        if (!firstStone) {
-            x += 4; // to account for consistent error
-        }
         drive.goTo(new Vector2D(x, y), SPEED);
 
         // go in for stone
@@ -94,7 +123,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
             }
         };
         timer1.schedule(startIntakeTask, 0);
-        //drive.vertical(8, SPEED, 4);
+        drive.vertical(8, SPEED);
 
         TimerTask cancelIntakeTask = new TimerTask() {
             @Override
@@ -123,13 +152,20 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         if (skyStoneNum == 6) {
             return;
         }
-        //drive.goTo(new Vector2D(36, 98), SPEED,5);
+        drive.goTo(new Vector2D(36, 112), SPEED);
         // place stone on foundation
-        arm.scoreAUTO();
+        arm.score();
+        Utils.sleep(500);
+        TimerTask resetArm = new TimerTask() {
+            @Override
+            public void run() {
+                arm.resetArmPosition();
+            }
+        };
+        timer1.schedule(resetArm,0);
     }
 
     private void park() {
-        // Debug.log("Parking");
         drive.goTo(new Vector2D(36, 72), SPEED);
     }
 
