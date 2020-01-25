@@ -55,6 +55,7 @@ public class MoonshotArmSystem {
     //private Servo capstoneServo;
     private ColorSensor intakeSensor;
 
+    private int initialGreenColor;
     private int targetWinchPositionTicks = 0;
     private boolean intaking;
 
@@ -72,6 +73,7 @@ public class MoonshotArmSystem {
         pulley = hardwareMap.get(Servo.class, Constants.PULLEY_SERVO);
         //capstoneServo = hardwareMap.get(Servo.class, Constants.CAPSTONE_SERVO);
         intakeSensor = hardwareMap.get(ColorSensor.class, Constants.INTAKE_COLOR_SENSOR);
+        initialGreenColor = intakeSensor.green();
         //liftSensor = hardwareMap.get(TouchSensor.class, Constants.LIFT_TOUCH_SENSOR);
         foundationGrabberState = FoundationGrabberState.OPEN;
         localizer = new LiftLocalizer();
@@ -438,8 +440,9 @@ public class MoonshotArmSystem {
 
 
     private boolean intakeFull() {
-        int green = intakeSensor.green();
-        return green > 900;
+        return initialGreenColor - intakeSensor.green() > 300;
+        //int green = intakeSensor.green();
+        //return green > 900;
     }
 
 
@@ -510,10 +513,8 @@ public class MoonshotArmSystem {
             Debug.log("right power:" + intakeRight.getPower());
         }
         Debug.log("after intaking");
-        suck(0);
-        boxTransfer.setPosition(BOX_FLAT_POSITION);
+        primeToScore();
     }
-
 
     public void primeToScoreAUTO() {
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);

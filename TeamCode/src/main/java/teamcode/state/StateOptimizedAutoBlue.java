@@ -22,7 +22,7 @@ public class StateOptimizedAutoBlue extends AbstractOpMode {
     SkystonePos pos;
     Timer timer1;
     Timer timer2;
-    private final double SPEED = 0.6;
+    private final double SPEED = 0.75;
     @Override
     protected void onInitialize() {
         gps = new GPS(hardwareMap, new Vector2D(9, 38.5), 0);
@@ -42,7 +42,7 @@ public class StateOptimizedAutoBlue extends AbstractOpMode {
 
         if(pos == SkystonePos.LEFT){
             intakeStone(1, true);
-            arm.primeToScoreAUTO();
+            //arm.primeToScoreAUTO(); DON'T do this daryoush on the main thread!!!!
             scoreStone( true);
             intakeStone(4, false);
             scoreStone(false);
@@ -93,8 +93,8 @@ public class StateOptimizedAutoBlue extends AbstractOpMode {
                 arm.suck(-1);
                 Utils.sleep(50);
                 Debug.log("Intake active");
-                arm.intakeSequence();
-
+                arm.intakeSequenceAUTO(4000);
+                arm.primeToScoreAUTO();
             }
         }.start();
         Debug.log("intake thread after");
@@ -105,8 +105,8 @@ public class StateOptimizedAutoBlue extends AbstractOpMode {
 
         }else{
             drive.goTo(new Vector2D(36, 37 - ((6 - stoneNum) - 2) * 8), SPEED);
-            drive.goTo(new Vector2D(57, 37 - ((6 - stoneNum) - 2) * 8), SPEED);
-            drive.goTo(new Vector2D(57, 37 - ((6 - stoneNum) - 1) * 8), SPEED);
+            drive.goTo(new Vector2D(58, 37 - ((6 - stoneNum) - 2) * 8), SPEED);
+            drive.goTo(new Vector2D(58, 37 - ((6 - stoneNum) - 1) * 8), SPEED);
         }
 
         Utils.sleep(250);
