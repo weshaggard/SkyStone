@@ -21,7 +21,7 @@ public class AutoIntakeTest extends AbstractOpMode {
         MoonshotArmSystem arm = new MoonshotArmSystem(hardwareMap);
 
         Debug.log("intake sequence");
-        arm.intakeSequenceAUTO();
+        //arm.intakeSequenceAUTO();
 
         Debug.log("Pausing");
         Utils.sleep(2000);

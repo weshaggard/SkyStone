@@ -57,7 +57,7 @@ public class Utils {
 
     public static void sleep(long milliseconds) {
         try {
-            Thread.sleep(milliseconds);
+            Thread.currentThread().sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

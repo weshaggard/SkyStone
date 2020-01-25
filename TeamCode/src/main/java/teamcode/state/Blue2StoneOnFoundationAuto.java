@@ -128,7 +128,7 @@ public class Blue2StoneOnFoundationAuto extends AbstractOpMode {
         TimerTask startIntakeTask = new TimerTask() {
             @Override
             public void run() {
-                arm.intakeSequenceAUTO();
+                //arm.intakeSequenceAUTO();
             }
         };
         timer1.schedule(startIntakeTask, 0);

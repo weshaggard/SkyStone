@@ -21,10 +21,10 @@ public class MoonshotArmSystem {
     private static final double FRONT_GRABBER_OPEN_POSITION = 0.64;
     private static final double FRONT_GRABBER_INTAKE_POSITION = 0.84;
     private static final double FRONT_GRABBER_CLOSED_POSITION = 1;
-    private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 1;
+    private static final double FOUNDATION_GRABBER_RIGHT_OPEN_POSITION = 0.6;
     private static final double FOUNDATION_GRABBER_LEFT_OPEN_POSITION = 0;
-    private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0.5;
-    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0.5;
+    private static final double FOUNDATION_GRABBER_RIGHT_CLOSED_POSITION = 0;
+    private static final double FOUNDATION_GRABBER_LEFT_CLOSED_POSITION = 0.6;
 
 
     private static final double PULLEY_RETRACTED_POSITION = 0;
@@ -284,6 +284,8 @@ public class MoonshotArmSystem {
         pulley.setPosition(PULLEY_EXTENDED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
+        Utils.sleep(200);
+        pulley.setPosition(PULLEY_RETRACTED_POSITION);
     }
 
     public void score() {
@@ -437,7 +439,6 @@ public class MoonshotArmSystem {
 
     private boolean intakeFull() {
         int green = intakeSensor.green();
-        Debug.log("Green: " + green);
         return green > 900;
     }
 
@@ -493,29 +494,41 @@ public class MoonshotArmSystem {
 
     // making it work with auto by copy pasting in a super janky way cuz we outta time
 
-    public void intakeSequenceAUTO() {
+
+
+    public void intakeSequenceAUTO(long timeoutMillis) {
+        long currentTime = System.currentTimeMillis();
         suck(INTAKE_POWER);
         boxTransfer.setPosition(BOX_RAMPED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
         intaking = true;
-        while (!intakeFull() && intaking && AbstractOpMode.currentOpMode().opModeIsActive()) ;
+        Debug.log("pre sucking");
+        while (!intakeFull() && intaking && AbstractOpMode.currentOpMode().opModeIsActive() && System.currentTimeMillis() - currentTime < timeoutMillis){
+            Debug.log("sucking");
+            Debug.log("left power:" + intakeLeft.getPower());
+            Debug.log("right power:" + intakeRight.getPower());
+        }
+        Debug.log("after intaking");
         suck(0);
         boxTransfer.setPosition(BOX_FLAT_POSITION);
     }
+
 
     public void primeToScoreAUTO() {
         backGrabber.setPosition(BACK_GRABBER_CLOSED_POSITION);
         frontGrabber.setPosition(FRONT_GRABBER_CLOSED_POSITION);
         Utils.sleep(500);
-        pulley.setPosition(1);
+        pulley.setPosition(PULLEY_PRIMED_POSITION);
     }
 
     public void scoreAUTO() {
+        pulley.setPosition(PULLEY_EXTENDED_POSITION);
+        Utils.sleep(1000);
         frontGrabber.setPosition(FRONT_GRABBER_OPEN_POSITION);
         backGrabber.setPosition(BACK_GRABBER_OPEN_POSITION);
-        Utils.sleep(500);
-        pulley.setPosition(0);
+        Utils.sleep(1000);
+        pulley.setPosition(PULLEY_RETRACTED_POSITION);
     }
 
 

@@ -3,6 +3,7 @@ package teamcode.state;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import teamcode.common.AbstractOpMode;
 import teamcode.common.Debug;
@@ -78,12 +79,14 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
     private boolean bDown = false;
     private boolean rbDown = false;
 
+    private boolean canAdjustFoundation = true;
+
     private void armUpdate() {
         if (gamepad1.right_trigger > 0.3) {
             arm.intakeSequence();
         } else if (gamepad1.right_stick_button) {
             arm.extend();
-        } else if (gamepad1.dpad_up) {
+        } else if (gamepad1.dpad_up && !gamepad1.dpad_right) {
             while (gamepad1.dpad_up) {
                 arm.liftContinuously(WINCH_MOTOR_POWER);
             }
@@ -92,7 +95,7 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
 
         } else if (gamepad1.dpad_down) {
             while (gamepad1.dpad_down) {
-                arm.fastDroop();
+                arm.liftContinuously(-0.2);
             }
             arm.liftContinuously(0);
 
@@ -101,6 +104,10 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
         } else if (gamepad1.a) {
             arm.reset();
         } else if (gamepad1.dpad_left) {
+            while(gamepad1.dpad_left) {
+                arm.liftContinuously(0.69);
+            }
+            arm.liftContinuously(0);
             // free button
         } else if (gamepad1.left_bumper) {
             while(gamepad1.left_bumper) {
@@ -124,12 +131,43 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
         if (!gamepad1.right_bumper) {
             rbDown = false;
         }
+        if(gamepad1.dpad_right && !gamepad1.dpad_up){
+            while(gamepad1.dpad_right){
+                arm.fastDroop();
+            }
+            arm.liftContinuously(0);
+        }
+        if(gamepad2.b){
+            arm.score();
+        }
+        if(gamepad2.dpad_up){
+            while(gamepad2.dpad_up){
+                arm.liftContinuously(WINCH_MOTOR_POWER);
+            }
+            arm.liftContinuously(0);
+        }
+        if(gamepad2.dpad_down){
+            while(gamepad2.dpad_down) {
+                arm.liftContinuously(-0.5);
+            }
+            arm.liftContinuously(0);
+        }
+        if(gamepad2.y){
+            arm.retract();
+        }
 
 
         if (gamepad2.a) {
             driverOne = !driverOne;
-        } else if (gamepad2.x) {
+        } else if (gamepad2.x && canAdjustFoundation) {
+            canAdjustFoundation = false;
             arm.adjustFoundation();
+            TimerTask canAdjustFoundationTask = new TimerTask(){
+                public void run(){
+                    canAdjustFoundation = true;
+                }
+            };
+            new Timer().schedule(canAdjustFoundationTask, 2000);
         }
 
     }
@@ -163,10 +201,6 @@ public class StateChampionshipTeleOp extends AbstractOpMode {
             } else {
                 velocity = velocity.multiply(NORMAL_MODIFIER_LINEAR);
                 turnSpeed *= NORMAL_MODIFIER_ROTATIONAL;
-            }
-            if (flipDriveControls) {
-                velocity = velocity.multiply(-1);
-                turnSpeed *= -1;
             }
 
             turnSpeed += TURN_SPEED_CORRECTION_MODIFIER * velocity.magnitude();
